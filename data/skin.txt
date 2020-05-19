@@ -1,0 +1,6 @@
+pallor
+hyperpigmentation
+hypopigmentation
+cyanosis
+rashes
+mottling

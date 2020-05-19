@@ -1,0 +1,12 @@
+BCG 
+DPT 
+Cholera
+MMR 
+Polio 
+Tetanus
+Hep A 
+Hep B
+H. flu 
+HPV 
+Varicella
+Meningo
