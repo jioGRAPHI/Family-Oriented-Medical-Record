@@ -3913,7 +3913,7 @@ if __name__ == "__main__":
 	mydb = mysql.connector.connect(
 		host = "localhost",
 		user = "root",
-		passwd = "b1gheadJigz0116",
+		passwd = "",
 		database = "med_record"
 	)
 
