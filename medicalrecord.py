@@ -20,23 +20,40 @@ def menu_frame(self, controller, num):
 	menu_frame = tk.Frame(self, height = 60, width = 1200, bg = "#b1c3e6")
 	menu_frame.pack(side="top")
 
-	tk.Button(menu_frame, text="<", command=lambda: controller.show_frame("LandingPage"), height = 2, width = 5, bd = 0, bg = "#043c39", fg = "#ffffff").place(x=5, y=23)
-	tk.Button(menu_frame, text="Patient Consultation Form", command=lambda: controller.show_frame("PatientForm"), height = 3, width = 28, bd = 0, bg = "#dbdbdb", wraplength = 180).place(x=60, y=9)
-	tk.Button(menu_frame, text="Geriatric Depression Scale – Short Form", command=lambda: controller.show_frame("GeriaticForm"), height = 3, width = 28, bd = 0, bg = "#dbdbdb", wraplength = 180).place(x=285, y=9)
-	tk.Button(menu_frame, text="First Consultation Record", command=lambda: controller.show_frame("FirstConsForm"), height = 3, width = 28, bd = 0, bg = "#dbdbdb", wraplength = 180).place(x=510, y=9)
-	tk.Button(menu_frame, text="Family Assessment Tools", command=lambda: controller.show_frame("FamAssessForm"), height = 3, width = 28, bd = 0, bg = "#dbdbdb", wraplength = 180).place(x=735, y=9)
-	tk.Button(menu_frame, text="Additional Form", command=lambda: controller.show_frame("followup_patient_form"), height = 3, width = 28, bd = 0, bg = "#dbdbdb", wraplength = 180).place(x=960, y=9)
+	back_bttn = tk.Button(menu_frame, text="<", command=lambda: controller.show_frame("LandingPage"), height = 2, width = 5, bd = 0, bg = "#043c39", fg = "#ffffff")
+	back_bttn.place(x=5, y=23)
+	bttn1 = tk.Button(menu_frame, text="Patient Consultation Form", command=lambda: controller.show_frame("PatientForm"), height = 3, width = 30, bd = 0, bg = "#dbdbdb", wraplength = 180)
+	bttn1.place(x=60, y=9)
+	bttn2 = tk.Button(menu_frame, text="Geriatric Depression Scale – Short Form", command=lambda: controller.show_frame("GeriaticForm"), height = 3, width = 30, bd = 0, bg = "#dbdbdb", wraplength = 180)
+	bttn2.place(x=285, y=9)
+	bttn3 = tk.Button(menu_frame, text="First Consultation Record", command=lambda: controller.show_frame("FirstConsForm"), height = 3, width = 30, bd = 0, bg = "#dbdbdb", wraplength = 180)
+	bttn3.place(x=510, y=9)
+	bttn4 = tk.Button(menu_frame, text="Family Assessment Tools", command=lambda: controller.show_frame("FamAssessForm"), height = 3, width = 30, bd = 0, bg = "#dbdbdb", wraplength = 180)
+	bttn4.place(x=735, y=9)
+	bttn5 = tk.Button(menu_frame, text="Additional Form", command=lambda: controller.show_frame("followup_patient_form"), height = 3, width = 30, bd = 0, bg = "#dbdbdb", wraplength = 180)
+	bttn5.place(x=960, y=9)
 
 	if(num == 1):
-		tk.Button(menu_frame, text="Patient Consultation Form", command=lambda: controller.show_frame("PatientForm"), height = 3, width = 28, bd = 0, wraplength = 180).place(x=60, y=9)
+		bttn1.config(height = 3, width = 30, bd = 0, wraplength = 180, bg = "SystemButtonFace")
 	elif(num == 2):
-		tk.Button(menu_frame, text="Geriatric Depression Scale – Short Form", command=lambda: controller.show_frame("GeriaticForm"), height = 3, width = 28, bd = 0, wraplength = 180).place(x=285, y=9)
+		bttn2.config(height = 3, width = 30, bd = 0, wraplength = 180, bg = "SystemButtonFace")
 	elif(num == 3):
-		tk.Button(menu_frame, text="First Consultation Record", command=lambda: controller.show_frame("FirstConsForm"), height = 3, width = 28, bd = 0, wraplength = 180).place(x=510, y=9)
+		bttn3.config(height = 3, width = 30, bd = 0, wraplength = 180, bg = "SystemButtonFace")
 	elif(num == 4):
-		tk.Button(menu_frame, text="Family Assessment Tools", command=lambda: controller.show_frame("FamAssessForm"), height = 3, width = 28, bd = 0, wraplength = 180).place(x=735, y=9)
+		bttn4.config(height = 3, width = 30, bd = 0, wraplength = 180, bg = "SystemButtonFace")
 	else:
-		tk.Button(menu_frame, text="Additional Form", command=lambda: controller.show_frame("followup_patient_form"), height = 3, width = 28, bd = 0, wraplength = 180).place(x=960, y=9)
+		bttn5.config(height = 3, width = 30, bd = 0, wraplength = 180, bg = "SystemButtonFace")
+
+	# if self.controller.flag.get() == 0:
+	# 	bttn1.config(state = "disabled")
+	# 	bttn2.config(state = "disabled")
+	# 	bttn4.config(state = "disabled")
+	# 	bttn5.config(state = "disabled")
+	# else:
+	# 	bttn1.config(state = "normal")
+	# 	bttn2.config(state = "normal")
+	# 	bttn4.config(state = "normal")
+	# 	bttn5.config(state = "normal")
 
 def submenu_buttons_1(self, controller, num):
 	side_menu_frame = tk.Frame(self, height = 720, width = 200) # , bg = "#cfedc5"
@@ -93,7 +110,8 @@ class MedSystem(tk.Tk):
 		self.title_font = tkfont.Font(family='Times New Roman', size=14, weight="bold")
 		self.label_font = tkfont.Font(family='Helvetica', size=10)
 
-		self.patient_id = tk.StringVar(container)
+		self.patient_id = tk.StringVar(self)
+		# self.flag = tk.IntVar(self) # flag to determine if user is adding new data or editing existing
 
 		self.frames = {}
 		for F in (LandingPage, PatientForm, GeriaticForm, FirstConsForm, FamAssessForm, ReferralForm, review_of_systems_form, review_of_systems_form_2, physical_examination_form, assessment_table, family_apgar_form, followup_patient_form, followup_patient_form_2,followup_assessment_table):
@@ -112,15 +130,6 @@ class MedSystem(tk.Tk):
 		if page_name == "LandingPage":
 			LandingPage = self.get_page("LandingPage")
 			LandingPage.load_patients()
-
-		if page_name == "PatientForm":
-			p = self.get_page(page_name)
-			p.load_data()
-
-		if page_name == "FirstConsForm":
-			p = self.get_page(page_name)
-			p.load_data()
-			
 
 		frame = self.frames[page_name]
 		frame.tkraise()
@@ -147,11 +156,25 @@ class LandingPage(tk.Frame):
 		self.w.place(x=400, y=220)
 		self.w.bind("<<ComboboxSelected>>", self.get_index)
 
-		self.continue_bttn = tk.Button(self, text="Continue", command=lambda: controller.show_frame("PatientForm"), height = 2, width = 25, bd = 0, bg = "#043c39", fg = "#ffffff", activebackground = "#cf0007")
+		self.continue_bttn = tk.Button(self, text="Continue", command=lambda: self.continue_login(), height = 2, width = 25, bd = 0, bg = "#043c39", fg = "#ffffff", activebackground = "#cf0007")
 		self.continue_bttn.place(x=510, y=350)
-		tk.Button(self, text="Add a New Patient", command=lambda: controller.show_frame("FirstConsForm"), height = 2, width = 25, bd = 0, bg = "#043c39", fg = "#ffffff", activebackground = "#cf0007").place(x=510, y=400)
+		tk.Button(self, text="Add a New Patient", command=lambda: self.add_new(), height = 2, width = 25, bd = 0, bg = "#043c39", fg = "#ffffff", activebackground = "#cf0007").place(x=510, y=400)
 
 		self.load_patients()
+
+	def continue_login(self):
+		for F in (PatientForm, FirstConsForm, review_of_systems_form, review_of_systems_form_2):
+			page_name = F.__name__
+			p = self.controller.get_page(page_name)
+			p.load_data()
+
+		# self.controller.flag.set(1)
+		self.controller.show_frame("PatientForm")
+
+	def add_new(self):
+		self.controller.patient_id = tk.StringVar()
+		# self.controller.flag.set(0)
+		self.controller.show_frame("FirstConsForm")
 
 	def get_index(self, event):
 		self.controller.patient_id.set(self.list_of_patients_id[self.w.current()])
@@ -369,8 +392,6 @@ class FirstConsForm(tk.Frame):
 		menu_frame(self, self.controller, 3)
 		submenu_buttons_1(self, self.controller, 1)
 
-		print(self.controller.patient_id.get())
-
 		form_frame = tk.Frame(self, height = 720, width = 1000)
 		form_frame.pack(side="left")
 
@@ -587,7 +608,7 @@ class FamAssessForm(tk.Frame):
 
 		for i in range(4):
 			self.b_var.append(0)
-			b = tk.Button(form_frame, text="✓", command=partial(self.set_var, i), height = 1, width = 5, bd = 1,fg = "#000000", bg = "#e3e3e3")
+			b = tk.Button(form_frame, text="✓", command=partial(self.set_var, i), height = 1, width = 5, bd = 1, fg = "#000000", bg = "#e3e3e3")
 			b.place(x=x_value, y=340)
 			self.lob.append(b)
 			x_value = x_value + 100
@@ -709,7 +730,7 @@ class review_of_systems_form(tk.Frame):
 		self.label_font = tkfont.Font(family='Helvetica', size = 8, slant="italic")
 		self.label_font_2 = tkfont.Font(family='Helvetica', size = 8, weight="bold")
 
-		y_value = 70
+		y_value = 60
 
 		self.heent_var = []
 		self.respi_var = []
@@ -721,25 +742,37 @@ class review_of_systems_form(tk.Frame):
 		self.musculo_var = []
 		self.skin_var = []
 
+		self.heent_cb = []
+		self.respi_cb = []
+		self.cardio_cb = []
+		self.gastro_cb = []
+		self.genito_cb = []
+		self.meta_cb = []
+		self.neuro_cb = []
+		self.musculo_cb = []
+		self.skin_cb = []
+
 		label = tk.Label(form_frame, text="Review of Systems:", font=self.label_font_2)
-		label.place(x=25, y=25)
+		label.place(x=25, y=15)
 
 		with open("./data/heent.txt", 'r') as f:
 			self.heent_opt = f.read().splitlines()
 		f.close()
 
 		heent_label = tk.Label(form_frame, text="HEENT", font=self.label_font, fg="#636363")
-		heent_label.place(x=25, y=45)
+		heent_label.place(x=25, y=35)
 
 		for i in range(len(self.heent_opt)):
-			self.heent_var.append(tk.IntVar())
+			self.heent_var.append(tk.IntVar(self))
 			cb = tk.Checkbutton(form_frame, text=self.heent_opt[i], variable=self.heent_var[i])
 			cb.place(x=25, y=y_value)
+			self.heent_cb.append(cb)
 			y_value = y_value + 20
 
-		self.heent_var.append(tk.IntVar())
+		self.heent_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="others:", variable=self.heent_var[len(self.heent_opt)])
 		cb.place(x=25, y=y_value)
+		self.heent_cb.append(cb)
 		y_value = y_value + 20
 
 		self.other_heent = tk.Text(form_frame, height = 1, width = 20, wrap="word")
@@ -756,14 +789,16 @@ class review_of_systems_form(tk.Frame):
 		y_value = y_value + 25
 
 		for i in range(len(self.respi_opt)):
-			self.respi_var.append(tk.IntVar())
+			self.respi_var.append(tk.IntVar(self))
 			cb = tk.Checkbutton(form_frame, text=self.respi_opt[i], variable=self.respi_var[i])
 			cb.place(x=25, y=y_value)
+			self.respi_cb.append(cb)
 			y_value = y_value + 20
 
-		self.respi_var.append(tk.IntVar())
+		self.respi_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="others:", variable=self.respi_var[len(self.respi_opt)])
 		cb.place(x=25, y=y_value)
+		self.respi_cb.append(cb)
 		y_value = y_value + 20
 
 		self.other_respi = tk.Text(form_frame, height = 1, width = 20, wrap="word")
@@ -780,21 +815,23 @@ class review_of_systems_form(tk.Frame):
 		y_value = y_value + 25
 
 		for i in range(len(self.cardio_opt)):
-			self.cardio_var.append(tk.IntVar())
+			self.cardio_var.append(tk.IntVar(self))
 			cb = tk.Checkbutton(form_frame, text=self.cardio_opt[i], variable=self.cardio_var[i])
 			cb.place(x=25, y=y_value)
+			self.cardio_cb.append(cb)
 			y_value = y_value + 20
 
-		self.cardio_var.append(tk.IntVar())
+		self.cardio_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="others:", variable=self.cardio_var[len(self.cardio_opt)])
 		cb.place(x=25, y=y_value)
+		self.cardio_cb.append(cb)
 		y_value = y_value + 20
 
 		self.other_cardio = tk.Text(form_frame, height = 1, width = 20, wrap="word")
 		self.other_cardio.place(x=50, y=y_value)
 
 
-		y_value = 25
+		y_value = 15
 
 		with open("./data/gastro.txt", 'r') as f:
 			self.gastro_opt = f.read().splitlines()
@@ -805,14 +842,16 @@ class review_of_systems_form(tk.Frame):
 		y_value = y_value + 25
 
 		for i in range(len(self.gastro_opt)):
-			self.gastro_var.append(tk.IntVar())
+			self.gastro_var.append(tk.IntVar(self))
 			cb = tk.Checkbutton(form_frame, text=self.gastro_opt[i], variable=self.gastro_var[i])
 			cb.place(x=300, y=y_value)
+			self.gastro_cb.append(cb)
 			y_value = y_value + 20
 
-		self.gastro_var.append(tk.IntVar())
+		self.gastro_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="others:", variable=self.gastro_var[len(self.gastro_opt)])
 		cb.place(x=300, y=y_value)
+		self.gastro_cb.append(cb)
 		y_value = y_value + 20
 
 		self.other_gastro = tk.Text(form_frame, height = 1, width = 20, wrap="word")
@@ -829,14 +868,16 @@ class review_of_systems_form(tk.Frame):
 		y_value = y_value + 25
 
 		for i in range(len(self.genito_opt)):
-			self.genito_var.append(tk.IntVar())
+			self.genito_var.append(tk.IntVar(self))
 			cb = tk.Checkbutton(form_frame, text=self.genito_opt[i], variable=self.genito_var[i])
 			cb.place(x=300, y=y_value)
+			self.genito_cb.append(cb)
 			y_value = y_value + 20
 
-		self.genito_var.append(tk.IntVar())
+		self.genito_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="others:", variable=self.genito_var[len(self.genito_opt)])
 		cb.place(x=300, y=y_value)
+		self.genito_cb.append(cb)
 		y_value = y_value + 20
 
 		self.other_genito = tk.Text(form_frame, height = 1, width = 20, wrap="word")
@@ -853,21 +894,23 @@ class review_of_systems_form(tk.Frame):
 		y_value = y_value + 25
 
 		for i in range(len(self.meta_opt)):
-			self.meta_var.append(tk.IntVar())
+			self.meta_var.append(tk.IntVar(self))
 			cb = tk.Checkbutton(form_frame, text=self.meta_opt[i], variable=self.meta_var[i])
 			cb.place(x=300, y=y_value)
+			self.meta_cb.append(cb)
 			y_value = y_value + 20
 
-		self.meta_var.append(tk.IntVar())
+		self.meta_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="others:", variable=self.meta_var[len(self.meta_opt)])
 		cb.place(x=300, y=y_value)
+		self.meta_cb.append(cb)
 		y_value = y_value + 20
 
 		self.other_meta = tk.Text(form_frame, height = 1, width = 20, wrap="word")
 		self.other_meta.place(x=325, y=y_value)
 
 
-		y_value = 25
+		y_value = 15
 
 		with open("./data/neuro.txt", 'r') as f:
 			self.neuro_opt = f.read().splitlines()
@@ -878,14 +921,16 @@ class review_of_systems_form(tk.Frame):
 		y_value = y_value + 25
 
 		for i in range(len(self.neuro_opt)):
-			self.neuro_var.append(tk.IntVar())
+			self.neuro_var.append(tk.IntVar(self))
 			cb = tk.Checkbutton(form_frame, text=self.neuro_opt[i], variable=self.neuro_var[i])
 			cb.place(x=575, y=y_value)
+			self.neuro_cb.append(cb)
 			y_value = y_value + 20
 
-		self.neuro_var.append(tk.IntVar())
+		self.neuro_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="others:", variable=self.neuro_var[len(self.neuro_opt)])
 		cb.place(x=575, y=y_value)
+		self.neuro_cb.append(cb)
 		y_value = y_value + 20
 
 		self.other_neuro = tk.Text(form_frame, height = 1, width = 20, wrap="word")
@@ -902,14 +947,16 @@ class review_of_systems_form(tk.Frame):
 		y_value = y_value + 25
 
 		for i in range(len(self.musculo_opt)):
-			self.musculo_var.append(tk.IntVar())
+			self.musculo_var.append(tk.IntVar(self))
 			cb = tk.Checkbutton(form_frame, text=self.musculo_opt[i], variable=self.musculo_var[i])
 			cb.place(x=575, y=y_value)
+			self.musculo_cb.append(cb)
 			y_value = y_value + 20
 
-		self.musculo_var.append(tk.IntVar())
+		self.musculo_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="others:", variable=self.musculo_var[len(self.musculo_opt)])
 		cb.place(x=575, y=y_value)
+		self.musculo_cb.append(cb)
 		y_value = y_value + 20
 
 		self.other_musculo = tk.Text(form_frame, height = 1, width = 20, wrap="word")
@@ -926,14 +973,16 @@ class review_of_systems_form(tk.Frame):
 		y_value = y_value + 25
 
 		for i in range(len(self.skin_opt)):
-			self.skin_var.append(tk.IntVar())
+			self.skin_var.append(tk.IntVar(self))
 			cb = tk.Checkbutton(form_frame, text=self.skin_opt[i], variable=self.skin_var[i])
 			cb.place(x=575, y=y_value)
+			self.skin_cb.append(cb)
 			y_value = y_value + 20
 
-		self.skin_var.append(tk.IntVar())
+		self.skin_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="others:", variable=self.skin_var[len(self.skin_opt)])
 		cb.place(x=575, y=y_value)
+		self.skin_cb.append(cb)
 		y_value = y_value + 20
 
 		self.other_skin = tk.Text(form_frame, height = 1, width = 20, wrap="word")
@@ -965,14 +1014,24 @@ class review_of_systems_form(tk.Frame):
 			cur.execute(sql, val)
 			mydb.commit()
 
-		cur.execute(("SELECT heent_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-		res = cur.fetchone()
-		if res is None:
-			cur.execute(("INSERT INTO patientrevofsys (heent_others, patient_id) VALUES (%s, %s)"), (self.other_heent.get("1.0",'end-1c'), self.controller.patient_id.get()))
-			mydb.commit()
+		if self.heent_var[len(self.heent_opt)].get() == 1:
+			cur.execute(("SELECT heent_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+			res = cur.fetchone()
+			if res is None:
+				cur.execute(("INSERT INTO patientrevofsys (heent_others, patient_id) VALUES (%s, %s)"), (self.other_heent.get("1.0",'end-1c'), self.controller.patient_id.get()))
+				mydb.commit()
+			else:
+				cur.execute(("UPDATE patientrevofsys SET heent_others = %s WHERE patient_id = %s"), (self.other_heent.get("1.0",'end-1c'), self.controller.patient_id.get()))
+				mydb.commit()
 		else:
-			cur.execute(("UPDATE patientrevofsys SET heent_others = %s WHERE patient_id = %s"), (self.other_heent.get("1.0",'end-1c'), self.controller.patient_id.get()))
-			mydb.commit()
+			cur.execute(("SELECT heent_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+			res = cur.fetchone()
+			if res is None:
+				cur.execute(("INSERT INTO patientrevofsys (heent_others, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+				mydb.commit()
+			else:
+				cur.execute(("UPDATE patientrevofsys SET heent_others = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+				mydb.commit()
 
 		####################################
 
@@ -989,14 +1048,25 @@ class review_of_systems_form(tk.Frame):
 			cur.execute(sql, val)
 			mydb.commit()
 
-		cur.execute(("SELECT respi_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-		res = cur.fetchone()
-		if res is None:
-			cur.execute(("INSERT INTO patientrevofsys (respi_others, patient_id) VALUES (%s, %s)"), (self.other_respi.get("1.0",'end-1c'), self.controller.patient_id.get()))
-			mydb.commit()
+		if self.respi_var[len(self.respi_opt)].get() == 1:
+			cur.execute(("SELECT respi_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+			res = cur.fetchone()
+			if res is None:
+				cur.execute(("INSERT INTO patientrevofsys (respi_others, patient_id) VALUES (%s, %s)"), (self.other_respi.get("1.0",'end-1c'), self.controller.patient_id.get()))
+				mydb.commit()
+			else:
+				cur.execute(("UPDATE patientrevofsys SET respi_others = %s WHERE patient_id = %s"), (self.other_respi.get("1.0",'end-1c'), self.controller.patient_id.get()))
+				mydb.commit()
 		else:
-			cur.execute(("UPDATE patientrevofsys SET respi_others = %s WHERE patient_id = %s"), (self.other_respi.get("1.0",'end-1c'), self.controller.patient_id.get()))
-			mydb.commit()
+			cur.execute(("SELECT respi_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+			res = cur.fetchone()
+			if res is None:
+				cur.execute(("INSERT INTO patientrevofsys (respi_others, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+				mydb.commit()
+			else:
+				cur.execute(("UPDATE patientrevofsys SET respi_others = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+				mydb.commit()
+
 
 		####################################
 
@@ -1015,14 +1085,24 @@ class review_of_systems_form(tk.Frame):
 			cur.execute(sql, val)
 			mydb.commit()
 
-		cur.execute(("SELECT cardio_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-		res = cur.fetchone()
-		if res is None:
-			cur.execute(("INSERT INTO patientrevofsys (cardio_others, patient_id) VALUES (%s, %s)"), (self.other_cardio.get("1.0",'end-1c'), self.controller.patient_id.get()))
-			mydb.commit()
+		if self.cardio_var[len(self.cardio_opt)].get() == 1:
+			cur.execute(("SELECT cardio_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+			res = cur.fetchone()
+			if res is None:
+				cur.execute(("INSERT INTO patientrevofsys (cardio_others, patient_id) VALUES (%s, %s)"), (self.other_cardio.get("1.0",'end-1c'), self.controller.patient_id.get()))
+				mydb.commit()
+			else:
+				cur.execute(("UPDATE patientrevofsys SET cardio_others = %s WHERE patient_id = %s"), (self.other_cardio.get("1.0",'end-1c'), self.controller.patient_id.get()))
+				mydb.commit()
 		else:
-			cur.execute(("UPDATE patientrevofsys SET cardio_others = %s WHERE patient_id = %s"), (self.other_cardio.get("1.0",'end-1c'), self.controller.patient_id.get()))
-			mydb.commit()
+			cur.execute(("SELECT cardio_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+			res = cur.fetchone()
+			if res is None:
+				cur.execute(("INSERT INTO patientrevofsys (cardio_others, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+				mydb.commit()
+			else:
+				cur.execute(("UPDATE patientrevofsys SET cardio_others = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+				mydb.commit()
 
 		####################################
 
@@ -1041,14 +1121,24 @@ class review_of_systems_form(tk.Frame):
 			cur.execute(sql, val)
 			mydb.commit()
 
-		cur.execute(("SELECT gastro_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-		res = cur.fetchone()
-		if res is None:
-			cur.execute(("INSERT INTO patientrevofsys (gastro_others, patient_id) VALUES (%s, %s)"), (self.other_gastro.get("1.0",'end-1c'), self.controller.patient_id.get()))
-			mydb.commit()
+		if self.gastro_var[len(self.gastro_opt)].get() == 1:
+			cur.execute(("SELECT gastro_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+			res = cur.fetchone()
+			if res is None:
+				cur.execute(("INSERT INTO patientrevofsys (gastro_others, patient_id) VALUES (%s, %s)"), (self.other_gastro.get("1.0",'end-1c'), self.controller.patient_id.get()))
+				mydb.commit()
+			else:
+				cur.execute(("UPDATE patientrevofsys SET gastro_others = %s WHERE patient_id = %s"), (self.other_gastro.get("1.0",'end-1c'), self.controller.patient_id.get()))
+				mydb.commit()
 		else:
-			cur.execute(("UPDATE patientrevofsys SET gastro_others = %s WHERE patient_id = %s"), (self.other_gastro.get("1.0",'end-1c'), self.controller.patient_id.get()))
-			mydb.commit()
+			cur.execute(("SELECT gastro_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+			res = cur.fetchone()
+			if res is None:
+				cur.execute(("INSERT INTO patientrevofsys (gastro_others, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+				mydb.commit()
+			else:
+				cur.execute(("UPDATE patientrevofsys SET gastro_others = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+				mydb.commit()
 
 		####################################
 
@@ -1067,14 +1157,24 @@ class review_of_systems_form(tk.Frame):
 			cur.execute(sql, val)
 			mydb.commit()
 
-		cur.execute(("SELECT genito_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-		res = cur.fetchone()
-		if res is None:
-			cur.execute(("INSERT INTO patientrevofsys (genito_others, patient_id) VALUES (%s, %s)"), (self.other_genito.get("1.0",'end-1c'), self.controller.patient_id.get()))
-			mydb.commit()
+		if self.genito_var[len(self.genito_opt)].get() == 1:
+			cur.execute(("SELECT genito_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+			res = cur.fetchone()
+			if res is None:
+				cur.execute(("INSERT INTO patientrevofsys (genito_others, patient_id) VALUES (%s, %s)"), (self.other_genito.get("1.0",'end-1c'), self.controller.patient_id.get()))
+				mydb.commit()
+			else:
+				cur.execute(("UPDATE patientrevofsys SET genito_others = %s WHERE patient_id = %s"), (self.other_genito.get("1.0",'end-1c'), self.controller.patient_id.get()))
+				mydb.commit()
 		else:
-			cur.execute(("UPDATE patientrevofsys SET genito_others = %s WHERE patient_id = %s"), (self.other_genito.get("1.0",'end-1c'), self.controller.patient_id.get()))
-			mydb.commit()
+			cur.execute(("SELECT genito_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+			res = cur.fetchone()
+			if res is None:
+				cur.execute(("INSERT INTO patientrevofsys (genito_others, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+				mydb.commit()
+			else:
+				cur.execute(("UPDATE patientrevofsys SET genito_others = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+				mydb.commit()
 
 		####################################
 
@@ -1093,14 +1193,24 @@ class review_of_systems_form(tk.Frame):
 			cur.execute(sql, val)
 			mydb.commit()
 
-		cur.execute(("SELECT meta_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-		res = cur.fetchone()
-		if res is None:
-			cur.execute(("INSERT INTO patientrevofsys (meta_others, patient_id) VALUES (%s, %s)"), (self.other_meta.get("1.0",'end-1c'), self.controller.patient_id.get()))
-			mydb.commit()
+		if self.meta_var[len(self.meta_opt)].get() == 1:
+			cur.execute(("SELECT meta_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+			res = cur.fetchone()
+			if res is None:
+				cur.execute(("INSERT INTO patientrevofsys (meta_others, patient_id) VALUES (%s, %s)"), (self.other_meta.get("1.0",'end-1c'), self.controller.patient_id.get()))
+				mydb.commit()
+			else:
+				cur.execute(("UPDATE patientrevofsys SET meta_others = %s WHERE patient_id = %s"), (self.other_meta.get("1.0",'end-1c'), self.controller.patient_id.get()))
+				mydb.commit()
 		else:
-			cur.execute(("UPDATE patientrevofsys SET meta_others = %s WHERE patient_id = %s"), (self.other_meta.get("1.0",'end-1c'), self.controller.patient_id.get()))
-			mydb.commit()
+			cur.execute(("SELECT meta_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+			res = cur.fetchone()
+			if res is None:
+				cur.execute(("INSERT INTO patientrevofsys (meta_others, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+				mydb.commit()
+			else:
+				cur.execute(("UPDATE patientrevofsys SET meta_others = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+				mydb.commit()
 
 		####################################
 
@@ -1119,14 +1229,24 @@ class review_of_systems_form(tk.Frame):
 			cur.execute(sql, val)
 			mydb.commit()
 
-		cur.execute(("SELECT neuro_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-		res = cur.fetchone()
-		if res is None:
-			cur.execute(("INSERT INTO patientrevofsys (neuro_others, patient_id) VALUES (%s, %s)"), (self.other_neuro.get("1.0",'end-1c'), self.controller.patient_id.get()))
-			mydb.commit()
+		if self.neuro_var[len(self.neuro_opt)].get() == 1:
+			cur.execute(("SELECT neuro_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+			res = cur.fetchone()
+			if res is None:
+				cur.execute(("INSERT INTO patientrevofsys (neuro_others, patient_id) VALUES (%s, %s)"), (self.other_neuro.get("1.0",'end-1c'), self.controller.patient_id.get()))
+				mydb.commit()
+			else:
+				cur.execute(("UPDATE patientrevofsys SET neuro_others = %s WHERE patient_id = %s"), (self.other_neuro.get("1.0",'end-1c'), self.controller.patient_id.get()))
+				mydb.commit()
 		else:
-			cur.execute(("UPDATE patientrevofsys SET neuro_others = %s WHERE patient_id = %s"), (self.other_neuro.get("1.0",'end-1c'), self.controller.patient_id.get()))
-			mydb.commit()
+			cur.execute(("SELECT neuro_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+			res = cur.fetchone()
+			if res is None:
+				cur.execute(("INSERT INTO patientrevofsys (neuro_others, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+				mydb.commit()
+			else:
+				cur.execute(("UPDATE patientrevofsys SET neuro_others = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+				mydb.commit()
 
 		####################################
 
@@ -1143,14 +1263,24 @@ class review_of_systems_form(tk.Frame):
 			cur.execute(sql, val)
 			mydb.commit()
 
-		cur.execute(("SELECT musculo_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-		res = cur.fetchone()
-		if res is None:
-			cur.execute(("INSERT INTO patientrevofsys (musculo_others, patient_id) VALUES (%s, %s)"), (self.other_musculo.get("1.0",'end-1c'), self.controller.patient_id.get()))
-			mydb.commit()
+		if self.musculo_var[len(self.musculo_opt)].get() == 1:
+			cur.execute(("SELECT musculo_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+			res = cur.fetchone()
+			if res is None:
+				cur.execute(("INSERT INTO patientrevofsys (musculo_others, patient_id) VALUES (%s, %s)"), (self.other_musculo.get("1.0",'end-1c'), self.controller.patient_id.get()))
+				mydb.commit()
+			else:
+				cur.execute(("UPDATE patientrevofsys SET musculo_others = %s WHERE patient_id = %s"), (self.other_musculo.get("1.0",'end-1c'), self.controller.patient_id.get()))
+				mydb.commit()
 		else:
-			cur.execute(("UPDATE patientrevofsys SET musculo_others = %s WHERE patient_id = %s"), (self.other_musculo.get("1.0",'end-1c'), self.controller.patient_id.get()))
-			mydb.commit()
+			cur.execute(("SELECT musculo_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+			res = cur.fetchone()
+			if res is None:
+				cur.execute(("INSERT INTO patientrevofsys (musculo_others, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+				mydb.commit()
+			else:
+				cur.execute(("UPDATE patientrevofsys SET musculo_others = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+				mydb.commit()
 
 		####################################
 
@@ -1169,14 +1299,24 @@ class review_of_systems_form(tk.Frame):
 			cur.execute(sql, val)
 			mydb.commit()
 
-		cur.execute(("SELECT skin_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-		res = cur.fetchone()
-		if res is None:
-			cur.execute(("INSERT INTO patientrevofsys (skin_others, patient_id) VALUES (%s, %s)"), (self.other_skin.get("1.0",'end-1c'), self.controller.patient_id.get()))
-			mydb.commit()
+		if self.skin_var[len(self.skin_opt)].get() == 1:
+			cur.execute(("SELECT skin_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+			res = cur.fetchone()
+			if res is None:
+				cur.execute(("INSERT INTO patientrevofsys (skin_others, patient_id) VALUES (%s, %s)"), (self.other_skin.get("1.0",'end-1c'), self.controller.patient_id.get()))
+				mydb.commit()
+			else:
+				cur.execute(("UPDATE patientrevofsys SET skin_others = %s WHERE patient_id = %s"), (self.other_skin.get("1.0",'end-1c'), self.controller.patient_id.get()))
+				mydb.commit()
 		else:
-			cur.execute(("UPDATE patientrevofsys SET skin_others = %s WHERE patient_id = %s"), (self.other_skin.get("1.0",'end-1c'), self.controller.patient_id.get()))
-			mydb.commit()
+			cur.execute(("SELECT skin_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+			res = cur.fetchone()
+			if res is None:
+				cur.execute(("INSERT INTO patientrevofsys (skin_others, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+				mydb.commit()
+			else:
+				cur.execute(("UPDATE patientrevofsys SET skin_others = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+				mydb.commit()
 
 		####################################
 
@@ -1184,229 +1324,120 @@ class review_of_systems_form(tk.Frame):
 			if i >= len(self.heent_opt):
 				if self.heent_var[i].get() == 1:
 					self.other_heent.delete('1.0', 'end') # clear the text field
-			self.heent_var[i] = tk.IntVar()
+			self.heent_var[i] = tk.IntVar(self)
 
 		for i in range(len(self.respi_var)):
 			if i >= len(self.respi_opt):
 				if self.respi_var[i].get() == 1:
 					self.other_respi.delete('1.0', 'end') # clear the text field
-			self.respi_var[i] = tk.IntVar()
+			self.respi_var[i] = tk.IntVar(self)
 
 		for i in range(len(self.cardio_var)):
 			if i >= len(self.cardio_opt):
 				if self.cardio_var[i].get() == 1:
 					self.other_cardio.delete('1.0', 'end') # clear the text field
-			self.cardio_var[i] = tk.IntVar()
+			self.cardio_var[i] = tk.IntVar(self)
 
 		for i in range(len(self.gastro_var)):
 			if i >= len(self.gastro_opt):
 				if self.gastro_var[i].get() == 1:
 					self.other_gastro.delete('1.0', 'end') # clear the text field
-			self.gastro_var[i] = tk.IntVar()
+			self.gastro_var[i] = tk.IntVar(self)
 
 		for i in range(len(self.genito_var)):
 			if i >= len(self.genito_opt):
 				if self.genito_var[i].get() == 1:
 					self.other_genito.delete('1.0', 'end') # clear the text field
-			self.genito_var[i] = tk.IntVar()
+			self.genito_var[i] = tk.IntVar(self)
 
 		for i in range(len(self.meta_var)):
 			if i >= len(self.meta_opt):
 				if self.meta_var[i].get() == 1:
 					self.other_meta.delete('1.0', 'end') # clear the text field
-			self.meta_var[i] = tk.IntVar()
+			self.meta_var[i] = tk.IntVar(self)
 
 		for i in range(len(self.neuro_var)):
 			if i >= len(self.neuro_opt):
 				if self.neuro_var[i].get() == 1:
 					self.other_neuro.delete('1.0', 'end') # clear the text field
-			self.neuro_var[i] = tk.IntVar()
+			self.neuro_var[i] = tk.IntVar(self)
 
 		for i in range(len(self.musculo_var)):
 			if i >= len(self.musculo_opt):
 				if self.musculo_var[i].get() == 1:
 					self.other_musculo.delete('1.0', 'end') # clear the text field
-			self.musculo_var[i] = tk.IntVar()
+			self.musculo_var[i] = tk.IntVar(self)
 
 		for i in range(len(self.skin_var)):
 			if i >= len(self.skin_opt):
 				if self.skin_var[i].get() == 1:
 					self.other_skin.delete('1.0', 'end') # clear the text field
-			self.skin_var[i] = tk.IntVar()
+			self.skin_var[i] = tk.IntVar(self)
 
 	def load_data(self):
 
 		cur.execute(("SELECT heent_1, heent_2, heent_3, heent_4, heent_5, heent_6, heent_7, heent_8 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 
-		self.heent_var[0].set(res[0])
-		self.heent_var[1].set(res[1])
-		self.heent_var[2].set(res[2])
-		self.heent_var[3].set(res[3])
-		self.heent_var[4].set(res[4])
-		self.heent_var[5].set(res[5])
-		self.heent_var[6].set(res[6])
-		self.heent_var[7].set(res[7])
-
-		self.heent_var[0].config(state = "disabled")
-		self.heent_var[1].config(state = "disabled")
-		self.heent_var[2].config(state = "disabled")
-		self.heent_var[3].config(state = "disabled")
-		self.heent_var[4].config(state = "disabled")
-		self.heent_var[5].config(state = "disabled")
-		self.heent_var[6].config(state = "disabled")
-		self.heent_var[7].config(state = "disabled")
+		for i in range(len(self.heent_var)):
+			self.heent_var[i].set(res[i])
+			self.heent_cb[i].config(state = "disabled")
 
 		cur.execute(("SELECT respi_1, respi_2, respi_3, respi_4, respi_5 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 
-		self.respi_var[0].set(res[0])
-		self.respi_var[1].set(res[1])
-		self.respi_var[2].set(res[2])
-		self.respi_var[3].set(res[3])
-		self.respi_var[4].set(res[4])
-
-		self.respi_var[0].config(state = "disabled")
-		self.respi_var[1].config(state = "disabled")
-		self.respi_var[2].config(state = "disabled")
-		self.respi_var[3].config(state = "disabled")
-		self.respi_var[4].config(state = "disabled")
-
+		for i in range(len(self.respi_var)):
+			self.respi_var[i].set(res[i])
+			self.respi_cb[i].config(state = "disabled")
 
 		cur.execute(("SELECT cardio_1, cardio_2, cardio_3, cardio_4, cardio_5, cardio_6, cardio_7 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 
-		self.cardio_var[0].set(res[0])
-		self.cardio_var[1].set(res[1])
-		self.cardio_var[2].set(res[2])
-		self.cardio_var[3].set(res[3])
-		self.cardio_var[4].set(res[4])
-		self.cardio_var[5].set(res[5])
-		self.cardio_var[6].set(res[6])
-
-		self.cardio_var[0].config(state = "disabled")
-		self.cardio_var[1].config(state = "disabled")
-		self.cardio_var[2].config(state = "disabled")
-		self.cardio_var[3].config(state = "disabled")
-		self.cardio_var[4].config(state = "disabled")
-		self.cardio_var[5].config(state = "disabled")
-		self.cardio_var[6].config(state = "disabled")
+		for i in range(len(self.cardio_var)):
+			self.cardio_var[i].set(res[i])
+			self.cardio_cb[i].config(state = "disabled")
 
 		cur.execute(("SELECT gastro_1, gastro_2, gastro_3, gastro_4, gastro_5, gastro_6, gastro_7, gastro_8, gastro_9 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 
-		self.gastro_var[0].set(res[0])
-		self.gastro_var[1].set(res[1])
-		self.gastro_var[2].set(res[2])
-		self.gastro_var[3].set(res[3])
-		self.gastro_var[4].set(res[4])
-		self.gastro_var[5].set(res[5])
-		self.gastro_var[6].set(res[6])
-		self.gastro_var[7].set(res[7])
-		self.gastro_var[8].set(res[8])
-
-		self.gastro_var[0].config(state = "disabled")
-		self.gastro_var[1].config(state = "disabled")
-		self.gastro_var[2].config(state = "disabled")
-		self.gastro_var[3].config(state = "disabled")
-		self.gastro_var[4].config(state = "disabled")
-		self.gastro_var[5].config(state = "disabled")
-		self.gastro_var[6].config(state = "disabled")
-		self.gastro_var[7].config(state = "disabled")
-		self.gastro_var[8].config(state = "disabled")
+		for i in range(len(self.gastro_var)):
+			self.gastro_var[i].set(res[i])
+			self.gastro_cb[i].config(state = "disabled")
 
 		cur.execute(("SELECT genito_1, genito_2, genito_3, genito_4, genito_5, genito_6, genito_7, genito_8 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 
-		self.genito_var[0].set(res[0])
-		self.genito_var[1].set(res[1])
-		self.genito_var[2].set(res[2])
-		self.genito_var[3].set(res[3])
-		self.genito_var[4].set(res[4])
-		self.genito_var[5].set(res[5])
-		self.genito_var[6].set(res[6])
-		self.genito_var[7].set(res[7])
-
-		self.genito_var[0].config(state = "disabled")
-		self.genito_var[1].config(state = "disabled")
-		self.genito_var[2].config(state = "disabled")
-		self.genito_var[3].config(state = "disabled")
-		self.genito_var[4].config(state = "disabled")
-		self.genito_var[5].config(state = "disabled")
-		self.genito_var[6].config(state = "disabled")
-		self.genito_var[7].config(state = "disabled")
+		for i in range(len(self.genito_var)):
+			self.genito_var[i].set(res[i])
+			self.genito_cb[i].config(state = "disabled")
 
 		cur.execute(("SELECT meta_1, meta_2, meta_3, meta_4, meta_5, meta_6 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 
-		self.meta_var[0].set(res[0])
-		self.meta_var[1].set(res[1])
-		self.meta_var[2].set(res[2])
-		self.meta_var[3].set(res[3])
-		self.meta_var[4].set(res[4])
-		self.meta_var[5].set(res[5])
-
-		self.meta_var[0].config(state = "disabled")
-		self.meta_var[1].config(state = "disabled")
-		self.meta_var[2].config(state = "disabled")
-		self.meta_var[3].config(state = "disabled")
-		self.meta_var[4].config(state = "disabled")
-		self.meta_var[5].config(state = "disabled")
+		for i in range(len(self.meta_var)):
+			self.meta_var[i].set(res[i])
+			self.meta_cb[i].config(state = "disabled")
 
 		cur.execute(("SELECT neuro_1, neuro_2, neuro_3, neuro_4, neuro_5, neuro_6, neuro_7, neuro_8 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 
-		self.neuro_var[0].set(res[0])
-		self.neuro_var[1].set(res[1])
-		self.neuro_var[2].set(res[2])
-		self.neuro_var[3].set(res[3])
-		self.neuro_var[4].set(res[4])
-		self.neuro_var[5].set(res[5])
-		self.neuro_var[6].set(res[6])
-		self.neuro_var[7].set(res[7])
-
-		self.neuro_var[0].config(state = "disabled")
-		self.neuro_var[1].config(state = "disabled")
-		self.neuro_var[2].config(state = "disabled")
-		self.neuro_var[3].config(state = "disabled")
-		self.neuro_var[4].config(state = "disabled")
-		self.neuro_var[5].config(state = "disabled")
-		self.neuro_var[6].config(state = "disabled")
-		self.neuro_var[7].config(state = "disabled")
+		for i in range(len(self.neuro_var)):
+			self.neuro_var[i].set(res[i])
+			self.neuro_cb[i].config(state = "disabled")
 
 		cur.execute(("SELECT musculo_1, musculo_2, musculo_3, musculo_4, musculo_5 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 
-		self.musculo_var[0].set(res[0])
-		self.musculo_var[1].set(res[1])
-		self.musculo_var[2].set(res[2])
-		self.musculo_var[3].set(res[3])
-		self.musculo_var[4].set(res[4])
-
-		self.musculo_var[0].config(state = "disabled")
-		self.musculo_var[1].config(state = "disabled")
-		self.musculo_var[2].config(state = "disabled")
-		self.musculo_var[3].config(state = "disabled")
-		self.musculo_var[4].config(state = "disabled")
+		for i in range(len(self.musculo_var)):
+			self.musculo_var[i].set(res[i])
+			self.musculo_cb[i].config(state = "disabled")
 
 		cur.execute(("SELECT skin_1, skin_2, skin_3, skin_4, skin_5, skin_6, skin_7 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 
-		self.skin_var[0].set(res[0])
-		self.skin_var[1].set(res[1])
-		self.skin_var[2].set(res[2])
-		self.skin_var[3].set(res[3])
-		self.skin_var[4].set(res[4])
-		self.skin_var[5].set(res[5])
-		self.skin_var[6].set(res[6])
-
-		self.skin_var[0].config(state = "disabled")
-		self.skin_var[1].config(state = "disabled")
-		self.skin_var[2].config(state = "disabled")
-		self.skin_var[3].config(state = "disabled")
-		self.skin_var[4].config(state = "disabled")
-		self.skin_var[5].config(state = "disabled")
-		self.skin_var[6].config(state = "disabled")
+		for i in range(len(self.skin_var)):
+			self.skin_var[i].set(res[i])
+			self.skin_cb[i].config(state = "disabled")
 
 		self.other_heent.delete('1.0', 'end')
 		self.other_respi.delete('1.0', 'end')
@@ -1502,13 +1533,13 @@ class review_of_systems_form_2(tk.Frame):
 		y_value = y_value + 25
 
 		for i in range(len(self.famhist_opt)):
-			self.famhist_var.append(tk.IntVar())
+			self.famhist_var.append(tk.IntVar(self))
 			cb = tk.Checkbutton(form_frame, text=self.famhist_opt[i], variable=self.famhist_var[i])
 			cb.place(x=25, y=y_value)
 			self.famhist_cb.append(cb)
 			y_value = y_value + 20
 
-		self.famhist_var.append(tk.IntVar())
+		self.famhist_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="others:", variable=self.famhist_var[len(self.famhist_opt)])
 		cb.place(x=25, y=y_value)
 		self.famhist_cb.append(cb)
@@ -1529,13 +1560,13 @@ class review_of_systems_form_2(tk.Frame):
 		y_value = y_value + 25
 
 		for i in range(len(self.immunohist_opt)):
-			self.immunohist_var.append(tk.IntVar())
+			self.immunohist_var.append(tk.IntVar(self))
 			cb = tk.Checkbutton(form_frame, text=self.immunohist_opt[i], variable=self.immunohist_var[i])
 			cb.place(x=250, y=y_value)
 			self.immunohist_cb.append(cb)
 			y_value = y_value + 20
 
-		self.immunohist_var.append(tk.IntVar())
+		self.immunohist_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="Boosters:", variable=self.immunohist_var[len(self.immunohist_opt)])
 		cb.place(x=250, y=y_value)
 		self.immunohist_cb.append(cb)
@@ -1545,7 +1576,7 @@ class review_of_systems_form_2(tk.Frame):
 		self.other_booster.place(x=300, y=y_value)
 		y_value = y_value + 30
 
-		self.immunohist_var.append(tk.IntVar())
+		self.immunohist_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="Combination:", variable=self.immunohist_var[len(self.immunohist_opt)+1])
 		cb.place(x=250, y=y_value)
 		self.immunohist_cb.append(cb)
@@ -1556,8 +1587,8 @@ class review_of_systems_form_2(tk.Frame):
 		self.immunohist_cb.append(cb)
 		y_value = y_value + 30
 
-		self.immunohist_var.append(tk.IntVar())
-		cb = tk.Checkbutton(form_frame, text="others:", variable=self.immunohist_var[len(self.immunohist_opt)+2])
+		self.immunohist_var.append(tk.IntVar(self))
+		cb = tk.Checkbutton(form_frame, text="Others:", variable=self.immunohist_var[len(self.immunohist_opt)+2])
 		cb.place(x=250, y=y_value)
 		self.immunohist_cb.append(cb)
 		y_value = y_value + 20
@@ -1573,19 +1604,23 @@ class review_of_systems_form_2(tk.Frame):
 		smoker_label.place(x=250, y=y_value)
 		y_value = y_value + 20
 
-		self.lob = []
-		b = []
-
 		self.smoker_var = 0
 
-		yes_b = tk.Button(form_frame, text="Yes", command=partial(self.set_score, 1, 0), height = 1, width = 4, bd = 1)
-		yes_b.place(x=270, y=y_value) 
-		no_b = tk.Button(form_frame, text="No", command=partial(self.set_score, -1, 0), height = 1, width = 4, bd = 1)
-		no_b.place(x=320, y=y_value)
+		self.smoker_var_arr = []
+		self.smoker_cb = []
+		self.smoker_var_arr.append(tk.IntVar(self))
+		cb = tk.Checkbutton(form_frame, text="Yes", variable=self.smoker_var_arr[0])
+		cb.place(x=270, y=y_value)
+		self.smoker_cb.append(cb)
 
-		b.append(yes_b)
-		b.append(no_b)
-		self.lob.append(b)
+		self.smoker_var_arr.append(tk.IntVar(self))
+		cb = tk.Checkbutton(form_frame, text="No", variable=self.smoker_var_arr[1])
+		cb.place(x=320, y=y_value)
+		self.smoker_cb.append(cb)
+
+		self.smoker_cb[0].config(command=partial(self.check_cb, self.smoker_cb, self.smoker_var_arr, 0, 1))
+		self.smoker_cb[1].config(command=partial(self.check_cb, self.smoker_cb, self.smoker_var_arr, 1, 1))
+
 		y_value = y_value + 30
 
 		pack_label = tk.Label(form_frame, text="Pack years?", font=self.label_font, fg="#636363")
@@ -1594,9 +1629,9 @@ class review_of_systems_form_2(tk.Frame):
 		self.pack_smoke.place(x=320, y=y_value)
 		y_value = y_value + 30
 
-		self.quit_var = tk.IntVar()
-		quit_cb = tk.Checkbutton(form_frame, text="Quit, when?", variable=self.quit_var)
-		quit_cb.place(x=250, y=y_value)
+		self.quit_var = tk.IntVar(self)
+		self.quit_cb = tk.Checkbutton(form_frame, text="Quit, when?", variable=self.quit_var)
+		self.quit_cb.place(x=250, y=y_value)
 
 		self.quit_cb_text = tk.Text(form_frame, height = 1, width = 10, wrap="word")
 		self.quit_cb_text.place(x=360, y=y_value)
@@ -1610,15 +1645,20 @@ class review_of_systems_form_2(tk.Frame):
 
 		self.alcohol_var = 0
 
-		yes_b = tk.Button(form_frame, text="Yes", command=partial(self.set_score, 1, 1), height = 1, width = 4, bd = 1)
-		yes_b.place(x=495, y=y_value) 
-		no_b = tk.Button(form_frame, text="No", command=partial(self.set_score, -1, 1), height = 1, width = 4, bd = 1)
-		no_b.place(x=545, y=y_value)
+		self.alcohol_var_arr = []
+		self.alcohol_cb = []
+		self.alcohol_var_arr.append(tk.IntVar(self))
+		cb = tk.Checkbutton(form_frame, text="Yes", variable=self.alcohol_var_arr[0])
+		cb.place(x=495, y=y_value)
+		self.alcohol_cb.append(cb)
 
-		b = []
-		b.append(yes_b)
-		b.append(no_b)
-		self.lob.append(b)
+		self.alcohol_var_arr.append(tk.IntVar(self))
+		cb = tk.Checkbutton(form_frame, text="No", variable=self.alcohol_var_arr[1])
+		cb.place(x=545, y=y_value)
+		self.alcohol_cb.append(cb)
+
+		self.alcohol_cb[0].config(command=partial(self.check_cb, self.alcohol_cb, self.alcohol_var_arr, 0, 2))
+		self.alcohol_cb[1].config(command=partial(self.check_cb, self.alcohol_cb, self.alcohol_var_arr, 1, 2))
 		y_value = y_value + 30
 
 		alco_freq_label = tk.Label(form_frame, text="Frequency?", font=self.label_font, fg="#636363")
@@ -1645,15 +1685,20 @@ class review_of_systems_form_2(tk.Frame):
 
 		self.exercise_var = 0
 
-		yes_b = tk.Button(form_frame, text="Yes", command=partial(self.set_score, 1, 2), height = 1, width = 4, bd = 1)
-		yes_b.place(x=495, y=y_value) 
-		no_b = tk.Button(form_frame, text="No", command=partial(self.set_score, -1, 2), height = 1, width = 4, bd = 1)
-		no_b.place(x=545, y=y_value)
+		self.exercise_var_arr = []
+		self.exercise_cb = []
+		self.exercise_var_arr.append(tk.IntVar(self))
+		cb = tk.Checkbutton(form_frame, text="Yes", variable=self.exercise_var_arr[0])
+		cb.place(x=495, y=y_value)
+		self.exercise_cb.append(cb)
 
-		b = []
-		b.append(yes_b)
-		b.append(no_b)
-		self.lob.append(b)
+		self.exercise_var_arr.append(tk.IntVar(self))
+		cb = tk.Checkbutton(form_frame, text="No", variable=self.exercise_var_arr[1])
+		cb.place(x=545, y=y_value)
+		self.exercise_cb.append(cb)
+
+		self.exercise_cb[0].config(command=partial(self.check_cb, self.exercise_cb, self.exercise_var_arr, 0, 3))
+		self.exercise_cb[1].config(command=partial(self.check_cb, self.exercise_cb, self.exercise_var_arr, 1, 3))
 		y_value = y_value + 30
 
 		exercise_type_label = tk.Label(form_frame, text="Type of exercise: ", font=self.label_font, fg="#636363")
@@ -1830,60 +1875,100 @@ class review_of_systems_form_2(tk.Frame):
 				cur.execute(sql, val)
 				mydb.commit()
 
-			cur.execute(("SELECT famhist_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				cur.execute(("INSERT INTO patientrevofsys (famhist_others, patient_id) VALUES (%s, %s)"), (self.other_famhist.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
+			if self.famhist_var[len(self.famhist_opt)].get() == 1:
+				cur.execute(("SELECT famhist_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (famhist_others, patient_id) VALUES (%s, %s)"), (self.other_famhist.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET famhist_others = %s WHERE patient_id = %s"), (self.other_famhist.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
 			else:
-				cur.execute(("UPDATE patientrevofsys SET famhist_others = %s WHERE patient_id = %s"), (self.other_famhist.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
+				cur.execute(("SELECT famhist_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (famhist_others, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET famhist_others = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+					mydb.commit()
 
 			####################################
 
-			cur.execute(("SELECT immuno_1, immuno_2, immuno_3, immuno_4, immuno_5, immuno_6, immuno_7, immuno_8, immuno_9, immuno_9, immuno_10, immuno_11, immuno_12, immuno_13, immuno_14, immuno_15 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+			cur.execute(("SELECT immuno_1, immuno_2, immuno_3, immuno_4, immuno_5, immuno_6, immuno_7, immuno_8, immuno_9, immuno_10, immuno_11, immuno_12, immuno_13, immuno_14, immuno_15 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 			res = cur.fetchone()
 			if res is None:
-				sql = "INSERT INTO patientrevofsys (immuno_1, immuno_2, immuno_3, immuno_4, immuno_5, immuno_6, immuno_7, immuno_8, immuno_9, immuno_9, immuno_10, immuno_11, immuno_12, immuno_13, immuno_14, immuno_15, patient_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+				sql = "INSERT INTO patientrevofsys (immuno_1, immuno_2, immuno_3, immuno_4, immuno_5, immuno_6, immuno_7, immuno_8, immuno_9, immuno_10, immuno_11, immuno_12, immuno_13, immuno_14, immuno_15, patient_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
 				val = (self.immunohist_var[0].get(), self.immunohist_var[1].get(), self.immunohist_var[2].get(), self.immunohist_var[3].get(), self.immunohist_var[4].get(), 
 					self.immunohist_var[5].get(), self.immunohist_var[6].get(), self.immunohist_var[7].get(), self.immunohist_var[8].get(), self.immunohist_var[9].get(), 
 					self.immunohist_var[10].get(), self.immunohist_var[11].get(), self.immunohist_var[12].get(), self.immunohist_var[13].get(), self.immunohist_var[14].get(), self.controller.patient_id.get())
 				cur.execute(sql, val)
 				mydb.commit()
 			else:
-				sql = "UPDATE patientrevofsys SET immuno_1 = %s, immuno_2 = %s, immuno_3 = %s, immuno_4 = %s, immuno_5 = %s, immuno_6 = %s, immuno_7 = %s, immuno_8 = %s, immuno_9 = %s, immuno_9 = %s, immuno_10 = %s, immuno_11 = %s, immuno_12 = %s, immuno_13 = %s, immuno_14 = %s, immuno_15 = %s WHERE patient_id = %s"
+				sql = "UPDATE patientrevofsys SET immuno_1 = %s, immuno_2 = %s, immuno_3 = %s, immuno_4 = %s, immuno_5 = %s, immuno_6 = %s, immuno_7 = %s, immuno_8 = %s, immuno_9 = %s, immuno_10 = %s, immuno_11 = %s, immuno_12 = %s, immuno_13 = %s, immuno_14 = %s, immuno_15 = %s WHERE patient_id = %s"
 				val = (self.immunohist_var[0].get(), self.immunohist_var[1].get(), self.immunohist_var[2].get(), self.immunohist_var[3].get(), self.immunohist_var[4].get(), 
 					self.immunohist_var[5].get(), self.immunohist_var[6].get(), self.immunohist_var[7].get(), self.immunohist_var[8].get(), self.immunohist_var[9].get(), 
 					self.immunohist_var[10].get(), self.immunohist_var[11].get(), self.immunohist_var[12].get(), self.immunohist_var[13].get(), self.immunohist_var[14].get(), self.controller.patient_id.get())
 				cur.execute(sql, val)
 				mydb.commit()
 
-			cur.execute(("SELECT immuno_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				cur.execute(("INSERT INTO patientrevofsys (immuno_others, patient_id) VALUES (%s, %s)"), (self.other_immuno.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
+			if self.immunohist_var[len(self.immunohist_opt)].get() == 1:
+				cur.execute(("SELECT immuno_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (immuno_others, patient_id) VALUES (%s, %s)"), (self.other_immunohist.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET immuno_others = %s WHERE patient_id = %s"), (self.other_immunohist.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
 			else:
-				cur.execute(("UPDATE patientrevofsys SET immuno_others = %s WHERE patient_id = %s"), (self.other_immuno.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
+				cur.execute(("SELECT immuno_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (immuno_others, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET immuno_others = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+					mydb.commit()
 
-			cur.execute(("SELECT immuno_booster FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				cur.execute(("INSERT INTO patientrevofsys (immuno_booster, patient_id) VALUES (%s, %s)"), (self.other_booster.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
+			if self.immunohist_var[len(self.immunohist_opt)+1].get() == 1:
+				cur.execute(("SELECT immuno_booster FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (immuno_booster, patient_id) VALUES (%s, %s)"), (self.other_booster.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET immuno_booster = %s WHERE patient_id = %s"), (self.other_booster.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
 			else:
-				cur.execute(("UPDATE patientrevofsys SET immuno_booster = %s WHERE patient_id = %s"), (self.other_booster.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
+				cur.execute(("SELECT immuno_booster FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (immuno_booster, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET immuno_booster = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+					mydb.commit()
 
-			cur.execute(("SELECT immuno_combi FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				cur.execute(("INSERT INTO patientrevofsys (immuno_combi, patient_id) VALUES (%s, %s)"), (self.other_combi.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
+			if self.immunohist_var[len(self.immunohist_opt)+2].get() == 1:
+				cur.execute(("SELECT immuno_combi FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (immuno_combi, patient_id) VALUES (%s, %s)"), (self.other_combi.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET immuno_combi = %s WHERE patient_id = %s"), (self.other_combi.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
 			else:
-				cur.execute(("UPDATE patientrevofsys SET immuno_combi = %s WHERE patient_id = %s"), (self.other_combi.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
+				cur.execute(("SELECT immuno_combi FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (immuno_combi, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET immuno_combi = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+					mydb.commit()
 
 			####################################
 
@@ -1892,7 +1977,7 @@ class review_of_systems_form_2(tk.Frame):
 				if i >= len(self.famhist_opt):
 					if self.famhist_var[i].get() == 1:
 						self.other_famhist.delete('1.0', 'end') # clear the text field
-				self.famhist_var[i] = tk.IntVar()
+				self.famhist_var[i] = tk.IntVar(self)
 
 				############### get details for immunization history
 			for i in range(len(self.immunohist_var)):
@@ -1906,7 +1991,7 @@ class review_of_systems_form_2(tk.Frame):
 					elif i == len(self.immunohist_opt)+2:
 						if self.immunohist_var[i].get() == 1:
 							self.other_immunohist.delete('1.0', 'end')
-				self.immunohist_var[i] = tk.IntVar()
+				self.immunohist_var[i] = tk.IntVar(self)
 
 			cur.execute(("SELECT smoker FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 			res = cur.fetchone()
@@ -1921,14 +2006,24 @@ class review_of_systems_form_2(tk.Frame):
 				cur.execute(sql, val)
 				mydb.commit()
 
-			cur.execute(("SELECT smoker_pack FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				cur.execute(("INSERT INTO patientrevofsys (smoker_pack, patient_id) VALUES (%s, %s)"), (self.pack_smoke.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
+			if self.smoker_var == 1:
+				cur.execute(("SELECT smoker_pack FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (smoker_pack, patient_id) VALUES (%s, %s)"), (self.pack_smoke.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET smoker_pack = %s WHERE patient_id = %s"), (self.pack_smoke.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
 			else:
-				cur.execute(("UPDATE patientrevofsys SET smoker_pack = %s WHERE patient_id = %s"), (self.pack_smoke.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
+				cur.execute(("SELECT smoker_pack FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (smoker_pack, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET smoker_pack = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+					mydb.commit()
 
 			####################################
 
@@ -1936,23 +2031,33 @@ class review_of_systems_form_2(tk.Frame):
 			res = cur.fetchone()
 			if res is None:
 				sql = "INSERT INTO patientrevofsys (smoker_quit, patient_id) VALUES (%s, %s)"
-				val = (self.quit_var, self.controller.patient_id.get())
+				val = (self.quit_var.get(), self.controller.patient_id.get())
 				cur.execute(sql, val)
 				mydb.commit()
 			else:
 				sql = "UPDATE patientrevofsys SET smoker_quit = %s WHERE patient_id = %s"
-				val = (self.quit_var, self.controller.patient_id.get())
+				val = (self.quit_var.get(), self.controller.patient_id.get())
 				cur.execute(sql, val)
 				mydb.commit()
 
-			cur.execute(("SELECT smoker_quit_when FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				cur.execute(("INSERT INTO patientrevofsys (smoker_quit_when, patient_id) VALUES (%s, %s)"), (self.quit_cb_text.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
+			if self.quit_var.get() == 1:
+				cur.execute(("SELECT smoker_quit_when FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (smoker_quit_when, patient_id) VALUES (%s, %s)"), (self.quit_cb_text.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET smoker_quit_when = %s WHERE patient_id = %s"), (self.quit_cb_text.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
 			else:
-				cur.execute(("UPDATE patientrevofsys SET smoker_quit_when = %s WHERE patient_id = %s"), (self.quit_cb_text.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
+				cur.execute(("SELECT smoker_quit_when FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (smoker_quit_when, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET smoker_quit_when = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+					mydb.commit()
 
 			####################################
 
@@ -1969,32 +2074,60 @@ class review_of_systems_form_2(tk.Frame):
 				cur.execute(sql, val)
 				mydb.commit()
 
-			cur.execute(("SELECT drinker_freq FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				cur.execute(("INSERT INTO patientrevofsys (drinker_freq, patient_id) VALUES (%s, %s)"), (self.alco_freq.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-			else:
-				cur.execute(("UPDATE patientrevofsys SET drinker_freq = %s WHERE patient_id = %s"), (self.alco_freq.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
+			if self.alcohol_var == 1:
+				cur.execute(("SELECT drinker_freq FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (drinker_freq, patient_id) VALUES (%s, %s)"), (self.alco_freq.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET drinker_freq = %s WHERE patient_id = %s"), (self.alco_freq.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
 
-			cur.execute(("SELECT drinker_dur FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				cur.execute(("INSERT INTO patientrevofsys (drinker_dur, patient_id) VALUES (%s, %s)"), (self.alco_dur.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-			else:
-				cur.execute(("UPDATE patientrevofsys SET drinker_dur = %s WHERE patient_id = %s"), (self.alco_dur.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
+				cur.execute(("SELECT drinker_dur FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (drinker_dur, patient_id) VALUES (%s, %s)"), (self.alco_dur.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET drinker_dur = %s WHERE patient_id = %s"), (self.alco_dur.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
 
-			cur.execute(("SELECT drinker_type FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				cur.execute(("INSERT INTO patientrevofsys (drinker_type, patient_id) VALUES (%s, %s)"), (self.alco_type.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
+				cur.execute(("SELECT drinker_type FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (drinker_type, patient_id) VALUES (%s, %s)"), (self.alco_type.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET drinker_type = %s WHERE patient_id = %s"), (self.alco_type.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
 			else:
-				cur.execute(("UPDATE patientrevofsys SET drinker_type = %s WHERE patient_id = %s"), (self.alco_type.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
+				cur.execute(("SELECT drinker_freq FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (drinker_freq, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET drinker_freq = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+					mydb.commit()
+
+				cur.execute(("SELECT drinker_dur FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (drinker_dur, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET drinker_dur = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+					mydb.commit()
+
+				cur.execute(("SELECT drinker_type FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (drinker_type, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET drinker_type = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+					mydb.commit()
 
 			####################################
 
@@ -2011,14 +2144,24 @@ class review_of_systems_form_2(tk.Frame):
 				cur.execute(sql, val)
 				mydb.commit()
 
-			cur.execute(("SELECT exercise_type FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				cur.execute(("INSERT INTO patientrevofsys (exercise_type, patient_id) VALUES (%s, %s)"), (self.exercise_type.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
+			if self.exercise_var == 1:
+				cur.execute(("SELECT exercise_type FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (exercise_type, patient_id) VALUES (%s, %s)"), (self.exercise_type.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET exercise_type = %s WHERE patient_id = %s"), (self.exercise_type.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
 			else:
-				cur.execute(("UPDATE patientrevofsys SET exercise_type = %s WHERE patient_id = %s"), (self.exercise_type.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
+				cur.execute(("SELECT exercise_type FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (exercise_type, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET exercise_type = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+					mydb.commit()
 
 			####################################
 
@@ -2165,33 +2308,48 @@ class review_of_systems_form_2(tk.Frame):
 
 			self.controller.show_frame("FirstConsForm")
 
+		self.controller.flag.set(1)
+
 	def load_data(self):
 
-		cur.execute(("SELECT famhist_1, famhist_2, famhist_3, famhist_4, famhist_5, famhist_6, famhist_7, immuno_1, immuno_2, immuno_3, immuno_4, immuno_5, immuno_6, immuno_7, immuno_8, immuno_9, immuno_9, immuno_10, immuno_11, immuno_12, immuno_13, immuno_14, immuno_15 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+		cur.execute(("SELECT famhist_1, famhist_2, famhist_3, famhist_4, famhist_5, famhist_6, famhist_7, immuno_1, immuno_2, immuno_3, immuno_4, immuno_5, immuno_6, immuno_7, immuno_8, immuno_9, immuno_10, immuno_11, immuno_12, immuno_13, immuno_14, immuno_15, smoker, drinker, exercise FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 
-		self.famhist_var[0].set(res[0])
-		self.famhist_var[1].set(res[1])
-		self.famhist_var[2].set(res[2])
-		self.famhist_var[3].set(res[3])
-		self.famhist_var[4].set(res[4])
-		self.famhist_var[5].set(res[5])
-		self.famhist_var[6].set(res[6])
-		self.immunohist_var[0].set(res[7])
-		self.immunohist_var[1].set(res[8])
-		self.immunohist_var[2].set(res[9])
-		self.immunohist_var[3].set(res[10])
-		self.immunohist_var[4].set(res[11])
-		self.immunohist_var[5].set(res[12])
-		self.immunohist_var[6].set(res[13])
-		self.immunohist_var[7].set(res[14])
-		self.immunohist_var[8].set(res[15])
-		self.immunohist_var[9].set(res[16])
-		self.immunohist_var[10].set(res[17])
-		self.immunohist_var[11].set(res[18])
-		self.immunohist_var[12].set(res[19])
-		self.immunohist_var[13].set(res[20])
-		self.immunohist_var[14].set(res[21])
+		for i in range(len(self.famhist_var)):
+			self.famhist_var[i].set(res[i])
+
+		for i in range(len(self.immunohist_var)):
+			self.immunohist_var[i].set(res[i+7])
+
+		if res[22] == 0:
+			self.smoker_var_arr[0].set(0)
+			self.smoker_var_arr[1].set(1)
+		elif res[22] == 1:
+			self.smoker_var_arr[0].set(1)
+			self.smoker_var_arr[1].set(0)
+		else:
+			self.smoker_var_arr[0].set(0)
+			self.smoker_var_arr[1].set(0)
+
+		if res[23] == 0:
+			self.alcohol_var_arr[0].set(0)
+			self.alcohol_var_arr[1].set(1)
+		elif res[23] == 1:
+			self.alcohol_var_arr[0].set(1)
+			self.alcohol_var_arr[1].set(0)
+		else:
+			self.alcohol_var_arr[0].set(0)
+			self.alcohol_var_arr[1].set(0)
+
+		if res[24] == 0:
+			self.exercise_var_arr[0].set(0)
+			self.exercise_var_arr[1].set(1)
+		elif res[24] == 1:
+			self.exercise_var_arr[0].set(1)
+			self.exercise_var_arr[1].set(0)
+		else:
+			self.exercise_var_arr[0].set(0)
+			self.exercise_var_arr[1].set(0)
 
 		self.medhist_illness.delete('1.0', 'end')
 		self.medhist_hospt.delete('1.0', 'end')
@@ -2246,28 +2404,18 @@ class review_of_systems_form_2(tk.Frame):
 		self.bm_year.insert('1.0', res[22])
 		self.mb_compli.insert('1.0', res[23])
 
-		self.famhist_cb[0].config(state = "disabled")
-		self.famhist_cb[1].config(state = "disabled")
-		self.famhist_cb[2].config(state = "disabled")
-		self.famhist_cb[3].config(state = "disabled")
-		self.famhist_cb[4].config(state = "disabled")
-		self.famhist_cb[5].config(state = "disabled")
-		self.famhist_cb[6].config(state = "disabled")
-		self.immunohist_cb[0].config(state = "disabled")
-		self.immunohist_cb[1].config(state = "disabled")
-		self.immunohist_cb[2].config(state = "disabled")
-		self.immunohist_cb[3].config(state = "disabled")
-		self.immunohist_cb[4].config(state = "disabled")
-		self.immunohist_cb[5].config(state = "disabled")
-		self.immunohist_cb[6].config(state = "disabled")
-		self.immunohist_cb[7].config(state = "disabled")
-		self.immunohist_cb[8].config(state = "disabled")
-		self.immunohist_cb[9].config(state = "disabled")
-		self.immunohist_cb[10].config(state = "disabled")
-		self.immunohist_cb[11].config(state = "disabled")
-		self.immunohist_cb[12].config(state = "disabled")
-		self.immunohist_cb[13].config(state = "disabled")
-		self.immunohist_cb[14].config(state = "disabled")
+		for i in range(len(self.famhist_cb)):
+			self.famhist_cb[i].config(state = "disabled")
+
+		for i in range(len(self.immunohist_cb)):
+			self.immunohist_cb[i].config(state = "disabled")
+
+		self.smoker_cb[0].config(state = "disabled")
+		self.smoker_cb[1].config(state = "disabled")
+		self.alcohol_cb[0].config(state = "disabled")
+		self.alcohol_cb[1].config(state = "disabled")
+		self.exercise_cb[0].config(state = "disabled")
+		self.exercise_cb[1].config(state = "disabled")
 		self.medhist_illness.config(state = "disabled")
 		self.medhist_hospt.config(state = "disabled")
 		self.medhist_allergy.config(state = "disabled")
@@ -2276,6 +2424,7 @@ class review_of_systems_form_2(tk.Frame):
 		self.other_combi.config(state = "disabled")
 		self.other_immunohist.config(state = "disabled")
 		self.pack_smoke.config(state = "disabled")
+		self.quit_cb.config(state = "disabled")
 		self.quit_cb_text.config(state = "disabled")
 		self.alco_freq.config(state = "disabled")
 		self.alco_dur.config(state = "disabled")
@@ -2293,29 +2442,41 @@ class review_of_systems_form_2(tk.Frame):
 		self.bm_year.config(state = "disabled")
 		self.mb_compli.config(state = "disabled")
 
-	def set_score(self, vote, i):
-		if vote == 1:
-			(self.lob[i][1]).config(state = "disabled", bd = 0)
-			(self.lob[i][0]).config(bg = "#0060ba", fg = "#ffffff")
-		else:
-			(self.lob[i][0]).config(state = "disabled", bd = 0)
-			(self.lob[i][1]).config(bg = "#0060ba", fg = "#ffffff")
-		
+	def check_cb(self, cb_arr, cb_var_arr, i, question):
 		if i == 0:
-			if vote == 1:
-				self.smoker_var = 1
+			if cb_var_arr[i].get() == 1:
+				if question == 1:
+					self.smoker_var = 1
+				elif question == 2:
+					self.alcohol_var = 1
+				else:
+					self.exercise_var = 1
+				cb_arr[i+1].config(state="disabled")
 			else:
-				self.smoker_var = 0
-		elif i == 1:
-			if vote == 1:
-				self.alcohol_var = 1
-			else:
-				self.alcohol_var = 0
+				if question == 1:
+					self.smoker_var = 2
+				elif question == 2:
+					self.alcohol_var = 2
+				else:
+					self.exercise_var = 2
+				cb_arr[i+1].config(state="normal")
 		else:
-			if vote == 1:
-				self.exercise_var = 1
+			if cb_var_arr[i].get() == 1:
+				if question == 1:
+					self.smoker_var = 0
+				elif question == 2:
+					self.alcohol_var = 0
+				else:
+					self.exercise_var = 0
+				cb_arr[i-1].config(state="disabled")
 			else:
-				self.exercise_var = 0
+				if question == 1:
+					self.smoker_var = 2
+				elif question == 2:
+					self.alcohol_var = 2
+				else:
+					self.exercise_var = 2
+				cb_arr[i-1].config(state="normal")
 
 class physical_examination_form(tk.Frame):
 
@@ -2412,13 +2573,13 @@ class physical_examination_form(tk.Frame):
 
 		self.ge_var = []
 		self.ge_cb = []
-		self.ge_var.append(tk.IntVar())
+		self.ge_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="no significant findings", variable=self.ge_var[0])
 		cb.place(x=150, y=y_value)
 		self.ge_cb.append(cb)
 		y_value = y_value + 25
 
-		self.ge_var.append(tk.IntVar())
+		self.ge_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="findings:", variable=self.ge_var[1])
 		cb.place(x=150, y=y_value)
 		self.ge_cb.append(cb)
@@ -2435,13 +2596,13 @@ class physical_examination_form(tk.Frame):
 
 		self.sk_var = []
 		self.sk_cb = []
-		self.sk_var.append(tk.IntVar())
+		self.sk_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="no significant findings", variable=self.sk_var[0])
 		cb.place(x=150, y=y_value)
 		self.sk_cb.append(cb)
 		y_value = y_value + 25
 
-		self.sk_var.append(tk.IntVar())
+		self.sk_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="findings:", variable=self.sk_var[1])
 		cb.place(x=150, y=y_value)
 		self.sk_cb.append(cb)
@@ -2458,13 +2619,13 @@ class physical_examination_form(tk.Frame):
 
 		self.mu_var = []
 		self.mu_cb = []
-		self.mu_var.append(tk.IntVar())
+		self.mu_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="no significant findings", variable=self.mu_var[0])
 		cb.place(x=150, y=y_value)
 		self.mu_cb.append(cb)
 		y_value = y_value + 25
 
-		self.mu_var.append(tk.IntVar())
+		self.mu_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="findings:", variable=self.mu_var[1])
 		cb.place(x=150, y=y_value)
 		self.mu_cb.append(cb)
@@ -2481,13 +2642,13 @@ class physical_examination_form(tk.Frame):
 
 		self.he_var = []
 		self.he_cb = []
-		self.he_var.append(tk.IntVar())
+		self.he_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="no significant findings", variable=self.he_var[0])
 		cb.place(x=150, y=y_value)
 		self.he_cb.append(cb)
 		y_value = y_value + 25
 
-		self.he_var.append(tk.IntVar())
+		self.he_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="findings:", variable=self.he_var[1])
 		cb.place(x=150, y=y_value)
 		self.he_cb.append(cb)
@@ -2504,13 +2665,13 @@ class physical_examination_form(tk.Frame):
 
 		self.re_var = []
 		self.re_cb = []
-		self.re_var.append(tk.IntVar())
+		self.re_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="no significant findings", variable=self.re_var[0])
 		cb.place(x=150, y=y_value)
 		self.re_cb.append(cb)
 		y_value = y_value + 25
 
-		self.re_var.append(tk.IntVar())
+		self.re_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="findings:", variable=self.re_var[1])
 		cb.place(x=150, y=y_value)
 		self.re_cb.append(cb)
@@ -2527,13 +2688,13 @@ class physical_examination_form(tk.Frame):
 
 		self.ca_var = []
 		self.ca_cb = []
-		self.ca_var.append(tk.IntVar())
+		self.ca_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="no significant findings", variable=self.ca_var[0])
 		cb.place(x=150, y=y_value)
 		self.ca_cb.append(cb)
 		y_value = y_value + 25
 
-		self.ca_var.append(tk.IntVar())
+		self.ca_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="findings:", variable=self.ca_var[1])
 		cb.place(x=150, y=y_value)
 		self.ca_cb.append(cb)
@@ -2550,13 +2711,13 @@ class physical_examination_form(tk.Frame):
 
 		self.ga_var = []
 		self.ga_cb = []
-		self.ga_var.append(tk.IntVar())
+		self.ga_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="no significant findings", variable=self.ga_var[0])
 		cb.place(x=150, y=y_value)
 		self.ga_cb.append(cb)
 		y_value = y_value + 25
 
-		self.ga_var.append(tk.IntVar())
+		self.ga_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="findings:", variable=self.ga_var[1])
 		cb.place(x=150, y=y_value)
 		self.ga_cb.append(cb)
@@ -2573,13 +2734,13 @@ class physical_examination_form(tk.Frame):
 
 		self.gn_var = []
 		self.gn_cb = []
-		self.gn_var.append(tk.IntVar())
+		self.gn_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="no significant findings", variable=self.gn_var[0])
 		cb.place(x=150, y=y_value)
 		self.gn_cb.append(cb)
 		y_value = y_value + 25
 
-		self.gn_var.append(tk.IntVar())
+		self.gn_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="findings:", variable=self.gn_var[1])
 		cb.place(x=150, y=y_value)
 		self.gn_cb.append(cb)
@@ -2596,13 +2757,13 @@ class physical_examination_form(tk.Frame):
 
 		self.ie_var = []
 		self.ie_cb = []
-		self.ie_var.append(tk.IntVar())
+		self.ie_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="no significant findings", variable=self.ie_var[0])
 		cb.place(x=150, y=y_value)
 		self.ie_cb.append(cb)
 		y_value = y_value + 25
 
-		self.ie_var.append(tk.IntVar())
+		self.ie_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="findings:", variable=self.ie_var[1])
 		cb.place(x=150, y=y_value)
 		self.ie_cb.append(cb)
@@ -2619,13 +2780,13 @@ class physical_examination_form(tk.Frame):
 
 		self.dre_var = []
 		self.dre_cb = []
-		self.dre_var.append(tk.IntVar())
+		self.dre_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="no significant findings", variable=self.dre_var[0])
 		cb.place(x=150, y=y_value)
 		self.dre_cb.append(cb)
 		y_value = y_value + 25
 
-		self.dre_var.append(tk.IntVar())
+		self.dre_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="findings:", variable=self.dre_var[1])
 		cb.place(x=150, y=y_value)
 		self.dre_cb.append(cb)
@@ -2642,13 +2803,13 @@ class physical_examination_form(tk.Frame):
 
 		self.ne_var = []
 		self.ne_cb = []
-		self.ne_var.append(tk.IntVar())
+		self.ne_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="no significant findings", variable=self.ne_var[0])
 		cb.place(x=150, y=y_value)
 		self.ne_cb.append(cb)
 		y_value = y_value + 25
 
-		self.ne_var.append(tk.IntVar())
+		self.ne_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="findings:", variable=self.ne_var[1])
 		cb.place(x=150, y=y_value)
 		self.ne_cb.append(cb)
@@ -2800,15 +2961,15 @@ class assessment_table(tk.Frame):
 		healthstrat_label = tk.Label(form_frame, text="Health Education/Strategy:", font=self.label_font_2, fg="#636363")
 		healthstrat_label.place(x=675, y=190)
 
-		self.strat_var.append(tk.IntVar())
+		self.strat_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="Advice", variable=self.strat_var[0])
 		cb.place(x=695, y=205)
 
-		self.strat_var.append(tk.IntVar())
+		self.strat_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="Flyers/pamphlets", variable=self.strat_var[1])
 		cb.place(x=695, y=225)
 
-		self.strat_var.append(tk.IntVar())
+		self.strat_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="Others:", variable=self.strat_var[2])
 		cb.place(x=695, y=245)
 
@@ -2849,16 +3010,16 @@ class assessment_table(tk.Frame):
 
 		if self.strat_var[0].get() == 1:
 			print("Advice")
-			self.strat_var[0] = tk.IntVar()
+			self.strat_var[0] = tk.IntVar(self)
 
 		if self.strat_var[1].get() == 1:
 			print("Flyers/pamphlets")
-			self.strat_var[1] = tk.IntVar()
+			self.strat_var[1] = tk.IntVar(self)
 
 		if self.strat_var[2].get() == 1:
 			print(self.health_strat_others.get("1.0",'end-1c')) # get the string on the text field
 			self.health_strat_others.delete('1.0', 'end')
-			self.strat_var[2] = tk.IntVar()
+			self.strat_var[2] = tk.IntVar(self)
 
 	def add_to_table(self, assessment, icd, dpra):
 		id = self.tree.insert('', 'end', text="Assessment: " + assessment)
@@ -2920,32 +3081,32 @@ class family_apgar_form(tk.Frame):
 
 			var = []
 			cb_arr = []
-			var.append(tk.IntVar())
+			var.append(tk.IntVar(self))
 			cb = tk.Checkbutton(form_frame, text="0", variable=var[0])
 			cb.place(x=480, y=y_value)
 			cb_arr.append(cb)
 
-			var.append(tk.IntVar())
+			var.append(tk.IntVar(self))
 			cb = tk.Checkbutton(form_frame, text="1", variable=var[1])
 			cb.place(x=520, y=y_value)
 			cb_arr.append(cb)
 
-			var.append(tk.IntVar())
+			var.append(tk.IntVar(self))
 			cb = tk.Checkbutton(form_frame, text="2", variable=var[2])
 			cb.place(x=560, y=y_value)
 			cb_arr.append(cb)
 
-			var.append(tk.IntVar())
+			var.append(tk.IntVar(self))
 			cb = tk.Checkbutton(form_frame, text="0", variable=var[3])
 			cb.place(x=620, y=y_value)
 			cb_arr.append(cb)
 
-			var.append(tk.IntVar())
+			var.append(tk.IntVar(self))
 			cb = tk.Checkbutton(form_frame, text="1", variable=var[4])
 			cb.place(x=660, y=y_value)
 			cb_arr.append(cb)
 
-			var.append(tk.IntVar())
+			var.append(tk.IntVar(self))
 			cb = tk.Checkbutton(form_frame, text="2", variable=var[5])
 			cb.place(x=700, y=y_value)
 			cb_arr.append(cb)
@@ -3119,12 +3280,12 @@ class followup_patient_form(tk.Frame):
 
 		self.r_var = []
 		self.r_cb_arr = []
-		self.r_var.append(tk.IntVar())
+		self.r_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="continuing care from previous visit", variable=self.r_var[0])
 		cb.place(x=230, y=110)
 		self.r_cb_arr.append(cb)
 
-		self.r_var.append(tk.IntVar())
+		self.r_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="new complaint", variable=self.r_var[1])
 		cb.place(x=230, y=130)
 		self.r_cb_arr.append(cb)
@@ -3230,13 +3391,13 @@ class followup_patient_form_2(tk.Frame):
 
 		self.ge_var = []
 		self.ge_cb = []
-		self.ge_var.append(tk.IntVar())
+		self.ge_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="no significant findings", variable=self.ge_var[0])
 		cb.place(x=150, y=y_value)
 		self.ge_cb.append(cb)
 		y_value = y_value + 25
 
-		self.ge_var.append(tk.IntVar())
+		self.ge_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="findings:", variable=self.ge_var[1])
 		cb.place(x=150, y=y_value)
 		self.ge_cb.append(cb)
@@ -3253,13 +3414,13 @@ class followup_patient_form_2(tk.Frame):
 
 		self.sk_var = []
 		self.sk_cb = []
-		self.sk_var.append(tk.IntVar())
+		self.sk_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="no significant findings", variable=self.sk_var[0])
 		cb.place(x=150, y=y_value)
 		self.sk_cb.append(cb)
 		y_value = y_value + 25
 
-		self.sk_var.append(tk.IntVar())
+		self.sk_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="findings:", variable=self.sk_var[1])
 		cb.place(x=150, y=y_value)
 		self.sk_cb.append(cb)
@@ -3276,13 +3437,13 @@ class followup_patient_form_2(tk.Frame):
 
 		self.mu_var = []
 		self.mu_cb = []
-		self.mu_var.append(tk.IntVar())
+		self.mu_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="no significant findings", variable=self.mu_var[0])
 		cb.place(x=150, y=y_value)
 		self.mu_cb.append(cb)
 		y_value = y_value + 25
 
-		self.mu_var.append(tk.IntVar())
+		self.mu_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="findings:", variable=self.mu_var[1])
 		cb.place(x=150, y=y_value)
 		self.mu_cb.append(cb)
@@ -3299,13 +3460,13 @@ class followup_patient_form_2(tk.Frame):
 
 		self.he_var = []
 		self.he_cb = []
-		self.he_var.append(tk.IntVar())
+		self.he_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="no significant findings", variable=self.he_var[0])
 		cb.place(x=150, y=y_value)
 		self.he_cb.append(cb)
 		y_value = y_value + 25
 
-		self.he_var.append(tk.IntVar())
+		self.he_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="findings:", variable=self.he_var[1])
 		cb.place(x=150, y=y_value)
 		self.he_cb.append(cb)
@@ -3322,13 +3483,13 @@ class followup_patient_form_2(tk.Frame):
 
 		self.re_var = []
 		self.re_cb = []
-		self.re_var.append(tk.IntVar())
+		self.re_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="no significant findings", variable=self.re_var[0])
 		cb.place(x=150, y=y_value)
 		self.re_cb.append(cb)
 		y_value = y_value + 25
 
-		self.re_var.append(tk.IntVar())
+		self.re_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="findings:", variable=self.re_var[1])
 		cb.place(x=150, y=y_value)
 		self.re_cb.append(cb)
@@ -3345,13 +3506,13 @@ class followup_patient_form_2(tk.Frame):
 
 		self.ca_var = []
 		self.ca_cb = []
-		self.ca_var.append(tk.IntVar())
+		self.ca_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="no significant findings", variable=self.ca_var[0])
 		cb.place(x=150, y=y_value)
 		self.ca_cb.append(cb)
 		y_value = y_value + 25
 
-		self.ca_var.append(tk.IntVar())
+		self.ca_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="findings:", variable=self.ca_var[1])
 		cb.place(x=150, y=y_value)
 		self.ca_cb.append(cb)
@@ -3368,13 +3529,13 @@ class followup_patient_form_2(tk.Frame):
 
 		self.ga_var = []
 		self.ga_cb = []
-		self.ga_var.append(tk.IntVar())
+		self.ga_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="no significant findings", variable=self.ga_var[0])
 		cb.place(x=150, y=y_value)
 		self.ga_cb.append(cb)
 		y_value = y_value + 25
 
-		self.ga_var.append(tk.IntVar())
+		self.ga_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="findings:", variable=self.ga_var[1])
 		cb.place(x=150, y=y_value)
 		self.ga_cb.append(cb)
@@ -3391,13 +3552,13 @@ class followup_patient_form_2(tk.Frame):
 
 		self.gn_var = []
 		self.gn_cb = []
-		self.gn_var.append(tk.IntVar())
+		self.gn_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="no significant findings", variable=self.gn_var[0])
 		cb.place(x=150, y=y_value)
 		self.gn_cb.append(cb)
 		y_value = y_value + 25
 
-		self.gn_var.append(tk.IntVar())
+		self.gn_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="findings:", variable=self.gn_var[1])
 		cb.place(x=150, y=y_value)
 		self.gn_cb.append(cb)
@@ -3414,13 +3575,13 @@ class followup_patient_form_2(tk.Frame):
 
 		self.ie_var = []
 		self.ie_cb = []
-		self.ie_var.append(tk.IntVar())
+		self.ie_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="no significant findings", variable=self.ie_var[0])
 		cb.place(x=150, y=y_value)
 		self.ie_cb.append(cb)
 		y_value = y_value + 25
 
-		self.ie_var.append(tk.IntVar())
+		self.ie_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="findings:", variable=self.ie_var[1])
 		cb.place(x=150, y=y_value)
 		self.ie_cb.append(cb)
@@ -3437,13 +3598,13 @@ class followup_patient_form_2(tk.Frame):
 
 		self.dre_var = []
 		self.dre_cb = []
-		self.dre_var.append(tk.IntVar())
+		self.dre_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="no significant findings", variable=self.dre_var[0])
 		cb.place(x=150, y=y_value)
 		self.dre_cb.append(cb)
 		y_value = y_value + 25
 
-		self.dre_var.append(tk.IntVar())
+		self.dre_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="findings:", variable=self.dre_var[1])
 		cb.place(x=150, y=y_value)
 		self.dre_cb.append(cb)
@@ -3460,13 +3621,13 @@ class followup_patient_form_2(tk.Frame):
 
 		self.ne_var = []
 		self.ne_cb = []
-		self.ne_var.append(tk.IntVar())
+		self.ne_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="no significant findings", variable=self.ne_var[0])
 		cb.place(x=150, y=y_value)
 		self.ne_cb.append(cb)
 		y_value = y_value + 25
 
-		self.ne_var.append(tk.IntVar())
+		self.ne_var.append(tk.IntVar(self))
 		cb = tk.Checkbutton(form_frame, text="findings:", variable=self.ne_var[1])
 		cb.place(x=150, y=y_value)
 		self.ne_cb.append(cb)
@@ -3629,16 +3790,16 @@ class followup_assessment_table(tk.Frame):
 
 		if self.strat_var[0].get() == 1:
 			print("Advice")
-			self.strat_var[0] = tk.IntVar()
+			self.strat_var[0] = tk.IntVar(self)
 
 		if self.strat_var[1].get() == 1:
 			print("Flyers/pamphlets")
-			self.strat_var[1] = tk.IntVar()
+			self.strat_var[1] = tk.IntVar(self)
 
 		if self.strat_var[2].get() == 1:
 			print(self.health_strat_others.get("1.0",'end-1c')) # get the string on the text field
 			self.health_strat_others.delete('1.0', 'end')
-			self.strat_var[2] = tk.IntVar()
+			self.strat_var[2] = tk.IntVar(self)
 
 	def add_to_table(self, assessment, icd, dpra):
 		id = self.tree.insert('', 'end', text="Assessment: " + assessment)
