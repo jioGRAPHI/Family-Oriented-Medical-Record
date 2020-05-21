@@ -287,7 +287,6 @@ DROP TABLE IF EXISTS `patientfammember`;
 CREATE TABLE `patientfammember` (
   `log_id` int(10) NOT NULL AUTO_INCREMENT,
   `member_name` varchar(360) DEFAULT NULL,
-  `family_map` varchar(500) DEFAULT NULL,
   `screening` int(1) DEFAULT 0,
   `immunization` int(1) DEFAULT 0,
   `lifestyle_changes` int(1) DEFAULT 0,

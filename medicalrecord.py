@@ -114,10 +114,11 @@ class MedSystem(tk.Tk):
 		# self.flag = tk.IntVar(self) # flag to determine if user is adding new data or editing existing
 
 		self.frames = {}
-		for F in (LandingPage, PatientForm, GeriaticForm, FirstConsForm, FamAssessForm, ReferralForm, review_of_systems_form, review_of_systems_form_2, physical_examination_form, assessment_table, family_apgar_form, followup_patient_form, followup_patient_form_2,followup_assessment_table):
+		for F in (LandingPage, PatientForm, GeriaticForm, FirstConsForm, FamAssessForm, ReferralForm, review_of_systems_form, review_of_systems_form_2, physical_examination_form, assessment_table, family_apgar_form, family_apgar_form_res,followup_patient_form, followup_patient_form_2,followup_assessment_table):
 			page_name = F.__name__
 			frame = F(parent=container, controller=self)
 			self.frames[page_name] = frame
+
 
 			frame.grid(row=0, column=0, sticky="nsew")
 
@@ -130,6 +131,8 @@ class MedSystem(tk.Tk):
 		if page_name == "LandingPage":
 			LandingPage = self.get_page("LandingPage")
 			LandingPage.load_patients()
+		else:
+			self.get_page(page_name).load_data()
 
 		frame = self.frames[page_name]
 		frame.tkraise()
@@ -152,7 +155,7 @@ class LandingPage(tk.Frame):
 		self.list_of_patients_id = []
 
 		self.w = ttk.Combobox(self, values=self.list_of_patients, postcommand=self.changeValue)
-		self.w.config(height = 4, width = 60)
+		self.w.config(height = 4, width = 63)
 		self.w.place(x=400, y=220)
 		self.w.bind("<<ComboboxSelected>>", self.get_index)
 
@@ -163,7 +166,7 @@ class LandingPage(tk.Frame):
 		self.load_patients()
 
 	def continue_login(self):
-		for F in (PatientForm, FirstConsForm, review_of_systems_form, review_of_systems_form_2):
+		for F in (PatientForm, GeriaticForm, FirstConsForm, FamAssessForm, review_of_systems_form, review_of_systems_form_2, family_apgar_form, family_apgar_form_res):
 			page_name = F.__name__
 			p = self.controller.get_page(page_name)
 			p.load_data()
@@ -173,7 +176,12 @@ class LandingPage(tk.Frame):
 
 	def add_new(self):
 		self.controller.patient_id = tk.StringVar()
-		# self.controller.flag.set(0)
+
+		for F in (PatientForm, GeriaticForm, FirstConsForm, FamAssessForm, review_of_systems_form, review_of_systems_form_2, family_apgar_form, family_apgar_form_res):
+			page_name = F.__name__
+			p = self.controller.get_page(page_name)
+			p.load_data()
+
 		self.controller.show_frame("FirstConsForm")
 
 	def get_index(self, event):
@@ -185,7 +193,6 @@ class LandingPage(tk.Frame):
 
 		cur.execute("SELECT patient_id, last_name, first_name, middle_name FROM patient")
 		OPTIONS = cur.fetchall()
-
 		for x in range(len(OPTIONS)):
 			self.list_of_patients.append(OPTIONS[x][1] + ", " + OPTIONS[x][2] + " " + OPTIONS[x][3])
 			self.list_of_patients_id.append(OPTIONS[x][0])
@@ -260,10 +267,16 @@ class PatientForm(tk.Frame):
 	def load_data(self):
 		cur.execute(("SELECT last_name, first_name, middle_name FROM patient WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
-		self.patient_name['text'] = res[0] + ", " + res[1] + " " + res[2]
+
+		if res is not None:
+			self.patient_name['text'] = res[0] + ", " + res[1] + " " + res[2]
+		else:
+			self.patient_name['text'] = ""
 
 		cur.execute(("SELECT date_form, diagnosis, physician_name, diagnostics, medications, dispositions FROM patientconsultform WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchall()
+
+		self.tree.delete(*self.tree.get_children())
 
 		for i in range(len(res)):
 			id = self.tree.insert('', 'end', text=res[i][0])
@@ -320,8 +333,8 @@ class GeriaticForm(tk.Frame):
 		page_title = tk.Label(self, text="Geriatric Depression Scale – Short Form", font=self.title_font)
 		page_title.place(x=460, y=68)
 
-		patient_name_label = tk.Label(self, text="<FAMILY NAME, First Name>", font=self.title_font)
-		patient_name_label.place(x=90, y=110)
+		self.patient_name_label = tk.Label(self, text="", font=self.title_font)
+		self.patient_name_label.place(x=90, y=110)
 
 		question_label = tk.Label(self, text="Question", font=self.subtitle_font)
 		question_label.place(x=190, y=145)
@@ -361,6 +374,15 @@ class GeriaticForm(tk.Frame):
 		self.total_score.place(x=940, y=635)
 		self.total_score_value = tk.Label(self, text="", font=self.label_font)
 		self.total_score_value.place(x=980, y=635)
+
+	def load_data(self):
+		cur.execute(("SELECT last_name, first_name, middle_name FROM patient WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+		res = cur.fetchone()
+
+		if res is not None:
+			self.patient_name_label['text'] = res[0] + ", " + res[1] + " " + res[2]
+		else:
+			self.patient_name_label['text'] = ""
 
 	def set_score(self, vote, i):
 		self.score = self.score + vote
@@ -496,33 +518,78 @@ class FirstConsForm(tk.Frame):
 		cur.execute(("SELECT last_name, first_name, middle_name, address, birthdate, age, gender, civil_status, contact_no, occupation FROM patient WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 		
-		self.p_lname.insert('1.0', res[0])
-		self.p_fname.insert('1.0', res[1])
-		self.p_mname.insert('1.0', res[2])
-		self.p_addr.insert('1.0', res[3])
-		self.p_age.insert('1.0', res[5])
-		self.p_gender.insert('1.0', res[6])
-		self.p_civil_stat.insert('1.0', res[7])
-		self.p_contact.insert('1.0', res[8])
-		self.p_occup.insert('1.0', res[9])
-		self.p_bday.set_date(res[4])
+		if res is not None:
+			self.p_lname.insert('1.0', res[0])
+			self.p_fname.insert('1.0', res[1])
+			self.p_mname.insert('1.0', res[2])
+			self.p_addr.insert('1.0', res[3])
+			self.p_age.insert('1.0', res[5])
+			self.p_gender.insert('1.0', res[6])
+			self.p_civil_stat.insert('1.0', res[7])
+			self.p_contact.insert('1.0', res[8])
+			self.p_occup.insert('1.0', res[9])
+			self.p_bday.set_date(res[4])
 
-		self.p_lname.config(state = "disabled")
-		self.p_fname.config(state = "disabled")
-		self.p_mname.config(state = "disabled")
-		self.p_addr.config(state = "disabled")
-		self.p_age.config(state = "disabled")
-		self.p_gender.config(state = "disabled")
-		self.p_civil_stat.config(state = "disabled")
-		self.p_contact.config(state = "disabled")
-		self.p_occup.config(state = "disabled")
-		self.p_bday.config(state = "disabled")
-		self.p_datecons.config(state = "disabled")
-		self.p_compliant.config(state = "disabled")
-		self.p_hist_illness.config(state = "disabled")
-		self.p_context.config(state = "disabled")
-		self.p_pres_med.config(state = "disabled")
-		self.p_gender.config(state = "disabled")
+			self.p_lname.config(state = "disabled")
+			self.p_fname.config(state = "disabled")
+			self.p_mname.config(state = "disabled")
+			self.p_addr.config(state = "disabled")
+			self.p_age.config(state = "disabled")
+			self.p_gender.config(state = "disabled")
+			self.p_civil_stat.config(state = "disabled")
+			self.p_contact.config(state = "disabled")
+			self.p_occup.config(state = "disabled")
+			self.p_bday.config(state = "disabled")
+
+		else:
+			self.p_lname.delete('1.0', 'end')
+			self.p_fname.delete('1.0', 'end')
+			self.p_mname.delete('1.0', 'end')
+			self.p_addr.delete('1.0', 'end')
+			self.p_age.delete('1.0', 'end')
+			self.p_gender.delete('1.0', 'end')
+			self.p_civil_stat.delete('1.0', 'end')
+			self.p_contact.delete('1.0', 'end')
+			self.p_occup.delete('1.0', 'end')
+			self.p_lname.config(state = "normal")
+			self.p_fname.config(state = "normal")
+			self.p_mname.config(state = "normal")
+			self.p_addr.config(state = "normal")
+			self.p_age.config(state = "normal")
+			self.p_gender.config(state = "normal")
+			self.p_civil_stat.config(state = "normal")
+			self.p_contact.config(state = "normal")
+			self.p_occup.config(state = "normal")
+			self.p_bday.config(state = "normal")
+
+		cur.execute(("SELECT date_of_consult, complaint, history_of_illness, context, present_medication FROM patientconsultation WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+		res = cur.fetchone()
+		
+		if res is not None:
+			self.p_datecons.set_date(res[0])
+			self.p_compliant.insert('1.0', res[1])
+			self.p_hist_illness.insert('1.0', res[2])
+			self.p_context.insert('1.0', res[3])
+			self.p_pres_med.insert('1.0', res[4])
+
+			self.p_datecons.config(state = "disabled")
+			self.p_compliant.config(state = "disabled")
+			self.p_hist_illness.config(state = "disabled")
+			self.p_context.config(state = "disabled")
+			self.p_pres_med.config(state = "disabled")
+
+		else:
+			self.p_datecons.set_date(dt.datetime.today())
+			self.p_compliant.delete('1.0', 'end')
+			self.p_hist_illness.delete('1.0', 'end')
+			self.p_context.delete('1.0', 'end')
+			self.p_pres_med.delete('1.0', 'end')
+
+			self.p_datecons.config(state = "normal")
+			self.p_compliant.config(state = "normal")
+			self.p_hist_illness.config(state = "normal")
+			self.p_context.config(state = "normal")
+			self.p_pres_med.config(state = "normal")
 
 	def edit_details(self):
 		self.p_lname.config(state = "normal")
@@ -673,11 +740,16 @@ class FamAssessForm(tk.Frame):
 				(self.lob[i]).config(fg = "#000000", bg = "#e3e3e3")
 
 	def add_details_map(self, genogram, fammap, ecomap):
-		# add details to new patient id if records does not exist, if it exists, append
-		# print(date_in.get_date())
-		print(genogram)
-		print(fammap)
-		print(ecomap)
+
+		cur.execute(("SELECT patient_id FROM patientfamassessment WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+		res = cur.fetchone()
+		if res is None:
+			cur.execute(("INSERT INTO patientfamassessment (genogram, family_map, ecomap, patient_id) VALUES (%s, %s, %s, %s)"), (genogram, fammap, ecomap, self.controller.patient_id.get()))
+			mydb.commit()
+		else:
+			cur.execute(("UPDATE patientfamassessment SET genogram = %s, family_map = %s, ecomap = %s WHERE patient_id = %s"), (genogram, fammap, ecomap, self.controller.patient_id.get()))
+			mydb.commit()
+
 
 		self.genogram.delete('1.0', 'end')
 		self.fammap.delete('1.0', 'end')
@@ -689,7 +761,15 @@ class FamAssessForm(tk.Frame):
 		if name == "":
 			messagebox.showwarning("Warning", "Please input a family member")
 		else:
-			print(name)
+			cur.execute(("SELECT member_name FROM patientfammember WHERE patient_id = %s and member_name = %s"), (self.controller.patient_id.get(), name))
+			res = cur.fetchone()
+			if res is None:
+				cur.execute(("INSERT INTO patientfammember (member_name, screening, immunization, lifestyle_changes, counseling_needs, patient_id) VALUES (%s, %s, %s, %s, %s, %s)"), (name, int(scr_in), int(if_in), int(lf_in), int(c_in), self.controller.patient_id.get()))
+				mydb.commit()
+			else:
+				cur.execute(("UPDATE patientfammember SET member_name = %s, screening = %s, immunization = %s, lifestyle_changes = %s, counseling_needs = %s WHERE patient_id = %s and member_name = %s"), (name, int(scr_in), int(if_in), int(lf_in), int(c_in), self.controller.patient_id.get(), name))
+				mydb.commit()
+
 			id = self.tree.insert('', 'end', text=name)
 			if scr_in == 1:
 				self.tree.set(id, 'A', "Yes")
@@ -712,6 +792,60 @@ class FamAssessForm(tk.Frame):
 				self.tree.set(id, 'D', "No")
 
 			self.fam_member.delete('1.0', 'end')
+
+			self.screening_var = 0
+			self.immunization_var = 0
+			self.lifestyle_var = 0
+			self.counseling_var = 0
+			
+			for i in range(4):
+				(self.lob[i]).config(fg = "#000000", bg = "#e3e3e3")
+
+	def load_data(self):
+		self.genogram.delete('1.0', 'end')
+		self.fammap.delete('1.0', 'end')
+		self.ecomap.delete('1.0', 'end')
+		
+		cur.execute(("SELECT genogram, family_map, ecomap FROM patientfamassessment WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+		res = cur.fetchone()
+
+		if res is not None:
+			self.genogram.insert('1.0', res[0])
+			self.fammap.insert('1.0', res[1])
+			self.ecomap.insert('1.0', res[2])
+		else:
+			self.genogram.delete('1.0', 'end')
+			self.fammap.delete('1.0', 'end')
+			self.ecomap.delete('1.0', 'end')
+
+		self.fam_member.delete('1.0', 'end')
+
+		cur.execute(("SELECT member_name, screening, immunization, lifestyle_changes, counseling_needs FROM patientfammember WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+		res = cur.fetchall()
+
+		self.tree.delete(*self.tree.get_children())
+
+		for i in range(len(res)):
+			id = self.tree.insert('', 'end', text=res[i][0])
+			if res[i][1] == 1:
+				self.tree.set(id, 'A', "Yes")
+			else:
+				self.tree.set(id, 'A', "No")
+
+			if res[i][2] == 1:
+				self.tree.set(id, 'B', "Yes")
+			else:
+				self.tree.set(id, 'B', "No")
+
+			if res[i][3] == 1:
+				self.tree.set(id, 'C', "Yes")
+			else:
+				self.tree.set(id, 'C', "No")
+
+			if res[i][4] == 1:
+				self.tree.set(id, 'D', "Yes")
+			else:
+				self.tree.set(id, 'D', "No")
 
 ########################
 
@@ -1379,65 +1513,110 @@ class review_of_systems_form(tk.Frame):
 		cur.execute(("SELECT heent_1, heent_2, heent_3, heent_4, heent_5, heent_6, heent_7, heent_8 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 
-		for i in range(len(self.heent_var)):
-			self.heent_var[i].set(res[i])
-			self.heent_cb[i].config(state = "disabled")
+		if res is not None:
+			for i in range(len(self.heent_var)):
+				self.heent_var[i].set(res[i])
+				self.heent_cb[i].config(state = "disabled")
+		else:
+			for i in range(8):
+				self.heent_var[i] = tk.IntVar(self)
+				self.heent_cb[i].config(state = "normal")
 
 		cur.execute(("SELECT respi_1, respi_2, respi_3, respi_4, respi_5 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 
-		for i in range(len(self.respi_var)):
-			self.respi_var[i].set(res[i])
-			self.respi_cb[i].config(state = "disabled")
+		if res is not None:
+			for i in range(len(self.respi_var)):
+				self.respi_var[i].set(res[i])
+				self.respi_cb[i].config(state = "disabled")
+		else:
+			for i in range(5):
+				self.respi_var[i] = tk.IntVar(self)
+				self.respi_cb[i].config(state = "normal")
 
 		cur.execute(("SELECT cardio_1, cardio_2, cardio_3, cardio_4, cardio_5, cardio_6, cardio_7 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 
-		for i in range(len(self.cardio_var)):
-			self.cardio_var[i].set(res[i])
-			self.cardio_cb[i].config(state = "disabled")
+		if res is not None:
+			for i in range(len(self.cardio_var)):
+				self.cardio_var[i].set(res[i])
+				self.cardio_cb[i].config(state = "disabled")
+		else:
+			for i in range(7):
+				self.cardio_var[i] = tk.IntVar(self)
+				self.cardio_cb[i].config(state = "normal")
 
 		cur.execute(("SELECT gastro_1, gastro_2, gastro_3, gastro_4, gastro_5, gastro_6, gastro_7, gastro_8, gastro_9 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 
-		for i in range(len(self.gastro_var)):
-			self.gastro_var[i].set(res[i])
-			self.gastro_cb[i].config(state = "disabled")
+		if res is not None:
+			for i in range(len(self.gastro_var)):
+				self.gastro_var[i].set(res[i])
+				self.gastro_cb[i].config(state = "disabled")
+		else:
+			for i in range(9):
+				self.gastro_var[i] = tk.IntVar(self)
+				self.gastro_cb[i].config(state = "normal")
 
 		cur.execute(("SELECT genito_1, genito_2, genito_3, genito_4, genito_5, genito_6, genito_7, genito_8 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 
-		for i in range(len(self.genito_var)):
-			self.genito_var[i].set(res[i])
-			self.genito_cb[i].config(state = "disabled")
+		if res is not None:
+			for i in range(len(self.genito_var)):
+				self.genito_var[i].set(res[i])
+				self.genito_cb[i].config(state = "disabled")
+		else:
+			for i in range(8):
+				self.genito_var[i] = tk.IntVar(self)
+				self.genito_cb[i].config(state = "normal")
 
 		cur.execute(("SELECT meta_1, meta_2, meta_3, meta_4, meta_5, meta_6 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 
-		for i in range(len(self.meta_var)):
-			self.meta_var[i].set(res[i])
-			self.meta_cb[i].config(state = "disabled")
+		if res is not None:
+			for i in range(len(self.meta_var)):
+				self.meta_var[i].set(res[i])
+				self.meta_cb[i].config(state = "disabled")
+		else:
+			for i in range(6):
+				self.meta_var[i] = tk.IntVar(self)
+				self.meta_cb[i].config(state = "normal")
 
 		cur.execute(("SELECT neuro_1, neuro_2, neuro_3, neuro_4, neuro_5, neuro_6, neuro_7, neuro_8 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 
-		for i in range(len(self.neuro_var)):
-			self.neuro_var[i].set(res[i])
-			self.neuro_cb[i].config(state = "disabled")
+		if res is not None:
+			for i in range(len(self.neuro_var)):
+				self.neuro_var[i].set(res[i])
+				self.neuro_cb[i].config(state = "disabled")
+		else:
+			for i in range(8):
+				self.neuro_var[i] = tk.IntVar(self)
+				self.neuro_cb[i].config(state = "normal")
 
 		cur.execute(("SELECT musculo_1, musculo_2, musculo_3, musculo_4, musculo_5 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 
-		for i in range(len(self.musculo_var)):
-			self.musculo_var[i].set(res[i])
-			self.musculo_cb[i].config(state = "disabled")
+		if res is not None:
+			for i in range(len(self.musculo_var)):
+				self.musculo_var[i].set(res[i])
+				self.musculo_cb[i].config(state = "disabled")
+		else:
+			for i in range(5):
+				self.musculo_var[i] = tk.IntVar(self)
+				self.musculo_cb[i].config(state = "normal")
 
 		cur.execute(("SELECT skin_1, skin_2, skin_3, skin_4, skin_5, skin_6, skin_7 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 
-		for i in range(len(self.skin_var)):
-			self.skin_var[i].set(res[i])
-			self.skin_cb[i].config(state = "disabled")
+		if res is not None:
+			for i in range(len(self.skin_var)):
+				self.skin_var[i].set(res[i])
+				self.skin_cb[i].config(state = "disabled")
+		else:
+			for i in range(7):
+				self.skin_var[i] = tk.IntVar(self)
+				self.skin_cb[i].config(state = "normal")
 
 		self.other_heent.delete('1.0', 'end')
 		self.other_respi.delete('1.0', 'end')
@@ -1452,26 +1631,46 @@ class review_of_systems_form(tk.Frame):
 		cur.execute(("SELECT heent_others, respi_others, cardio_others, gastro_others, genito_others, meta_others, neuro_others, musculo_others, skin_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 
-		self.other_heent.insert('1.0', res[0])
-		self.other_respi.insert('1.0', res[1])
-		self.other_cardio.insert('1.0', res[2])
-		self.other_gastro.insert('1.0', res[3])
-		self.other_genito.insert('1.0', res[4])
-		self.other_meta.insert('1.0', res[5])
-		self.other_neuro.insert('1.0', res[6])
-		self.other_musculo.insert('1.0', res[7])
-		self.other_skin.insert('1.0', res[8])
-		
+		if res is not None:
+			self.other_heent.insert('1.0', res[0])
+			self.other_respi.insert('1.0', res[1])
+			self.other_cardio.insert('1.0', res[2])
+			self.other_gastro.insert('1.0', res[3])
+			self.other_genito.insert('1.0', res[4])
+			self.other_meta.insert('1.0', res[5])
+			self.other_neuro.insert('1.0', res[6])
+			self.other_musculo.insert('1.0', res[7])
+			self.other_skin.insert('1.0', res[8])
+			
 
-		self.other_heent.config(state = "disabled")
-		self.other_respi.config(state = "disabled")
-		self.other_cardio.config(state = "disabled")
-		self.other_gastro.config(state = "disabled")
-		self.other_genito.config(state = "disabled")
-		self.other_meta.config(state = "disabled")
-		self.other_neuro.config(state = "disabled")
-		self.other_musculo.config(state = "disabled")
-		self.other_skin.config(state = "disabled")
+			self.other_heent.config(state = "disabled")
+			self.other_respi.config(state = "disabled")
+			self.other_cardio.config(state = "disabled")
+			self.other_gastro.config(state = "disabled")
+			self.other_genito.config(state = "disabled")
+			self.other_meta.config(state = "disabled")
+			self.other_neuro.config(state = "disabled")
+			self.other_musculo.config(state = "disabled")
+			self.other_skin.config(state = "disabled")
+		else:
+			self.other_heent.delete('1.0', 'end')
+			self.other_respi.delete('1.0', 'end')
+			self.other_cardio.delete('1.0', 'end')
+			self.other_gastro.delete('1.0', 'end')
+			self.other_genito.delete('1.0', 'end')
+			self.other_meta.delete('1.0', 'end')
+			self.other_neuro.delete('1.0', 'end')
+			self.other_musculo.delete('1.0', 'end')
+			self.other_skin.delete('1.0', 'end')
+			self.other_heent.config(state = "normal")
+			self.other_respi.config(state = "normal")
+			self.other_cardio.config(state = "normal")
+			self.other_gastro.config(state = "normal")
+			self.other_genito.config(state = "normal")
+			self.other_meta.config(state = "normal")
+			self.other_neuro.config(state = "normal")
+			self.other_musculo.config(state = "normal")
+			self.other_skin.config(state = "normal")
 
 class review_of_systems_form_2(tk.Frame):
 
@@ -1779,577 +1978,597 @@ class review_of_systems_form_2(tk.Frame):
 		self.mb_compli.place(x=485, y=y_value)
 		y_value = y_value + 30
 
-		tk.Button(form_frame, text="ADD", command=lambda: self.add_details(), height = 2, width = 10, bd = 0, bg = "#259400", fg = "#ffffff", activebackground = "#cf0007").place(x=875, y=65)
+		self.add_button = tk.Button(form_frame, text="ADD", command=lambda: self.add_details(), height = 2, width = 10, bd = 0, bg = "#259400", fg = "#ffffff", activebackground = "#cf0007")
+		self.add_button.place(x=875, y=65)
 		# add selected details from checkboxes
 		self.next_button = tk.Button(form_frame, text="Prev Page", command=lambda: controller.show_frame("review_of_systems_form"), height = 2, width = 10, bd = 0, bg = "#0060ba", fg = "#ffffff", activebackground = "#cf0007")
 		self.next_button.place(x=875, y=25)
 
 	def add_details(self):
-		cur.execute(("SELECT patient_id FROM patient WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-		res = cur.fetchone()
-		if res is None:
-			FirstConsForm = self.controller.get_page("FirstConsForm")
-			sql = "INSERT INTO patient (last_name, first_name, middle_name, address, birthdate, age, gender, civil_status, contact_no, occupation) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-			val = (FirstConsForm.p_lname.get("1.0",'end-1c'), FirstConsForm.p_fname.get("1.0",'end-1c'), FirstConsForm.p_mname.get("1.0",'end-1c'), FirstConsForm.p_addr.get("1.0",'end-1c'), 
-				FirstConsForm.p_bday.get_date().strftime('%Y-%m-%d'), int(FirstConsForm.p_age.get("1.0",'end-1c')), FirstConsForm.p_gender.get("1.0",'end-1c'), FirstConsForm.p_civil_stat.get("1.0",'end-1c'), 
-				FirstConsForm.p_contact.get("1.0",'end-1c'), FirstConsForm.p_occup.get("1.0",'end-1c'))
-
-			cur.execute(sql, val)
-			mydb.commit()
-
-			cur.execute("SELECT LAST_INSERT_ID()")
-
-			FirstConsForm.p_lname.delete('1.0', 'end')
-			FirstConsForm.p_fname.delete('1.0', 'end')
-			FirstConsForm.p_mname.delete('1.0', 'end')
-			FirstConsForm.p_addr.delete('1.0', 'end')
-			FirstConsForm.p_age.delete('1.0', 'end')
-			FirstConsForm.p_gender.delete('1.0', 'end')
-			FirstConsForm.p_civil_stat.delete('1.0', 'end')
-			FirstConsForm.p_contact.delete('1.0', 'end')
-			FirstConsForm.p_occup.delete('1.0', 'end')
-			FirstConsForm.p_bday.set_date(dt.datetime.today())
-			
-			self.controller.patient_id.set(cur.fetchone()[0])
-
-			sql = "INSERT INTO patientconsultation (date_of_consult, complaint, history_of_illness, context, present_medication, patient_id) VALUES (%s, %s, %s, %s, %s, %s)"
-			val = (FirstConsForm.p_datecons.get_date().strftime('%Y-%m-%d'), FirstConsForm.p_compliant.get("1.0",'end-1c'), FirstConsForm.p_hist_illness.get("1.0",'end-1c'), FirstConsForm.p_context.get("1.0",'end-1c'), FirstConsForm.p_pres_med.get("1.0",'end-1c'), int(self.controller.patient_id.get()))
-
-			cur.execute(sql, val)
-			mydb.commit()
-
-			FirstConsForm.p_datecons.set_date(dt.datetime.today())
-			FirstConsForm.p_compliant.delete('1.0', 'end')
-			FirstConsForm.p_hist_illness.delete('1.0', 'end')
-			FirstConsForm.p_context.delete('1.0', 'end')
-			FirstConsForm.p_pres_med.delete('1.0', 'end')
-			FirstConsForm.p_gender.delete('1.0', 'end')
-
-			review_of_systems_form = self.controller.get_page("review_of_systems_form")
-			review_of_systems_form.add_details()
-
-			cur.execute(("SELECT famhist_illness FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				cur.execute(("INSERT INTO patientrevofsys (famhist_illness, patient_id) VALUES (%s, %s)"), (self.medhist_illness.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-			else:
-				cur.execute(("UPDATE patientrevofsys SET famhist_illness = %s WHERE patient_id = %s"), (self.medhist_illness.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-
-			cur.execute(("SELECT famhist_hospt FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				cur.execute(("INSERT INTO patientrevofsys (famhist_hospt, patient_id) VALUES (%s, %s)"), (self.medhist_hospt.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-			else:
-				cur.execute(("UPDATE patientrevofsys SET famhist_hospt = %s WHERE patient_id = %s"), (self.medhist_hospt.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-
-			cur.execute(("SELECT famhist_allergy FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				cur.execute(("INSERT INTO patientrevofsys (famhist_allergy, patient_id) VALUES (%s, %s)"), (self.medhist_allergy.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-			else:
-				cur.execute(("UPDATE patientrevofsys SET famhist_allergy = %s WHERE patient_id = %s"), (self.medhist_allergy.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-
-			self.medhist_illness.delete('1.0', 'end') # clear the text field
-			self.medhist_hospt.delete('1.0', 'end') # clear the text field
-			self.medhist_allergy.delete('1.0', 'end') # clear the text field
-
-
-			cur.execute(("SELECT famhist_1, famhist_2, famhist_3, famhist_4, famhist_5, famhist_6, famhist_7 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				sql = "INSERT INTO patientrevofsys (famhist_1, famhist_2, famhist_3, famhist_4, famhist_5, famhist_6, famhist_7, patient_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-				val = (self.famhist_var[0].get(), self.famhist_var[1].get(), self.famhist_var[2].get(), self.famhist_var[3].get(), self.famhist_var[4].get(), 
-					self.famhist_var[5].get(), self.famhist_var[6].get(),self.controller.patient_id.get())
-				cur.execute(sql, val)
-				mydb.commit()
-			else:
-				sql = "UPDATE patientrevofsys SET famhist_1 = %s, famhist_2 = %s, famhist_3 = %s, famhist_4 = %s, famhist_5 = %s, famhist_6 = %s, famhist_7 = %s WHERE patient_id = %s"
-				val = (self.famhist_var[0].get(), self.famhist_var[1].get(), self.famhist_var[2].get(), self.famhist_var[3].get(), self.famhist_var[4].get(), 
-					self.famhist_var[5].get(), self.famhist_var[6].get(), self.controller.patient_id.get())
-				cur.execute(sql, val)
-				mydb.commit()
-
-			if self.famhist_var[len(self.famhist_opt)].get() == 1:
-				cur.execute(("SELECT famhist_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-				res = cur.fetchone()
-				if res is None:
-					cur.execute(("INSERT INTO patientrevofsys (famhist_others, patient_id) VALUES (%s, %s)"), (self.other_famhist.get("1.0",'end-1c'), self.controller.patient_id.get()))
-					mydb.commit()
-				else:
-					cur.execute(("UPDATE patientrevofsys SET famhist_others = %s WHERE patient_id = %s"), (self.other_famhist.get("1.0",'end-1c'), self.controller.patient_id.get()))
-					mydb.commit()
-			else:
-				cur.execute(("SELECT famhist_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-				res = cur.fetchone()
-				if res is None:
-					cur.execute(("INSERT INTO patientrevofsys (famhist_others, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
-					mydb.commit()
-				else:
-					cur.execute(("UPDATE patientrevofsys SET famhist_others = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
-					mydb.commit()
-
-			####################################
-
-			cur.execute(("SELECT immuno_1, immuno_2, immuno_3, immuno_4, immuno_5, immuno_6, immuno_7, immuno_8, immuno_9, immuno_10, immuno_11, immuno_12, immuno_13, immuno_14, immuno_15 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				sql = "INSERT INTO patientrevofsys (immuno_1, immuno_2, immuno_3, immuno_4, immuno_5, immuno_6, immuno_7, immuno_8, immuno_9, immuno_10, immuno_11, immuno_12, immuno_13, immuno_14, immuno_15, patient_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-				val = (self.immunohist_var[0].get(), self.immunohist_var[1].get(), self.immunohist_var[2].get(), self.immunohist_var[3].get(), self.immunohist_var[4].get(), 
-					self.immunohist_var[5].get(), self.immunohist_var[6].get(), self.immunohist_var[7].get(), self.immunohist_var[8].get(), self.immunohist_var[9].get(), 
-					self.immunohist_var[10].get(), self.immunohist_var[11].get(), self.immunohist_var[12].get(), self.immunohist_var[13].get(), self.immunohist_var[14].get(), self.controller.patient_id.get())
-				cur.execute(sql, val)
-				mydb.commit()
-			else:
-				sql = "UPDATE patientrevofsys SET immuno_1 = %s, immuno_2 = %s, immuno_3 = %s, immuno_4 = %s, immuno_5 = %s, immuno_6 = %s, immuno_7 = %s, immuno_8 = %s, immuno_9 = %s, immuno_10 = %s, immuno_11 = %s, immuno_12 = %s, immuno_13 = %s, immuno_14 = %s, immuno_15 = %s WHERE patient_id = %s"
-				val = (self.immunohist_var[0].get(), self.immunohist_var[1].get(), self.immunohist_var[2].get(), self.immunohist_var[3].get(), self.immunohist_var[4].get(), 
-					self.immunohist_var[5].get(), self.immunohist_var[6].get(), self.immunohist_var[7].get(), self.immunohist_var[8].get(), self.immunohist_var[9].get(), 
-					self.immunohist_var[10].get(), self.immunohist_var[11].get(), self.immunohist_var[12].get(), self.immunohist_var[13].get(), self.immunohist_var[14].get(), self.controller.patient_id.get())
-				cur.execute(sql, val)
-				mydb.commit()
-
-			if self.immunohist_var[len(self.immunohist_opt)].get() == 1:
-				cur.execute(("SELECT immuno_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-				res = cur.fetchone()
-				if res is None:
-					cur.execute(("INSERT INTO patientrevofsys (immuno_others, patient_id) VALUES (%s, %s)"), (self.other_immunohist.get("1.0",'end-1c'), self.controller.patient_id.get()))
-					mydb.commit()
-				else:
-					cur.execute(("UPDATE patientrevofsys SET immuno_others = %s WHERE patient_id = %s"), (self.other_immunohist.get("1.0",'end-1c'), self.controller.patient_id.get()))
-					mydb.commit()
-			else:
-				cur.execute(("SELECT immuno_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-				res = cur.fetchone()
-				if res is None:
-					cur.execute(("INSERT INTO patientrevofsys (immuno_others, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
-					mydb.commit()
-				else:
-					cur.execute(("UPDATE patientrevofsys SET immuno_others = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
-					mydb.commit()
-
-			if self.immunohist_var[len(self.immunohist_opt)+1].get() == 1:
-				cur.execute(("SELECT immuno_booster FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-				res = cur.fetchone()
-				if res is None:
-					cur.execute(("INSERT INTO patientrevofsys (immuno_booster, patient_id) VALUES (%s, %s)"), (self.other_booster.get("1.0",'end-1c'), self.controller.patient_id.get()))
-					mydb.commit()
-				else:
-					cur.execute(("UPDATE patientrevofsys SET immuno_booster = %s WHERE patient_id = %s"), (self.other_booster.get("1.0",'end-1c'), self.controller.patient_id.get()))
-					mydb.commit()
-			else:
-				cur.execute(("SELECT immuno_booster FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-				res = cur.fetchone()
-				if res is None:
-					cur.execute(("INSERT INTO patientrevofsys (immuno_booster, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
-					mydb.commit()
-				else:
-					cur.execute(("UPDATE patientrevofsys SET immuno_booster = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
-					mydb.commit()
-
-			if self.immunohist_var[len(self.immunohist_opt)+2].get() == 1:
-				cur.execute(("SELECT immuno_combi FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-				res = cur.fetchone()
-				if res is None:
-					cur.execute(("INSERT INTO patientrevofsys (immuno_combi, patient_id) VALUES (%s, %s)"), (self.other_combi.get("1.0",'end-1c'), self.controller.patient_id.get()))
-					mydb.commit()
-				else:
-					cur.execute(("UPDATE patientrevofsys SET immuno_combi = %s WHERE patient_id = %s"), (self.other_combi.get("1.0",'end-1c'), self.controller.patient_id.get()))
-					mydb.commit()
-			else:
-				cur.execute(("SELECT immuno_combi FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-				res = cur.fetchone()
-				if res is None:
-					cur.execute(("INSERT INTO patientrevofsys (immuno_combi, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
-					mydb.commit()
-				else:
-					cur.execute(("UPDATE patientrevofsys SET immuno_combi = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
-					mydb.commit()
-
-			####################################
-
-			############### get details for family history
-			for i in range(len(self.famhist_var)):
-				if i >= len(self.famhist_opt):
-					if self.famhist_var[i].get() == 1:
-						self.other_famhist.delete('1.0', 'end') # clear the text field
-				self.famhist_var[i] = tk.IntVar(self)
-
-				############### get details for immunization history
-			for i in range(len(self.immunohist_var)):
-				if i >= len(self.immunohist_opt):
-					if i == len(self.immunohist_opt):
-						if self.immunohist_var[i].get() == 1:
-							self.other_booster.delete('1.0', 'end')
-					elif i == len(self.immunohist_opt)+1:
-						if self.immunohist_var[i].get() == 1:
-							self.other_combi.delete('1.0', 'end')
-					elif i == len(self.immunohist_opt)+2:
-						if self.immunohist_var[i].get() == 1:
-							self.other_immunohist.delete('1.0', 'end')
-				self.immunohist_var[i] = tk.IntVar(self)
-
-			cur.execute(("SELECT smoker FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				sql = "INSERT INTO patientrevofsys (smoker, patient_id) VALUES (%s, %s)"
-				val = (self.smoker_var, self.controller.patient_id.get())
-				cur.execute(sql, val)
-				mydb.commit()
-			else:
-				sql = "UPDATE patientrevofsys SET smoker = %s WHERE patient_id = %s"
-				val = (self.smoker_var, self.controller.patient_id.get())
-				cur.execute(sql, val)
-				mydb.commit()
-
-			if self.smoker_var == 1:
-				cur.execute(("SELECT smoker_pack FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-				res = cur.fetchone()
-				if res is None:
-					cur.execute(("INSERT INTO patientrevofsys (smoker_pack, patient_id) VALUES (%s, %s)"), (self.pack_smoke.get("1.0",'end-1c'), self.controller.patient_id.get()))
-					mydb.commit()
-				else:
-					cur.execute(("UPDATE patientrevofsys SET smoker_pack = %s WHERE patient_id = %s"), (self.pack_smoke.get("1.0",'end-1c'), self.controller.patient_id.get()))
-					mydb.commit()
-			else:
-				cur.execute(("SELECT smoker_pack FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-				res = cur.fetchone()
-				if res is None:
-					cur.execute(("INSERT INTO patientrevofsys (smoker_pack, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
-					mydb.commit()
-				else:
-					cur.execute(("UPDATE patientrevofsys SET smoker_pack = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
-					mydb.commit()
-
-			####################################
-
-			cur.execute(("SELECT smoker_quit FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				sql = "INSERT INTO patientrevofsys (smoker_quit, patient_id) VALUES (%s, %s)"
-				val = (self.quit_var.get(), self.controller.patient_id.get())
-				cur.execute(sql, val)
-				mydb.commit()
-			else:
-				sql = "UPDATE patientrevofsys SET smoker_quit = %s WHERE patient_id = %s"
-				val = (self.quit_var.get(), self.controller.patient_id.get())
-				cur.execute(sql, val)
-				mydb.commit()
-
-			if self.quit_var.get() == 1:
-				cur.execute(("SELECT smoker_quit_when FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-				res = cur.fetchone()
-				if res is None:
-					cur.execute(("INSERT INTO patientrevofsys (smoker_quit_when, patient_id) VALUES (%s, %s)"), (self.quit_cb_text.get("1.0",'end-1c'), self.controller.patient_id.get()))
-					mydb.commit()
-				else:
-					cur.execute(("UPDATE patientrevofsys SET smoker_quit_when = %s WHERE patient_id = %s"), (self.quit_cb_text.get("1.0",'end-1c'), self.controller.patient_id.get()))
-					mydb.commit()
-			else:
-				cur.execute(("SELECT smoker_quit_when FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-				res = cur.fetchone()
-				if res is None:
-					cur.execute(("INSERT INTO patientrevofsys (smoker_quit_when, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
-					mydb.commit()
-				else:
-					cur.execute(("UPDATE patientrevofsys SET smoker_quit_when = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
-					mydb.commit()
-
-			####################################
-
-			cur.execute(("SELECT drinker FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				sql = "INSERT INTO patientrevofsys (drinker, patient_id) VALUES (%s, %s)"
-				val = (self.alcohol_var, self.controller.patient_id.get())
-				cur.execute(sql, val)
-				mydb.commit()
-			else:
-				sql = "UPDATE patientrevofsys SET drinker = %s WHERE patient_id = %s"
-				val = (self.alcohol_var, self.controller.patient_id.get())
-				cur.execute(sql, val)
-				mydb.commit()
-
-			if self.alcohol_var == 1:
-				cur.execute(("SELECT drinker_freq FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-				res = cur.fetchone()
-				if res is None:
-					cur.execute(("INSERT INTO patientrevofsys (drinker_freq, patient_id) VALUES (%s, %s)"), (self.alco_freq.get("1.0",'end-1c'), self.controller.patient_id.get()))
-					mydb.commit()
-				else:
-					cur.execute(("UPDATE patientrevofsys SET drinker_freq = %s WHERE patient_id = %s"), (self.alco_freq.get("1.0",'end-1c'), self.controller.patient_id.get()))
-					mydb.commit()
-
-				cur.execute(("SELECT drinker_dur FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-				res = cur.fetchone()
-				if res is None:
-					cur.execute(("INSERT INTO patientrevofsys (drinker_dur, patient_id) VALUES (%s, %s)"), (self.alco_dur.get("1.0",'end-1c'), self.controller.patient_id.get()))
-					mydb.commit()
-				else:
-					cur.execute(("UPDATE patientrevofsys SET drinker_dur = %s WHERE patient_id = %s"), (self.alco_dur.get("1.0",'end-1c'), self.controller.patient_id.get()))
-					mydb.commit()
-
-				cur.execute(("SELECT drinker_type FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-				res = cur.fetchone()
-				if res is None:
-					cur.execute(("INSERT INTO patientrevofsys (drinker_type, patient_id) VALUES (%s, %s)"), (self.alco_type.get("1.0",'end-1c'), self.controller.patient_id.get()))
-					mydb.commit()
-				else:
-					cur.execute(("UPDATE patientrevofsys SET drinker_type = %s WHERE patient_id = %s"), (self.alco_type.get("1.0",'end-1c'), self.controller.patient_id.get()))
-					mydb.commit()
-			else:
-				cur.execute(("SELECT drinker_freq FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-				res = cur.fetchone()
-				if res is None:
-					cur.execute(("INSERT INTO patientrevofsys (drinker_freq, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
-					mydb.commit()
-				else:
-					cur.execute(("UPDATE patientrevofsys SET drinker_freq = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
-					mydb.commit()
-
-				cur.execute(("SELECT drinker_dur FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-				res = cur.fetchone()
-				if res is None:
-					cur.execute(("INSERT INTO patientrevofsys (drinker_dur, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
-					mydb.commit()
-				else:
-					cur.execute(("UPDATE patientrevofsys SET drinker_dur = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
-					mydb.commit()
-
-				cur.execute(("SELECT drinker_type FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-				res = cur.fetchone()
-				if res is None:
-					cur.execute(("INSERT INTO patientrevofsys (drinker_type, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
-					mydb.commit()
-				else:
-					cur.execute(("UPDATE patientrevofsys SET drinker_type = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
-					mydb.commit()
-
-			####################################
-
-			cur.execute(("SELECT exercise FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				sql = "INSERT INTO patientrevofsys (exercise, patient_id) VALUES (%s, %s)"
-				val = (self.exercise_var, self.controller.patient_id.get())
-				cur.execute(sql, val)
-				mydb.commit()
-			else:
-				sql = "UPDATE patientrevofsys SET exercise = %s WHERE patient_id = %s"
-				val = (self.exercise_var, self.controller.patient_id.get())
-				cur.execute(sql, val)
-				mydb.commit()
-
-			if self.exercise_var == 1:
-				cur.execute(("SELECT exercise_type FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-				res = cur.fetchone()
-				if res is None:
-					cur.execute(("INSERT INTO patientrevofsys (exercise_type, patient_id) VALUES (%s, %s)"), (self.exercise_type.get("1.0",'end-1c'), self.controller.patient_id.get()))
-					mydb.commit()
-				else:
-					cur.execute(("UPDATE patientrevofsys SET exercise_type = %s WHERE patient_id = %s"), (self.exercise_type.get("1.0",'end-1c'), self.controller.patient_id.get()))
-					mydb.commit()
-			else:
-				cur.execute(("SELECT exercise_type FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-				res = cur.fetchone()
-				if res is None:
-					cur.execute(("INSERT INTO patientrevofsys (exercise_type, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
-					mydb.commit()
-				else:
-					cur.execute(("UPDATE patientrevofsys SET exercise_type = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
-					mydb.commit()
-
-			####################################
-
-			cur.execute(("SELECT ob_g FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				cur.execute(("INSERT INTO patientrevofsys (ob_g, patient_id) VALUES (%s, %s)"), (self.g_type.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-			else:
-				cur.execute(("UPDATE patientrevofsys SET ob_g = %s WHERE patient_id = %s"), (self.g_type.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-
-			cur.execute(("SELECT ob_p FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				cur.execute(("INSERT INTO patientrevofsys (ob_p, patient_id) VALUES (%s, %s)"), (self.p_type.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-			else:
-				cur.execute(("UPDATE patientrevofsys SET ob_p = %s WHERE patient_id = %s"), (self.p_type.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-
-			cur.execute(("SELECT menarche FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				cur.execute(("INSERT INTO patientrevofsys (menarche, patient_id) VALUES (%s, %s)"), (self.menarche.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-			else:
-				cur.execute(("UPDATE patientrevofsys SET menarche = %s WHERE patient_id = %s"), (self.menarche.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-
-			cur.execute(("SELECT menopause FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				cur.execute(("INSERT INTO patientrevofsys (menopause, patient_id) VALUES (%s, %s)"), (self.menopause.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-			else:
-				cur.execute(("UPDATE patientrevofsys SET menopause = %s WHERE patient_id = %s"), (self.menopause.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-
-			cur.execute(("SELECT coitus FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				cur.execute(("INSERT INTO patientrevofsys (coitus, patient_id) VALUES (%s, %s)"), (self.coitus.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-			else:
-				cur.execute(("UPDATE patientrevofsys SET coitus = %s WHERE patient_id = %s"), (self.coitus.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-
-			cur.execute(("SELECT bm_born FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				cur.execute(("INSERT INTO patientrevofsys (bm_born, patient_id) VALUES (%s, %s)"), (self.born.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-			else:
-				cur.execute(("UPDATE patientrevofsys SET bm_born = %s WHERE patient_id = %s"), (self.born.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-
-			cur.execute(("SELECT bm_via FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				cur.execute(("INSERT INTO patientrevofsys (bm_via, patient_id) VALUES (%s, %s)"), (self.via.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-			else:
-				cur.execute(("UPDATE patientrevofsys SET bm_via = %s WHERE patient_id = %s"), (self.via.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-			
-			cur.execute(("SELECT bm_g FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				cur.execute(("INSERT INTO patientrevofsys (bm_g, patient_id) VALUES (%s, %s)"), (self.to_a_g.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-			else:
-				cur.execute(("UPDATE patientrevofsys SET bm_g = %s WHERE patient_id = %s"), (self.to_a_g.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-			
-			cur.execute(("SELECT bm_p FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				cur.execute(("INSERT INTO patientrevofsys (bm_p, patient_id) VALUES (%s, %s)"), (self.bm_p.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-			else:
-				cur.execute(("UPDATE patientrevofsys SET bm_p = %s WHERE patient_id = %s"), (self.bm_p.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-			
-			cur.execute(("SELECT bm_year FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				cur.execute(("INSERT INTO patientrevofsys (bm_year, patient_id) VALUES (%s, %s)"), (self.bm_year.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-			else:
-				cur.execute(("UPDATE patientrevofsys SET bm_year = %s WHERE patient_id = %s"), (self.bm_year.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-
-			cur.execute(("SELECT bm_compli FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				cur.execute(("INSERT INTO patientrevofsys (bm_compli, patient_id) VALUES (%s, %s)"), (self.mb_compli.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-			else:
-				cur.execute(("UPDATE patientrevofsys SET bm_compli = %s WHERE patient_id = %s"), (self.mb_compli.get("1.0",'end-1c'), self.controller.patient_id.get()))
-				mydb.commit()
-			
-
-			self.pack_smoke.delete('1.0', 'end') # clear the text field
-			self.quit_cb_text.delete('1.0', 'end') # clear the text field
-			self.alco_freq.delete('1.0', 'end') # clear the text field
-			self.alco_dur.delete('1.0', 'end') # clear the text field
-			self.alco_type.delete('1.0', 'end') # clear the text field
-			self.exercise_type.delete('1.0', 'end') # clear the text field
-			self.g_type.delete('1.0', 'end') # clear the text field
-			self.p_type.delete('1.0', 'end') # clear the text field
-			self.menarche.delete('1.0', 'end') # clear the text field
-			self.menopause.delete('1.0', 'end') # clear the text field
-			self.coitus.delete('1.0', 'end') # clear the text field
-			self.born.delete('1.0', 'end') # clear the text field
-			self.via.delete('1.0', 'end') # clear the text field
-			self.to_a_g.delete('1.0', 'end') # clear the text field
-			self.bm_p.delete('1.0', 'end') # clear the text field
-			self.bm_year.delete('1.0', 'end') # clear the text field
-			self.mb_compli.delete('1.0', 'end') # clear the text field
-			
-			self.controller.show_frame("FirstConsForm")
-
+		try:
+			val = int(self.controller.get_page("FirstConsForm").p_age.get("1.0",'end-1c'))
+		except ValueError:
+			try:
+				val = float(self.controller.get_page("FirstConsForm").p_age.get("1.0",'end-1c'))
+			except ValueError:
+				messagebox.showwarning("Warning", "Invalid age input! Enter a number")
 		else:
-			FirstConsForm = self.controller.get_page("FirstConsForm")
-			sql = "UPDATE patient SET last_name = %s, first_name = %s, middle_name = %s, address = %s, birthdate = %s, age = %s, gender = %s, civil_status = %s, contact_no = %s, occupation = %s WHERE patient_id = %s"
-			val = (FirstConsForm.p_lname.get("1.0",'end-1c'), FirstConsForm.p_fname.get("1.0",'end-1c'), FirstConsForm.p_mname.get("1.0",'end-1c'), FirstConsForm.p_addr.get("1.0",'end-1c'), 
-				FirstConsForm.p_bday.get_date().strftime('%Y-%m-%d'), int(FirstConsForm.p_age.get("1.0",'end-1c')), FirstConsForm.p_gender.get("1.0",'end-1c'), FirstConsForm.p_civil_stat.get("1.0",'end-1c'), 
-				FirstConsForm.p_contact.get("1.0",'end-1c'), FirstConsForm.p_occup.get("1.0",'end-1c'), self.controller.patient_id.get())
+			cur.execute(("SELECT patient_id FROM patient WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+			res = cur.fetchone()
+			if res is None:
+				FirstConsForm = self.controller.get_page("FirstConsForm")
+				sql = "INSERT INTO patient (last_name, first_name, middle_name, address, birthdate, age, gender, civil_status, contact_no, occupation) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+				val = (FirstConsForm.p_lname.get("1.0",'end-1c'), FirstConsForm.p_fname.get("1.0",'end-1c'), FirstConsForm.p_mname.get("1.0",'end-1c'), FirstConsForm.p_addr.get("1.0",'end-1c'), 
+					FirstConsForm.p_bday.get_date().strftime('%Y-%m-%d'), int(FirstConsForm.p_age.get("1.0",'end-1c')), FirstConsForm.p_gender.get("1.0",'end-1c'), FirstConsForm.p_civil_stat.get("1.0",'end-1c'), 
+					FirstConsForm.p_contact.get("1.0",'end-1c'), FirstConsForm.p_occup.get("1.0",'end-1c'))
 
-			cur.execute(sql, val)
-			mydb.commit()
+				cur.execute(sql, val)
+				mydb.commit()
 
-			FirstConsForm.p_lname.delete('1.0', 'end')
-			FirstConsForm.p_fname.delete('1.0', 'end')
-			FirstConsForm.p_mname.delete('1.0', 'end')
-			FirstConsForm.p_addr.delete('1.0', 'end')
-			FirstConsForm.p_age.delete('1.0', 'end')
-			FirstConsForm.p_gender.delete('1.0', 'end')
-			FirstConsForm.p_civil_stat.delete('1.0', 'end')
-			FirstConsForm.p_contact.delete('1.0', 'end')
-			FirstConsForm.p_occup.delete('1.0', 'end')
-			FirstConsForm.p_bday.set_date(dt.datetime.today())
+				cur.execute("SELECT LAST_INSERT_ID()")
 
-			self.controller.show_frame("FirstConsForm")
+				FirstConsForm.p_lname.delete('1.0', 'end')
+				FirstConsForm.p_fname.delete('1.0', 'end')
+				FirstConsForm.p_mname.delete('1.0', 'end')
+				FirstConsForm.p_addr.delete('1.0', 'end')
+				FirstConsForm.p_age.delete('1.0', 'end')
+				FirstConsForm.p_gender.delete('1.0', 'end')
+				FirstConsForm.p_civil_stat.delete('1.0', 'end')
+				FirstConsForm.p_contact.delete('1.0', 'end')
+				FirstConsForm.p_occup.delete('1.0', 'end')
+				FirstConsForm.p_bday.set_date(dt.datetime.today())
+				
+				self.controller.patient_id.set(cur.fetchone()[0])
 
-		self.controller.flag.set(1)
+				sql = "INSERT INTO patientconsultation (date_of_consult, complaint, history_of_illness, context, present_medication, patient_id) VALUES (%s, %s, %s, %s, %s, %s)"
+				val = (FirstConsForm.p_datecons.get_date().strftime('%Y-%m-%d'), FirstConsForm.p_compliant.get("1.0",'end-1c'), FirstConsForm.p_hist_illness.get("1.0",'end-1c'), FirstConsForm.p_context.get("1.0",'end-1c'), FirstConsForm.p_pres_med.get("1.0",'end-1c'), int(self.controller.patient_id.get()))
+
+				cur.execute(sql, val)
+				mydb.commit()
+
+				FirstConsForm.p_datecons.set_date(dt.datetime.today())
+				FirstConsForm.p_compliant.delete('1.0', 'end')
+				FirstConsForm.p_hist_illness.delete('1.0', 'end')
+				FirstConsForm.p_context.delete('1.0', 'end')
+				FirstConsForm.p_pres_med.delete('1.0', 'end')
+				FirstConsForm.p_gender.delete('1.0', 'end')
+
+				review_of_systems_form = self.controller.get_page("review_of_systems_form")
+				review_of_systems_form.add_details()
+
+				cur.execute(("SELECT famhist_illness FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (famhist_illness, patient_id) VALUES (%s, %s)"), (self.medhist_illness.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET famhist_illness = %s WHERE patient_id = %s"), (self.medhist_illness.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+
+				cur.execute(("SELECT famhist_hospt FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (famhist_hospt, patient_id) VALUES (%s, %s)"), (self.medhist_hospt.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET famhist_hospt = %s WHERE patient_id = %s"), (self.medhist_hospt.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+
+				cur.execute(("SELECT famhist_allergy FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (famhist_allergy, patient_id) VALUES (%s, %s)"), (self.medhist_allergy.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET famhist_allergy = %s WHERE patient_id = %s"), (self.medhist_allergy.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+
+				self.medhist_illness.delete('1.0', 'end') # clear the text field
+				self.medhist_hospt.delete('1.0', 'end') # clear the text field
+				self.medhist_allergy.delete('1.0', 'end') # clear the text field
+
+
+				cur.execute(("SELECT famhist_1, famhist_2, famhist_3, famhist_4, famhist_5, famhist_6, famhist_7 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					sql = "INSERT INTO patientrevofsys (famhist_1, famhist_2, famhist_3, famhist_4, famhist_5, famhist_6, famhist_7, patient_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+					val = (self.famhist_var[0].get(), self.famhist_var[1].get(), self.famhist_var[2].get(), self.famhist_var[3].get(), self.famhist_var[4].get(), 
+						self.famhist_var[5].get(), self.famhist_var[6].get(),self.controller.patient_id.get())
+					cur.execute(sql, val)
+					mydb.commit()
+				else:
+					sql = "UPDATE patientrevofsys SET famhist_1 = %s, famhist_2 = %s, famhist_3 = %s, famhist_4 = %s, famhist_5 = %s, famhist_6 = %s, famhist_7 = %s WHERE patient_id = %s"
+					val = (self.famhist_var[0].get(), self.famhist_var[1].get(), self.famhist_var[2].get(), self.famhist_var[3].get(), self.famhist_var[4].get(), 
+						self.famhist_var[5].get(), self.famhist_var[6].get(), self.controller.patient_id.get())
+					cur.execute(sql, val)
+					mydb.commit()
+
+				if self.famhist_var[len(self.famhist_opt)].get() == 1:
+					cur.execute(("SELECT famhist_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+					res = cur.fetchone()
+					if res is None:
+						cur.execute(("INSERT INTO patientrevofsys (famhist_others, patient_id) VALUES (%s, %s)"), (self.other_famhist.get("1.0",'end-1c'), self.controller.patient_id.get()))
+						mydb.commit()
+					else:
+						cur.execute(("UPDATE patientrevofsys SET famhist_others = %s WHERE patient_id = %s"), (self.other_famhist.get("1.0",'end-1c'), self.controller.patient_id.get()))
+						mydb.commit()
+				else:
+					cur.execute(("SELECT famhist_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+					res = cur.fetchone()
+					if res is None:
+						cur.execute(("INSERT INTO patientrevofsys (famhist_others, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+						mydb.commit()
+					else:
+						cur.execute(("UPDATE patientrevofsys SET famhist_others = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+						mydb.commit()
+
+				####################################
+
+				cur.execute(("SELECT immuno_1, immuno_2, immuno_3, immuno_4, immuno_5, immuno_6, immuno_7, immuno_8, immuno_9, immuno_10, immuno_11, immuno_12, immuno_13, immuno_14, immuno_15 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					sql = "INSERT INTO patientrevofsys (immuno_1, immuno_2, immuno_3, immuno_4, immuno_5, immuno_6, immuno_7, immuno_8, immuno_9, immuno_10, immuno_11, immuno_12, immuno_13, immuno_14, immuno_15, patient_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+					val = (self.immunohist_var[0].get(), self.immunohist_var[1].get(), self.immunohist_var[2].get(), self.immunohist_var[3].get(), self.immunohist_var[4].get(), 
+						self.immunohist_var[5].get(), self.immunohist_var[6].get(), self.immunohist_var[7].get(), self.immunohist_var[8].get(), self.immunohist_var[9].get(), 
+						self.immunohist_var[10].get(), self.immunohist_var[11].get(), self.immunohist_var[12].get(), self.immunohist_var[13].get(), self.immunohist_var[14].get(), self.controller.patient_id.get())
+					cur.execute(sql, val)
+					mydb.commit()
+				else:
+					sql = "UPDATE patientrevofsys SET immuno_1 = %s, immuno_2 = %s, immuno_3 = %s, immuno_4 = %s, immuno_5 = %s, immuno_6 = %s, immuno_7 = %s, immuno_8 = %s, immuno_9 = %s, immuno_10 = %s, immuno_11 = %s, immuno_12 = %s, immuno_13 = %s, immuno_14 = %s, immuno_15 = %s WHERE patient_id = %s"
+					val = (self.immunohist_var[0].get(), self.immunohist_var[1].get(), self.immunohist_var[2].get(), self.immunohist_var[3].get(), self.immunohist_var[4].get(), 
+						self.immunohist_var[5].get(), self.immunohist_var[6].get(), self.immunohist_var[7].get(), self.immunohist_var[8].get(), self.immunohist_var[9].get(), 
+						self.immunohist_var[10].get(), self.immunohist_var[11].get(), self.immunohist_var[12].get(), self.immunohist_var[13].get(), self.immunohist_var[14].get(), self.controller.patient_id.get())
+					cur.execute(sql, val)
+					mydb.commit()
+
+				if self.immunohist_var[len(self.immunohist_opt)].get() == 1:
+					cur.execute(("SELECT immuno_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+					res = cur.fetchone()
+					if res is None:
+						cur.execute(("INSERT INTO patientrevofsys (immuno_others, patient_id) VALUES (%s, %s)"), (self.other_immunohist.get("1.0",'end-1c'), self.controller.patient_id.get()))
+						mydb.commit()
+					else:
+						cur.execute(("UPDATE patientrevofsys SET immuno_others = %s WHERE patient_id = %s"), (self.other_immunohist.get("1.0",'end-1c'), self.controller.patient_id.get()))
+						mydb.commit()
+				else:
+					cur.execute(("SELECT immuno_others FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+					res = cur.fetchone()
+					if res is None:
+						cur.execute(("INSERT INTO patientrevofsys (immuno_others, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+						mydb.commit()
+					else:
+						cur.execute(("UPDATE patientrevofsys SET immuno_others = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+						mydb.commit()
+
+				if self.immunohist_var[len(self.immunohist_opt)+1].get() == 1:
+					cur.execute(("SELECT immuno_booster FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+					res = cur.fetchone()
+					if res is None:
+						cur.execute(("INSERT INTO patientrevofsys (immuno_booster, patient_id) VALUES (%s, %s)"), (self.other_booster.get("1.0",'end-1c'), self.controller.patient_id.get()))
+						mydb.commit()
+					else:
+						cur.execute(("UPDATE patientrevofsys SET immuno_booster = %s WHERE patient_id = %s"), (self.other_booster.get("1.0",'end-1c'), self.controller.patient_id.get()))
+						mydb.commit()
+				else:
+					cur.execute(("SELECT immuno_booster FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+					res = cur.fetchone()
+					if res is None:
+						cur.execute(("INSERT INTO patientrevofsys (immuno_booster, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+						mydb.commit()
+					else:
+						cur.execute(("UPDATE patientrevofsys SET immuno_booster = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+						mydb.commit()
+
+				if self.immunohist_var[len(self.immunohist_opt)+2].get() == 1:
+					cur.execute(("SELECT immuno_combi FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+					res = cur.fetchone()
+					if res is None:
+						cur.execute(("INSERT INTO patientrevofsys (immuno_combi, patient_id) VALUES (%s, %s)"), (self.other_combi.get("1.0",'end-1c'), self.controller.patient_id.get()))
+						mydb.commit()
+					else:
+						cur.execute(("UPDATE patientrevofsys SET immuno_combi = %s WHERE patient_id = %s"), (self.other_combi.get("1.0",'end-1c'), self.controller.patient_id.get()))
+						mydb.commit()
+				else:
+					cur.execute(("SELECT immuno_combi FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+					res = cur.fetchone()
+					if res is None:
+						cur.execute(("INSERT INTO patientrevofsys (immuno_combi, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+						mydb.commit()
+					else:
+						cur.execute(("UPDATE patientrevofsys SET immuno_combi = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+						mydb.commit()
+
+				####################################
+
+				############### get details for family history
+				for i in range(len(self.famhist_var)):
+					if i >= len(self.famhist_opt):
+						if self.famhist_var[i].get() == 1:
+							self.other_famhist.delete('1.0', 'end') # clear the text field
+					self.famhist_var[i] = tk.IntVar(self)
+
+					############### get details for immunization history
+				for i in range(len(self.immunohist_var)):
+					if i >= len(self.immunohist_opt):
+						if i == len(self.immunohist_opt):
+							if self.immunohist_var[i].get() == 1:
+								self.other_booster.delete('1.0', 'end')
+						elif i == len(self.immunohist_opt)+1:
+							if self.immunohist_var[i].get() == 1:
+								self.other_combi.delete('1.0', 'end')
+						elif i == len(self.immunohist_opt)+2:
+							if self.immunohist_var[i].get() == 1:
+								self.other_immunohist.delete('1.0', 'end')
+					self.immunohist_var[i] = tk.IntVar(self)
+
+				cur.execute(("SELECT smoker FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					sql = "INSERT INTO patientrevofsys (smoker, patient_id) VALUES (%s, %s)"
+					val = (self.smoker_var, self.controller.patient_id.get())
+					cur.execute(sql, val)
+					mydb.commit()
+				else:
+					sql = "UPDATE patientrevofsys SET smoker = %s WHERE patient_id = %s"
+					val = (self.smoker_var, self.controller.patient_id.get())
+					cur.execute(sql, val)
+					mydb.commit()
+
+				if self.smoker_var == 1:
+					cur.execute(("SELECT smoker_pack FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+					res = cur.fetchone()
+					if res is None:
+						cur.execute(("INSERT INTO patientrevofsys (smoker_pack, patient_id) VALUES (%s, %s)"), (self.pack_smoke.get("1.0",'end-1c'), self.controller.patient_id.get()))
+						mydb.commit()
+					else:
+						cur.execute(("UPDATE patientrevofsys SET smoker_pack = %s WHERE patient_id = %s"), (self.pack_smoke.get("1.0",'end-1c'), self.controller.patient_id.get()))
+						mydb.commit()
+				else:
+					cur.execute(("SELECT smoker_pack FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+					res = cur.fetchone()
+					if res is None:
+						cur.execute(("INSERT INTO patientrevofsys (smoker_pack, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+						mydb.commit()
+					else:
+						cur.execute(("UPDATE patientrevofsys SET smoker_pack = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+						mydb.commit()
+
+				####################################
+
+				cur.execute(("SELECT smoker_quit FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					sql = "INSERT INTO patientrevofsys (smoker_quit, patient_id) VALUES (%s, %s)"
+					val = (self.quit_var.get(), self.controller.patient_id.get())
+					cur.execute(sql, val)
+					mydb.commit()
+				else:
+					sql = "UPDATE patientrevofsys SET smoker_quit = %s WHERE patient_id = %s"
+					val = (self.quit_var.get(), self.controller.patient_id.get())
+					cur.execute(sql, val)
+					mydb.commit()
+
+				if self.quit_var.get() == 1:
+					cur.execute(("SELECT smoker_quit_when FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+					res = cur.fetchone()
+					if res is None:
+						cur.execute(("INSERT INTO patientrevofsys (smoker_quit_when, patient_id) VALUES (%s, %s)"), (self.quit_cb_text.get("1.0",'end-1c'), self.controller.patient_id.get()))
+						mydb.commit()
+					else:
+						cur.execute(("UPDATE patientrevofsys SET smoker_quit_when = %s WHERE patient_id = %s"), (self.quit_cb_text.get("1.0",'end-1c'), self.controller.patient_id.get()))
+						mydb.commit()
+				else:
+					cur.execute(("SELECT smoker_quit_when FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+					res = cur.fetchone()
+					if res is None:
+						cur.execute(("INSERT INTO patientrevofsys (smoker_quit_when, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+						mydb.commit()
+					else:
+						cur.execute(("UPDATE patientrevofsys SET smoker_quit_when = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+						mydb.commit()
+
+				####################################
+
+				cur.execute(("SELECT drinker FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					sql = "INSERT INTO patientrevofsys (drinker, patient_id) VALUES (%s, %s)"
+					val = (self.alcohol_var, self.controller.patient_id.get())
+					cur.execute(sql, val)
+					mydb.commit()
+				else:
+					sql = "UPDATE patientrevofsys SET drinker = %s WHERE patient_id = %s"
+					val = (self.alcohol_var, self.controller.patient_id.get())
+					cur.execute(sql, val)
+					mydb.commit()
+
+				if self.alcohol_var == 1:
+					cur.execute(("SELECT drinker_freq FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+					res = cur.fetchone()
+					if res is None:
+						cur.execute(("INSERT INTO patientrevofsys (drinker_freq, patient_id) VALUES (%s, %s)"), (self.alco_freq.get("1.0",'end-1c'), self.controller.patient_id.get()))
+						mydb.commit()
+					else:
+						cur.execute(("UPDATE patientrevofsys SET drinker_freq = %s WHERE patient_id = %s"), (self.alco_freq.get("1.0",'end-1c'), self.controller.patient_id.get()))
+						mydb.commit()
+
+					cur.execute(("SELECT drinker_dur FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+					res = cur.fetchone()
+					if res is None:
+						cur.execute(("INSERT INTO patientrevofsys (drinker_dur, patient_id) VALUES (%s, %s)"), (self.alco_dur.get("1.0",'end-1c'), self.controller.patient_id.get()))
+						mydb.commit()
+					else:
+						cur.execute(("UPDATE patientrevofsys SET drinker_dur = %s WHERE patient_id = %s"), (self.alco_dur.get("1.0",'end-1c'), self.controller.patient_id.get()))
+						mydb.commit()
+
+					cur.execute(("SELECT drinker_type FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+					res = cur.fetchone()
+					if res is None:
+						cur.execute(("INSERT INTO patientrevofsys (drinker_type, patient_id) VALUES (%s, %s)"), (self.alco_type.get("1.0",'end-1c'), self.controller.patient_id.get()))
+						mydb.commit()
+					else:
+						cur.execute(("UPDATE patientrevofsys SET drinker_type = %s WHERE patient_id = %s"), (self.alco_type.get("1.0",'end-1c'), self.controller.patient_id.get()))
+						mydb.commit()
+				else:
+					cur.execute(("SELECT drinker_freq FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+					res = cur.fetchone()
+					if res is None:
+						cur.execute(("INSERT INTO patientrevofsys (drinker_freq, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+						mydb.commit()
+					else:
+						cur.execute(("UPDATE patientrevofsys SET drinker_freq = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+						mydb.commit()
+
+					cur.execute(("SELECT drinker_dur FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+					res = cur.fetchone()
+					if res is None:
+						cur.execute(("INSERT INTO patientrevofsys (drinker_dur, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+						mydb.commit()
+					else:
+						cur.execute(("UPDATE patientrevofsys SET drinker_dur = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+						mydb.commit()
+
+					cur.execute(("SELECT drinker_type FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+					res = cur.fetchone()
+					if res is None:
+						cur.execute(("INSERT INTO patientrevofsys (drinker_type, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+						mydb.commit()
+					else:
+						cur.execute(("UPDATE patientrevofsys SET drinker_type = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+						mydb.commit()
+
+				####################################
+
+				cur.execute(("SELECT exercise FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					sql = "INSERT INTO patientrevofsys (exercise, patient_id) VALUES (%s, %s)"
+					val = (self.exercise_var, self.controller.patient_id.get())
+					cur.execute(sql, val)
+					mydb.commit()
+				else:
+					sql = "UPDATE patientrevofsys SET exercise = %s WHERE patient_id = %s"
+					val = (self.exercise_var, self.controller.patient_id.get())
+					cur.execute(sql, val)
+					mydb.commit()
+
+				if self.exercise_var == 1:
+					cur.execute(("SELECT exercise_type FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+					res = cur.fetchone()
+					if res is None:
+						cur.execute(("INSERT INTO patientrevofsys (exercise_type, patient_id) VALUES (%s, %s)"), (self.exercise_type.get("1.0",'end-1c'), self.controller.patient_id.get()))
+						mydb.commit()
+					else:
+						cur.execute(("UPDATE patientrevofsys SET exercise_type = %s WHERE patient_id = %s"), (self.exercise_type.get("1.0",'end-1c'), self.controller.patient_id.get()))
+						mydb.commit()
+				else:
+					cur.execute(("SELECT exercise_type FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+					res = cur.fetchone()
+					if res is None:
+						cur.execute(("INSERT INTO patientrevofsys (exercise_type, patient_id) VALUES (%s, %s)"), ("", self.controller.patient_id.get()))
+						mydb.commit()
+					else:
+						cur.execute(("UPDATE patientrevofsys SET exercise_type = %s WHERE patient_id = %s"), ("", self.controller.patient_id.get()))
+						mydb.commit()
+
+				####################################
+
+				cur.execute(("SELECT ob_g FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (ob_g, patient_id) VALUES (%s, %s)"), (self.g_type.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET ob_g = %s WHERE patient_id = %s"), (self.g_type.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+
+				cur.execute(("SELECT ob_p FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (ob_p, patient_id) VALUES (%s, %s)"), (self.p_type.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET ob_p = %s WHERE patient_id = %s"), (self.p_type.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+
+				cur.execute(("SELECT menarche FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (menarche, patient_id) VALUES (%s, %s)"), (self.menarche.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET menarche = %s WHERE patient_id = %s"), (self.menarche.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+
+				cur.execute(("SELECT menopause FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (menopause, patient_id) VALUES (%s, %s)"), (self.menopause.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET menopause = %s WHERE patient_id = %s"), (self.menopause.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+
+				cur.execute(("SELECT coitus FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (coitus, patient_id) VALUES (%s, %s)"), (self.coitus.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET coitus = %s WHERE patient_id = %s"), (self.coitus.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+
+				cur.execute(("SELECT bm_born FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (bm_born, patient_id) VALUES (%s, %s)"), (self.born.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET bm_born = %s WHERE patient_id = %s"), (self.born.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+
+				cur.execute(("SELECT bm_via FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (bm_via, patient_id) VALUES (%s, %s)"), (self.via.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET bm_via = %s WHERE patient_id = %s"), (self.via.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				
+				cur.execute(("SELECT bm_g FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (bm_g, patient_id) VALUES (%s, %s)"), (self.to_a_g.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET bm_g = %s WHERE patient_id = %s"), (self.to_a_g.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				
+				cur.execute(("SELECT bm_p FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (bm_p, patient_id) VALUES (%s, %s)"), (self.bm_p.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET bm_p = %s WHERE patient_id = %s"), (self.bm_p.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				
+				cur.execute(("SELECT bm_year FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (bm_year, patient_id) VALUES (%s, %s)"), (self.bm_year.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET bm_year = %s WHERE patient_id = %s"), (self.bm_year.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+
+				cur.execute(("SELECT bm_compli FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+				res = cur.fetchone()
+				if res is None:
+					cur.execute(("INSERT INTO patientrevofsys (bm_compli, patient_id) VALUES (%s, %s)"), (self.mb_compli.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				else:
+					cur.execute(("UPDATE patientrevofsys SET bm_compli = %s WHERE patient_id = %s"), (self.mb_compli.get("1.0",'end-1c'), self.controller.patient_id.get()))
+					mydb.commit()
+				
+
+				self.pack_smoke.delete('1.0', 'end') # clear the text field
+				self.quit_cb_text.delete('1.0', 'end') # clear the text field
+				self.alco_freq.delete('1.0', 'end') # clear the text field
+				self.alco_dur.delete('1.0', 'end') # clear the text field
+				self.alco_type.delete('1.0', 'end') # clear the text field
+				self.exercise_type.delete('1.0', 'end') # clear the text field
+				self.g_type.delete('1.0', 'end') # clear the text field
+				self.p_type.delete('1.0', 'end') # clear the text field
+				self.menarche.delete('1.0', 'end') # clear the text field
+				self.menopause.delete('1.0', 'end') # clear the text field
+				self.coitus.delete('1.0', 'end') # clear the text field
+				self.born.delete('1.0', 'end') # clear the text field
+				self.via.delete('1.0', 'end') # clear the text field
+				self.to_a_g.delete('1.0', 'end') # clear the text field
+				self.bm_p.delete('1.0', 'end') # clear the text field
+				self.bm_year.delete('1.0', 'end') # clear the text field
+				self.mb_compli.delete('1.0', 'end') # clear the text field
+				
+				self.controller.show_frame("FirstConsForm")
+
+			else:
+				FirstConsForm = self.controller.get_page("FirstConsForm")
+				sql = "UPDATE patient SET last_name = %s, first_name = %s, middle_name = %s, address = %s, birthdate = %s, age = %s, gender = %s, civil_status = %s, contact_no = %s, occupation = %s WHERE patient_id = %s"
+				val = (FirstConsForm.p_lname.get("1.0",'end-1c'), FirstConsForm.p_fname.get("1.0",'end-1c'), FirstConsForm.p_mname.get("1.0",'end-1c'), FirstConsForm.p_addr.get("1.0",'end-1c'), 
+					FirstConsForm.p_bday.get_date().strftime('%Y-%m-%d'), int(FirstConsForm.p_age.get("1.0",'end-1c')), FirstConsForm.p_gender.get("1.0",'end-1c'), FirstConsForm.p_civil_stat.get("1.0",'end-1c'), 
+					FirstConsForm.p_contact.get("1.0",'end-1c'), FirstConsForm.p_occup.get("1.0",'end-1c'), self.controller.patient_id.get())
+
+				cur.execute(sql, val)
+				mydb.commit()
+
+				FirstConsForm.p_lname.delete('1.0', 'end')
+				FirstConsForm.p_fname.delete('1.0', 'end')
+				FirstConsForm.p_mname.delete('1.0', 'end')
+				FirstConsForm.p_addr.delete('1.0', 'end')
+				FirstConsForm.p_age.delete('1.0', 'end')
+				FirstConsForm.p_gender.delete('1.0', 'end')
+				FirstConsForm.p_civil_stat.delete('1.0', 'end')
+				FirstConsForm.p_contact.delete('1.0', 'end')
+				FirstConsForm.p_occup.delete('1.0', 'end')
+				FirstConsForm.p_bday.set_date(dt.datetime.today())
+
+				self.controller.show_frame("FirstConsForm")
 
 	def load_data(self):
 
 		cur.execute(("SELECT famhist_1, famhist_2, famhist_3, famhist_4, famhist_5, famhist_6, famhist_7, immuno_1, immuno_2, immuno_3, immuno_4, immuno_5, immuno_6, immuno_7, immuno_8, immuno_9, immuno_10, immuno_11, immuno_12, immuno_13, immuno_14, immuno_15, smoker, drinker, exercise FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 
-		for i in range(len(self.famhist_var)):
-			self.famhist_var[i].set(res[i])
+		if res is not None:
+			for i in range(len(self.famhist_var)):
+				self.famhist_var[i].set(res[i])
 
-		for i in range(len(self.immunohist_var)):
-			self.immunohist_var[i].set(res[i+7])
+			for i in range(len(self.immunohist_var)):
+				self.immunohist_var[i].set(res[i+7])
 
-		if res[22] == 0:
-			self.smoker_var_arr[0].set(0)
-			self.smoker_var_arr[1].set(1)
-		elif res[22] == 1:
-			self.smoker_var_arr[0].set(1)
-			self.smoker_var_arr[1].set(0)
+			if res[22] == 0:
+				self.smoker_var_arr[0].set(0)
+				self.smoker_var_arr[1].set(1)
+			elif res[22] == 1:
+				self.smoker_var_arr[0].set(1)
+				self.smoker_var_arr[1].set(0)
+			else:
+				self.smoker_var_arr[0].set(0)
+				self.smoker_var_arr[1].set(0)
+
+			if res[23] == 0:
+				self.alcohol_var_arr[0].set(0)
+				self.alcohol_var_arr[1].set(1)
+			elif res[23] == 1:
+				self.alcohol_var_arr[0].set(1)
+				self.alcohol_var_arr[1].set(0)
+			else:
+				self.alcohol_var_arr[0].set(0)
+				self.alcohol_var_arr[1].set(0)
+
+			if res[24] == 0:
+				self.exercise_var_arr[0].set(0)
+				self.exercise_var_arr[1].set(1)
+			elif res[24] == 1:
+				self.exercise_var_arr[0].set(1)
+				self.exercise_var_arr[1].set(0)
+			else:
+				self.exercise_var_arr[0].set(0)
+				self.exercise_var_arr[1].set(0)
+
+
 		else:
-			self.smoker_var_arr[0].set(0)
-			self.smoker_var_arr[1].set(0)
+			for i in range(7):
+				self.famhist_var[i] = tk.IntVar(self)
 
-		if res[23] == 0:
-			self.alcohol_var_arr[0].set(0)
-			self.alcohol_var_arr[1].set(1)
-		elif res[23] == 1:
-			self.alcohol_var_arr[0].set(1)
-			self.alcohol_var_arr[1].set(0)
-		else:
-			self.alcohol_var_arr[0].set(0)
-			self.alcohol_var_arr[1].set(0)
-
-		if res[24] == 0:
-			self.exercise_var_arr[0].set(0)
-			self.exercise_var_arr[1].set(1)
-		elif res[24] == 1:
-			self.exercise_var_arr[0].set(1)
-			self.exercise_var_arr[1].set(0)
-		else:
-			self.exercise_var_arr[0].set(0)
-			self.exercise_var_arr[1].set(0)
+			for i in range(15):
+				self.immunohist_var[i] = tk.IntVar(self)
+			for i in range(2):
+				self.smoker_var_arr[i] = tk.IntVar(self)
+				self.alcohol_var_arr[i] = tk.IntVar(self)
+				self.exercise_var_arr[i] = tk.IntVar(self)
 
 		self.medhist_illness.delete('1.0', 'end')
 		self.medhist_hospt.delete('1.0', 'end')
@@ -2379,68 +2598,133 @@ class review_of_systems_form_2(tk.Frame):
 		cur.execute(("SELECT famhist_illness, famhist_hospt, famhist_allergy, famhist_others, immuno_booster, immuno_combi, immuno_others, smoker_pack, smoker_quit_when, drinker_freq, drinker_dur, drinker_type, exercise_type, ob_g, ob_p, menarche, menopause, coitus, bm_born, bm_via, bm_g, bm_p, bm_year, bm_compli FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 
-		self.medhist_illness.insert('1.0', res[0])
-		self.medhist_hospt.insert('1.0', res[1])
-		self.medhist_allergy.insert('1.0', res[2])
-		self.other_famhist.insert('1.0', res[3])
-		self.other_booster.insert('1.0', res[4])
-		self.other_combi.insert('1.0', res[5])
-		self.other_immunohist.insert('1.0', res[6])
-		self.pack_smoke.insert('1.0', res[7])
-		self.quit_cb_text.insert('1.0', res[8])
-		self.alco_freq.insert('1.0', res[9])
-		self.alco_dur.insert('1.0', res[10])
-		self.alco_type.insert('1.0', res[11])
-		self.exercise_type.insert('1.0', res[12])
-		self.g_type.insert('1.0', res[13])
-		self.p_type.insert('1.0', res[14])
-		self.menarche.insert('1.0', res[15])
-		self.menopause.insert('1.0', res[16])
-		self.coitus.insert('1.0', res[17])
-		self.born.insert('1.0', res[18])
-		self.via.insert('1.0', res[19])
-		self.to_a_g.insert('1.0', res[20])
-		self.bm_p.insert('1.0', res[21])
-		self.bm_year.insert('1.0', res[22])
-		self.mb_compli.insert('1.0', res[23])
+		if res is not None:
+			self.medhist_illness.insert('1.0', res[0])
+			self.medhist_hospt.insert('1.0', res[1])
+			self.medhist_allergy.insert('1.0', res[2])
+			self.other_famhist.insert('1.0', res[3])
+			self.other_booster.insert('1.0', res[4])
+			self.other_combi.insert('1.0', res[5])
+			self.other_immunohist.insert('1.0', res[6])
+			self.pack_smoke.insert('1.0', res[7])
+			self.quit_cb_text.insert('1.0', res[8])
+			self.alco_freq.insert('1.0', res[9])
+			self.alco_dur.insert('1.0', res[10])
+			self.alco_type.insert('1.0', res[11])
+			self.exercise_type.insert('1.0', res[12])
+			self.g_type.insert('1.0', res[13])
+			self.p_type.insert('1.0', res[14])
+			self.menarche.insert('1.0', res[15])
+			self.menopause.insert('1.0', res[16])
+			self.coitus.insert('1.0', res[17])
+			self.born.insert('1.0', res[18])
+			self.via.insert('1.0', res[19])
+			self.to_a_g.insert('1.0', res[20])
+			self.bm_p.insert('1.0', res[21])
+			self.bm_year.insert('1.0', res[22])
+			self.mb_compli.insert('1.0', res[23])
 
-		for i in range(len(self.famhist_cb)):
-			self.famhist_cb[i].config(state = "disabled")
+			for i in range(len(self.famhist_cb)):
+				self.famhist_cb[i].config(state = "disabled")
 
-		for i in range(len(self.immunohist_cb)):
-			self.immunohist_cb[i].config(state = "disabled")
+			for i in range(len(self.immunohist_cb)):
+				self.immunohist_cb[i].config(state = "disabled")
 
-		self.smoker_cb[0].config(state = "disabled")
-		self.smoker_cb[1].config(state = "disabled")
-		self.alcohol_cb[0].config(state = "disabled")
-		self.alcohol_cb[1].config(state = "disabled")
-		self.exercise_cb[0].config(state = "disabled")
-		self.exercise_cb[1].config(state = "disabled")
-		self.medhist_illness.config(state = "disabled")
-		self.medhist_hospt.config(state = "disabled")
-		self.medhist_allergy.config(state = "disabled")
-		self.other_famhist.config(state = "disabled")
-		self.other_booster.config(state = "disabled")
-		self.other_combi.config(state = "disabled")
-		self.other_immunohist.config(state = "disabled")
-		self.pack_smoke.config(state = "disabled")
-		self.quit_cb.config(state = "disabled")
-		self.quit_cb_text.config(state = "disabled")
-		self.alco_freq.config(state = "disabled")
-		self.alco_dur.config(state = "disabled")
-		self.alco_type.config(state = "disabled")
-		self.exercise_type.config(state = "disabled")
-		self.g_type.config(state = "disabled")
-		self.p_type.config(state = "disabled")
-		self.menarche.config(state = "disabled")
-		self.menopause.config(state = "disabled")
-		self.coitus.config(state = "disabled")
-		self.born.config(state = "disabled")
-		self.via.config(state = "disabled")
-		self.to_a_g.config(state = "disabled")
-		self.bm_p.config(state = "disabled")
-		self.bm_year.config(state = "disabled")
-		self.mb_compli.config(state = "disabled")
+			self.smoker_cb[0].config(state = "disabled")
+			self.smoker_cb[1].config(state = "disabled")
+			self.alcohol_cb[0].config(state = "disabled")
+			self.alcohol_cb[1].config(state = "disabled")
+			self.exercise_cb[0].config(state = "disabled")
+			self.exercise_cb[1].config(state = "disabled")
+			self.medhist_illness.config(state = "disabled")
+			self.medhist_hospt.config(state = "disabled")
+			self.medhist_allergy.config(state = "disabled")
+			self.other_famhist.config(state = "disabled")
+			self.other_booster.config(state = "disabled")
+			self.other_combi.config(state = "disabled")
+			self.other_immunohist.config(state = "disabled")
+			self.pack_smoke.config(state = "disabled")
+			self.quit_cb.config(state = "disabled")
+			self.quit_cb_text.config(state = "disabled")
+			self.alco_freq.config(state = "disabled")
+			self.alco_dur.config(state = "disabled")
+			self.alco_type.config(state = "disabled")
+			self.exercise_type.config(state = "disabled")
+			self.g_type.config(state = "disabled")
+			self.p_type.config(state = "disabled")
+			self.menarche.config(state = "disabled")
+			self.menopause.config(state = "disabled")
+			self.coitus.config(state = "disabled")
+			self.born.config(state = "disabled")
+			self.via.config(state = "disabled")
+			self.to_a_g.config(state = "disabled")
+			self.bm_p.config(state = "disabled")
+			self.bm_year.config(state = "disabled")
+			self.mb_compli.config(state = "disabled")
+			self.add_button.config(state = "disabled")
+		else:
+			self.medhist_illness.delete('1.0', 'end')
+			self.medhist_hospt.delete('1.0', 'end')
+			self.medhist_allergy.delete('1.0', 'end')
+			self.other_famhist.delete('1.0', 'end')
+			self.other_booster.delete('1.0', 'end')
+			self.other_combi.delete('1.0', 'end')
+			self.other_immunohist.delete('1.0', 'end')
+			self.pack_smoke.delete('1.0', 'end')
+			self.quit_cb_text.delete('1.0', 'end')
+			self.alco_freq.delete('1.0', 'end')
+			self.alco_dur.delete('1.0', 'end')
+			self.alco_type.delete('1.0', 'end')
+			self.exercise_type.delete('1.0', 'end')
+			self.g_type.delete('1.0', 'end')
+			self.p_type.delete('1.0', 'end')
+			self.menarche.delete('1.0', 'end')
+			self.menopause.delete('1.0', 'end')
+			self.coitus.delete('1.0', 'end')
+			self.born.delete('1.0', 'end')
+			self.via.delete('1.0', 'end')
+			self.to_a_g.delete('1.0', 'end')
+			self.bm_p.delete('1.0', 'end')
+			self.bm_year.delete('1.0', 'end')
+			self.mb_compli.delete('1.0', 'end')
+			for i in range(len(self.famhist_cb)):
+				self.famhist_cb[i].config(state = "normal")
+
+			for i in range(len(self.immunohist_cb)):
+				self.immunohist_cb[i].config(state = "normal")
+
+			self.smoker_cb[0].config(state = "normal")
+			self.smoker_cb[1].config(state = "normal")
+			self.alcohol_cb[0].config(state = "normal")
+			self.alcohol_cb[1].config(state = "normal")
+			self.exercise_cb[0].config(state = "normal")
+			self.exercise_cb[1].config(state = "normal")
+			self.medhist_illness.config(state = "normal")
+			self.medhist_hospt.config(state = "normal")
+			self.medhist_allergy.config(state = "normal")
+			self.other_famhist.config(state = "normal")
+			self.other_booster.config(state = "normal")
+			self.other_combi.config(state = "normal")
+			self.other_immunohist.config(state = "normal")
+			self.pack_smoke.config(state = "normal")
+			self.quit_cb.config(state = "normal")
+			self.quit_cb_text.config(state = "normal")
+			self.alco_freq.config(state = "normal")
+			self.alco_dur.config(state = "normal")
+			self.alco_type.config(state = "normal")
+			self.exercise_type.config(state = "normal")
+			self.g_type.config(state = "normal")
+			self.p_type.config(state = "normal")
+			self.menarche.config(state = "normal")
+			self.menopause.config(state = "normal")
+			self.coitus.config(state = "normal")
+			self.born.config(state = "normal")
+			self.via.config(state = "normal")
+			self.to_a_g.config(state = "normal")
+			self.bm_p.config(state = "normal")
+			self.bm_year.config(state = "normal")
+			self.mb_compli.config(state = "normal")
+			self.add_button.config(state = "normal")
 
 	def check_cb(self, cb_arr, cb_var_arr, i, question):
 		if i == 0:
@@ -3146,6 +3430,16 @@ class family_apgar_form(tk.Frame):
 		tk.Label(form_frame, text="*Score: 0-hardly ever (halos hindi), 1-some of the time (minsan), 2-almost always (palagi)", font=self.label_font, fg="#636363").place(x=110, y=y_value+ 10)
 		tk.Label(form_frame, text="*Interpretation: 0-3 severely dysfunctional, 4-6 moderately dysfunctional, 7-10 highly functional", font=self.label_font, fg="#636363").place(x=110, y=y_value + 30)
 
+		self.res_bttn = tk.Button(form_frame, text="Show Results", command=lambda: controller.show_frame("family_apgar_form_res"), height = 1, width = 12, bd = 0, bg = "#183873", fg = "#ffffff")
+		self.res_bttn.place(x=820, y=y_value+ 10)
+
+	def load_data(self):
+		cur.execute(("SELECT fam_1_apgar_score, fam_2_apgar_score, avg_apgar_score FROM patientfamassessment WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+		res = cur.fetchone()
+		if res is None:
+			self.res_bttn.config(state = "disabled")
+		else:
+			self.res_bttn.config(state = "normal")
 
 	def check_cb(self, cb_arr, cb_var_arr, i, average, index): # will not add a button, must update database with every data change
 		if i < 3:
@@ -3244,6 +3538,92 @@ class family_apgar_form(tk.Frame):
 		else:
 			self.overall_f2_txt['text'] = str(self.vote_2) + " - Highly functional"
 
+		cur.execute(("SELECT fam_1_apgar_score, fam_2_apgar_score, avg_apgar_score FROM patientfamassessment WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+		res = cur.fetchone()
+		if res is None:
+			cur.execute(("INSERT INTO patientfamassessment (fam_1_apgar_score, fam_2_apgar_score, avg_apgar_score, patient_id) VALUES (%s, %s, %s, %s)"), (int(self.vote_1), int(self.vote_2), int(avg_value), self.controller.patient_id.get()))
+			mydb.commit()
+		else:
+			cur.execute(("UPDATE patientfamassessment SET fam_1_apgar_score = %s, fam_2_apgar_score = %s, avg_apgar_score = %s WHERE patient_id = %s"), (int(self.vote_1), int(self.vote_2), int(avg_value), self.controller.patient_id.get()))
+			mydb.commit()
+
+class family_apgar_form_res(tk.Frame):
+
+	def __init__(self, parent, controller):
+		tk.Frame.__init__(self, parent)
+		self.controller = controller
+		menu_frame(self, self.controller, 4)
+		submenu_buttons_2(self, self.controller, 2)
+
+		self.title_font = tkfont.Font(family='Times New Roman', size=12, weight="bold")
+		self.subtitle_font = tkfont.Font(family='Helvetica', size=12, weight="bold")
+		self.label_font = tkfont.Font(family='Helvetica', size=8, slant="italic")
+		self.label_font2 = tkfont.Font(family='Helvetica', size=8, weight="bold")
+		self.label_font3 = tkfont.Font(family='Helvetica', size=10, weight="bold", slant="italic")
+
+		form_frame = tk.Frame(self, height = 720, width = 1000)
+		form_frame.pack(side="left")
+
+		question_label = tk.Label(form_frame, text="Results of the Previous APGAR", font=self.subtitle_font)
+		question_label.place(x=110, y=60)
+
+		y_value = 70
+
+		fam_num_1_label = tk.Label(form_frame, text="Family Member 1: ", font=self.label_font3, fg ="#636362")
+		fam_num_1_label.place(x=110, y=100)
+
+		fam_num_2_label = tk.Label(form_frame, text="Family Member 2: ", font=self.label_font3, fg ="#636362")
+		fam_num_2_label.place(x=110, y=150)
+
+		average_label = tk.Label(form_frame, text="Average: ", font=self.label_font3, fg ="#636362")
+		average_label.place(x=110, y=200)
+
+		self.fam_num_1_score = tk.Label(form_frame, text="", font=self.title_font)
+		self.fam_num_1_score.place(x=280, y=100)
+
+		self.fam_num_2_score = tk.Label(form_frame, text="", font=self.title_font)
+		self.fam_num_2_score.place(x=280, y=150)
+
+		self.average_score = tk.Label(form_frame, text="", font=self.title_font)
+		self.average_score.place(x=280, y=200)
+
+		self.res_bttn = tk.Button(form_frame, text="Return", command=lambda: controller.show_frame("family_apgar_form"), height = 1, width = 12, bd = 0, bg = "#183873", fg = "#ffffff")
+		self.res_bttn.place(x=820, y=580)
+
+	def load_data(self):
+		self.fam_num_1_score['text'] = ""
+		self.fam_num_2_score['text'] = ""
+		self.average_score['text'] = ""
+
+		cur.execute(("SELECT fam_1_apgar_score, fam_2_apgar_score, avg_apgar_score FROM patientfamassessment WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+		res = cur.fetchone()
+
+		if res is not None:
+			if int(res[0]) <= 3:
+				self.fam_num_1_score['text'] = str(res[0]) +" - Severely dysfunctional" 
+			elif int(res[0]) <= 6:
+				self.fam_num_1_score['text'] = str(res[0]) + " - Moderately dysfunctional" 
+			else:
+				self.fam_num_1_score['text'] = str(res[0]) + " - Highly functional"
+
+			if int(res[1]) <= 3:
+				self.fam_num_2_score['text']  = str(res[1]) +" - Severely dysfunctional" 
+			elif int(res[1]) <= 6:
+				self.fam_num_2_score['text']  = str(res[1]) + " - Moderately dysfunctional" 
+			else:
+				self.fam_num_2_score['text']  = str(res[1]) + " - Highly functional"
+
+			if int(res[2]) <= 3:
+				self.average_score['text'] = str(res[2]) +" - Severely dysfunctional" 
+			elif int(res[2]) <= 6:
+				self.average_score['text'] = str(res[2]) + " - Moderately dysfunctional" 
+			else:
+				self.average_score['text'] = str(res[2]) + " - Highly functional"	
+		else:
+			self.fam_num_1_score['text'] = ""
+			self.fam_num_2_score['text'] = ""
+			self.average_score['text'] = ""
+
 class followup_patient_form(tk.Frame):
 
 	def __init__(self, parent, controller):
@@ -3266,7 +3646,7 @@ class followup_patient_form(tk.Frame):
 		p_name_label = tk.Label(form_frame, text="Name:", font=self.label_font_2)
 		p_name_label.place(x=90, y=50)
 
-		self.p_name = tk.Label(form_frame, text="<insert patient name here>", font=self.label_font_3)
+		self.p_name = tk.Label(form_frame, text="", font=self.label_font_3)
 		self.p_name.place(x=140, y=50)
 
 		f_date_label = tk.Label(form_frame, text="Date of Follow-up: ", font=self.label_font_2)
@@ -3333,6 +3713,23 @@ class followup_patient_form(tk.Frame):
 	def add_details(self):
 		print(self.f_s.get('1.0', 'end-1c'))
 		print(self.f_medication.get('1.0', 'end-1c'))
+
+	def load_data(self):
+		cur.execute(("SELECT last_name, first_name, middle_name FROM patient WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+		res = cur.fetchone()
+
+		if res is not None:
+			self.p_name['text'] = res[0] + ", " + res[1] + " " + res[2]
+		else:
+			self.p_name['text'] = ""
+
+		cur.execute(("SELECT ti_follow FROM patientassessment WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+		res = cur.fetchone()
+
+		if res is not None:
+			self.f_date_input['text'] = res[0]
+		else:
+			self.f_date_input['text'] = ""
 
 class followup_patient_form_2(tk.Frame):
 
