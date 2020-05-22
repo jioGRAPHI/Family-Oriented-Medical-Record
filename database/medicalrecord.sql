@@ -289,8 +289,7 @@ DROP TABLE IF EXISTS `patientfollowup`;
 CREATE TABLE `patientfollowup` (
   `log_id` int(10) NOT NULL AUTO_INCREMENT,
   `followup_date` date,
-  `reason_1` int(1) DEFAULT 0,
-  `reason_2` int(1) DEFAULT 0,
+  `reason` int(1) DEFAULT 0,
   `followup_s` varchar(500) DEFAULT NULL,
   `followup_med` varchar(500) DEFAULT NULL,
   `hr` varchar(10) DEFAULT NULL,
@@ -320,9 +319,6 @@ CREATE TABLE `patientfollowup` (
   `dre_others` varchar(360) DEFAULT NULL,
   `neuro_1` int(1) DEFAULT 0,
   `neuro_others` varchar(360) DEFAULT NULL,
-  `assessment` varchar(500) DEFAULT NULL,
-  `icd_code` varchar(500) DEFAULT NULL,
-  `dpra` varchar(500) DEFAULT NULL,
   `ti_drugs` varchar(360) DEFAULT NULL,
   `ti_diet` varchar(360) DEFAULT NULL,
   `ti_lifestyle` varchar(360) DEFAULT NULL,
@@ -374,6 +370,21 @@ CREATE TABLE `patientassessmenttree` (
   `patient_id` int(10),
   CONSTRAINT `pk_log_id` PRIMARY KEY (log_id),
   CONSTRAINT `fk_patient_id11` FOREIGN KEY (patient_id)
+  REFERENCES patient(patient_id)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE
+);
+
+DROP TABLE IF EXISTS `patientfollowuptree`;
+CREATE TABLE `patientfollowuptree` (
+  `log_id` int(10) NOT NULL AUTO_INCREMENT,
+  `followup_date` date,
+  `assessment` varchar(500) DEFAULT NULL,
+  `icd_code` varchar(500) DEFAULT NULL,
+  `dpra` varchar(500) DEFAULT NULL,
+  `patient_id` int(10),
+  CONSTRAINT `pk_log_id` PRIMARY KEY (log_id),
+  CONSTRAINT `fk_patient_id12` FOREIGN KEY (patient_id)
   REFERENCES patient(patient_id)
   ON DELETE CASCADE
   ON UPDATE CASCADE

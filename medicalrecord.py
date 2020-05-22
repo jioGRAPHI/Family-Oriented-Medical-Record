@@ -89,13 +89,17 @@ def submenu_buttons_3(self, controller, num):
 
 	b1 = tk.Button(side_menu_frame, text="Follow-up Patient Record", command=lambda: controller.show_frame("followup_patient_form"), height = 3, width = 25, bd = 0, bg = "#183873", fg = "#ffffff", wraplength = 150)
 	b1.place(x=25, y=160)
-	b2 = tk.Button(side_menu_frame, text="Referral Form and Clinical Summary", command=lambda: controller.show_frame("ReferralForm"), height = 3, width = 25, bd = 0, bg = "#183873", fg = "#ffffff", wraplength = 150)
+	b2 = tk.Button(side_menu_frame, text="Patient's Records", command=lambda: controller.show_frame("followup_patient_form_res"), height = 3, width = 25, bd = 0, bg = "#183873", fg = "#ffffff", wraplength = 150)
 	b2.place(x=25, y=220)
+	b3 = tk.Button(side_menu_frame, text="Referral Form and Clinical Summary", command=lambda: controller.show_frame("ReferralForm"), height = 3, width = 25, bd = 0, bg = "#183873", fg = "#ffffff", wraplength = 150)
+	b3.place(x=25, y=280)
 
 	if(num == 1):
 		b1.config(bg = "#2553a8")
-	else:
+	elif(num == 2):
 		b2.config(bg = "#2553a8")
+	else:
+		b3.config(bg = "#2553a8")
 
 class MedSystem(tk.Tk):
 
@@ -114,7 +118,7 @@ class MedSystem(tk.Tk):
 		# self.flag = tk.IntVar(self) # flag to determine if user is adding new data or editing existing
 
 		self.frames = {}
-		for F in (LandingPage, PatientForm, GeriaticForm, FirstConsForm, FamAssessForm, ReferralForm, review_of_systems_form, review_of_systems_form_2, physical_examination_form, assessment_table, family_apgar_form, family_apgar_form_res,followup_patient_form, followup_patient_form_2,followup_assessment_table):
+		for F in (LandingPage, PatientForm, GeriaticForm, FirstConsForm, FamAssessForm, ReferralForm, ReferralForm_res, review_of_systems_form, review_of_systems_form_2, physical_examination_form, assessment_table, family_apgar_form, family_apgar_form_res,followup_patient_form, followup_patient_form_2,followup_assessment_table,followup_patient_form_res):
 			page_name = F.__name__
 			frame = F(parent=container, controller=self)
 			self.frames[page_name] = frame
@@ -190,6 +194,7 @@ class LandingPage(tk.Frame):
 	def load_patients(self):
 		self.list_of_patients.clear()
 		self.list_of_patients_id.clear()
+		self.w.delete('0', 'end')
 
 		cur.execute("SELECT patient_id, last_name, first_name, middle_name FROM patient")
 		OPTIONS = cur.fetchall()
@@ -525,18 +530,27 @@ class FirstConsForm(tk.Frame):
 		res = cur.fetchone()
 		
 		if res is not None:
-			self.p_lname.insert('1.0', res[0])
-			self.p_fname.insert('1.0', res[1])
-			self.p_mname.insert('1.0', res[2])
-			self.p_addr.insert('1.0', res[3])
-			self.p_age.insert('1.0', res[5])
-			self.p_gender.insert('1.0', res[6])
-			self.p_civil_stat.insert('1.0', res[7])
-			self.p_contact.insert('1.0', res[8])
-			self.p_occup.insert('1.0', res[9])
-			self.p_bday.set_date(res[4])
-
-			self.p_lname.config(state = "disabled")
+			if res[0] is not None:
+				self.p_lname.insert('1.0', res[0])
+			if res[1] is not None:
+				self.p_fname.insert('1.0', res[1])
+			if res[2] is not None:
+				self.p_mname.insert('1.0', res[2])
+			if res[3] is not None:
+				self.p_addr.insert('1.0', res[3])
+			if res[4] is not None:
+				self.p_bday.set_date(res[4])
+			if res[5] is not None:
+				self.p_age.insert('1.0', res[5])
+			if res[6] is not None:
+				self.p_gender.insert('1.0', res[6])
+			if res[7] is not None:
+				self.p_civil_stat.insert('1.0', res[7])
+			if res[8] is not None:
+				self.p_contact.insert('1.0', res[8])
+			if res[9] is not None:
+				self.p_occup.insert('1.0', res[9])
+			
 			self.p_fname.config(state = "disabled")
 			self.p_mname.config(state = "disabled")
 			self.p_addr.config(state = "disabled")
@@ -572,11 +586,16 @@ class FirstConsForm(tk.Frame):
 		res = cur.fetchone()
 		
 		if res is not None:
-			self.p_datecons.set_date(res[0])
-			self.p_compliant.insert('1.0', res[1])
-			self.p_hist_illness.insert('1.0', res[2])
-			self.p_context.insert('1.0', res[3])
-			self.p_pres_med.insert('1.0', res[4])
+			if res[0] is not None:
+				self.p_datecons.set_date(res[0])
+			if res[1] is not None:
+				self.p_compliant.insert('1.0', res[1])
+			if res[2] is not None:
+				self.p_hist_illness.insert('1.0', res[2])
+			if res[3] is not None:
+				self.p_context.insert('1.0', res[3])
+			if res[4] is not None:
+				self.p_pres_med.insert('1.0', res[4])
 
 			self.p_datecons.config(state = "disabled")
 			self.p_compliant.config(state = "disabled")
@@ -816,9 +835,12 @@ class FamAssessForm(tk.Frame):
 		res = cur.fetchone()
 
 		if res is not None:
-			self.genogram.insert('1.0', res[0])
-			self.fammap.insert('1.0', res[1])
-			self.ecomap.insert('1.0', res[2])
+			if res[0] is not None:
+				self.genogram.insert('1.0', res[0])
+			if res[1] is not None:
+				self.fammap.insert('1.0', res[1])
+			if res[2] is not None:
+				self.ecomap.insert('1.0', res[2])
 		else:
 			self.genogram.delete('1.0', 'end')
 			self.fammap.delete('1.0', 'end')
@@ -1521,8 +1543,9 @@ class review_of_systems_form(tk.Frame):
 
 		if res is not None:
 			for i in range(len(self.heent_var)):
-				self.heent_var[i].set(res[i])
-				self.heent_cb[i].config(state = "disabled")
+				if res[i] is not None:
+					self.heent_var[i].set(res[i])
+					self.heent_cb[i].config(state = "disabled")
 		else:
 			for i in range(8):
 				self.heent_var[i].set(0)
@@ -1533,8 +1556,9 @@ class review_of_systems_form(tk.Frame):
 
 		if res is not None:
 			for i in range(len(self.respi_var)):
-				self.respi_var[i].set(res[i])
-				self.respi_cb[i].config(state = "disabled")
+				if res[i] is not None:
+					self.respi_var[i].set(res[i])
+					self.respi_cb[i].config(state = "disabled")
 		else:
 			for i in range(5):
 				self.respi_var[i].set(0)
@@ -1545,8 +1569,9 @@ class review_of_systems_form(tk.Frame):
 
 		if res is not None:
 			for i in range(len(self.cardio_var)):
-				self.cardio_var[i].set(res[i])
-				self.cardio_cb[i].config(state = "disabled")
+				if res[i] is not None:
+					self.cardio_var[i].set(res[i])
+					self.cardio_cb[i].config(state = "disabled")
 		else:
 			for i in range(7):
 				self.cardio_var[i].set(0)
@@ -1557,8 +1582,9 @@ class review_of_systems_form(tk.Frame):
 
 		if res is not None:
 			for i in range(len(self.gastro_var)):
-				self.gastro_var[i].set(res[i])
-				self.gastro_cb[i].config(state = "disabled")
+				if res[i] is not None:
+					self.gastro_var[i].set(res[i])
+					self.gastro_cb[i].config(state = "disabled")
 		else:
 			for i in range(9):
 				self.gastro_var[i].set(0)
@@ -1569,8 +1595,9 @@ class review_of_systems_form(tk.Frame):
 
 		if res is not None:
 			for i in range(len(self.genito_var)):
-				self.genito_var[i].set(res[i])
-				self.genito_cb[i].config(state = "disabled")
+				if res[i] is not None:
+					self.genito_var[i].set(res[i])
+					self.genito_cb[i].config(state = "disabled")
 		else:
 			for i in range(8):
 				self.genito_var[i].set(0)
@@ -1581,8 +1608,9 @@ class review_of_systems_form(tk.Frame):
 
 		if res is not None:
 			for i in range(len(self.meta_var)):
-				self.meta_var[i].set(res[i])
-				self.meta_cb[i].config(state = "disabled")
+				if res[i] is not None:
+					self.meta_var[i].set(res[i])
+					self.meta_cb[i].config(state = "disabled")
 		else:
 			for i in range(6):
 				self.meta_var[i].set(0)
@@ -1593,8 +1621,9 @@ class review_of_systems_form(tk.Frame):
 
 		if res is not None:
 			for i in range(len(self.neuro_var)):
-				self.neuro_var[i].set(res[i])
-				self.neuro_cb[i].config(state = "disabled")
+				if res[i] is not None:
+					self.neuro_var[i].set(res[i])
+					self.neuro_cb[i].config(state = "disabled")
 		else:
 			for i in range(8):
 				self.neuro_var[i].set(0)
@@ -1605,8 +1634,9 @@ class review_of_systems_form(tk.Frame):
 
 		if res is not None:
 			for i in range(len(self.musculo_var)):
-				self.musculo_var[i].set(res[i])
-				self.musculo_cb[i].config(state = "disabled")
+				if res[i] is not None:
+					self.musculo_var[i].set(res[i])
+					self.musculo_cb[i].config(state = "disabled")
 		else:
 			for i in range(5):
 				self.musculo_var[i].set(0)
@@ -1617,8 +1647,9 @@ class review_of_systems_form(tk.Frame):
 
 		if res is not None:
 			for i in range(len(self.skin_var)):
-				self.skin_var[i].set(res[i])
-				self.skin_cb[i].config(state = "disabled")
+				if res[i] is not None:
+					self.skin_var[i].set(res[i])
+					self.skin_cb[i].config(state = "disabled")
 		else:
 			for i in range(7):
 				self.skin_var[i].set(0)
@@ -1638,15 +1669,24 @@ class review_of_systems_form(tk.Frame):
 		res = cur.fetchone()
 
 		if res is not None:
-			self.other_heent.insert('1.0', res[0])
-			self.other_respi.insert('1.0', res[1])
-			self.other_cardio.insert('1.0', res[2])
-			self.other_gastro.insert('1.0', res[3])
-			self.other_genito.insert('1.0', res[4])
-			self.other_meta.insert('1.0', res[5])
-			self.other_neuro.insert('1.0', res[6])
-			self.other_musculo.insert('1.0', res[7])
-			self.other_skin.insert('1.0', res[8])
+			if res[0] is not None:
+				self.other_heent.insert('1.0', res[0])
+			if res[1] is not None:
+				self.other_respi.insert('1.0', res[1])
+			if res[2] is not None:
+				self.other_cardio.insert('1.0', res[2])
+			if res[3] is not None:
+				self.other_gastro.insert('1.0', res[3])
+			if res[4] is not None:
+				self.other_genito.insert('1.0', res[4])
+			if res[5] is not None:
+				self.other_meta.insert('1.0', res[5])
+			if res[6] is not None:
+				self.other_neuro.insert('1.0', res[6])
+			if res[7] is not None:
+				self.other_musculo.insert('1.0', res[7])
+			if res[8] is not None:
+				self.other_skin.insert('1.0', res[8])
 			
 
 			self.other_heent.config(state = "disabled")
@@ -2529,40 +2569,45 @@ class review_of_systems_form_2(tk.Frame):
 
 		if res is not None:
 			for i in range(len(self.famhist_var)):
-				self.famhist_var[i].set(res[i])
+				if res[i] is not None:
+					self.famhist_var[i].set(res[i])
 
 			for i in range(len(self.immunohist_var)):
-				self.immunohist_var[i].set(res[i+7])
+				if res[i+7] is not None:
+					self.immunohist_var[i].set(res[i+7])
 
-			if res[22] == 0:
-				self.smoker_var_arr[0].set(0)
-				self.smoker_var_arr[1].set(1)
-			elif res[22] == 1:
-				self.smoker_var_arr[0].set(1)
+			if res[22] is not None:
+				if res[22] == 0:
+					self.smoker_var_arr[0].set(0)
+					self.smoker_var_arr[1].set(1)
+				elif res[22] == 1:
+					self.smoker_var_arr[0].set(1)
+					self.smoker_var_arr[1].set(0)
+				else:
+					self.smoker_var_arr[0].set(0)
 				self.smoker_var_arr[1].set(0)
-			else:
-				self.smoker_var_arr[0].set(0)
-				self.smoker_var_arr[1].set(0)
 
-			if res[23] == 0:
-				self.alcohol_var_arr[0].set(0)
-				self.alcohol_var_arr[1].set(1)
-			elif res[23] == 1:
-				self.alcohol_var_arr[0].set(1)
-				self.alcohol_var_arr[1].set(0)
-			else:
-				self.alcohol_var_arr[0].set(0)
-				self.alcohol_var_arr[1].set(0)
+			if res[23] is not None:
+				if res[23] == 0:
+					self.alcohol_var_arr[0].set(0)
+					self.alcohol_var_arr[1].set(1)
+				elif res[23] == 1:
+					self.alcohol_var_arr[0].set(1)
+					self.alcohol_var_arr[1].set(0)
+				else:
+					self.alcohol_var_arr[0].set(0)
+					self.alcohol_var_arr[1].set(0)
 
-			if res[24] == 0:
-				self.exercise_var_arr[0].set(0)
-				self.exercise_var_arr[1].set(1)
-			elif res[24] == 1:
-				self.exercise_var_arr[0].set(1)
-				self.exercise_var_arr[1].set(0)
-			else:
-				self.exercise_var_arr[0].set(0)
-				self.exercise_var_arr[1].set(0)
+			if res[24] is not None:
+				if res[24] == 0:
+					self.exercise_var_arr[0].set(0)
+					self.exercise_var_arr[1].set(1)
+				elif res[24] == 1:
+					self.exercise_var_arr[0].set(1)
+					self.exercise_var_arr[1].set(0)
+				else:
+					self.exercise_var_arr[0].set(0)
+					self.exercise_var_arr[1].set(0)
 
 
 		else:
@@ -2605,30 +2650,54 @@ class review_of_systems_form_2(tk.Frame):
 		res = cur.fetchone()
 
 		if res is not None:
-			self.medhist_illness.insert('1.0', res[0])
-			self.medhist_hospt.insert('1.0', res[1])
-			self.medhist_allergy.insert('1.0', res[2])
-			self.other_famhist.insert('1.0', res[3])
-			self.other_booster.insert('1.0', res[4])
-			self.other_combi.insert('1.0', res[5])
-			self.other_immunohist.insert('1.0', res[6])
-			self.pack_smoke.insert('1.0', res[7])
-			self.quit_cb_text.insert('1.0', res[8])
-			self.alco_freq.insert('1.0', res[9])
-			self.alco_dur.insert('1.0', res[10])
-			self.alco_type.insert('1.0', res[11])
-			self.exercise_type.insert('1.0', res[12])
-			self.g_type.insert('1.0', res[13])
-			self.p_type.insert('1.0', res[14])
-			self.menarche.insert('1.0', res[15])
-			self.menopause.insert('1.0', res[16])
-			self.coitus.insert('1.0', res[17])
-			self.born.insert('1.0', res[18])
-			self.via.insert('1.0', res[19])
-			self.to_a_g.insert('1.0', res[20])
-			self.bm_p.insert('1.0', res[21])
-			self.bm_year.insert('1.0', res[22])
-			self.mb_compli.insert('1.0', res[23])
+			if res[0] is not None:
+				self.medhist_illness.insert('1.0', res[0])
+			if res[1] is not None:
+				self.medhist_hospt.insert('1.0', res[1])
+			if res[2] is not None:
+				self.medhist_allergy.insert('1.0', res[2])
+			if res[3] is not None:
+				self.other_famhist.insert('1.0', res[3])
+			if res[4] is not None:
+				self.other_booster.insert('1.0', res[4])
+			if res[5] is not None:
+				self.other_combi.insert('1.0', res[5])
+			if res[6] is not None:
+				self.other_immunohist.insert('1.0', res[6])
+			if res[7] is not None:
+				self.pack_smoke.insert('1.0', res[7])
+			if res[8] is not None:
+				self.quit_cb_text.insert('1.0', res[8])
+			if res[9] is not None:
+				self.alco_freq.insert('1.0', res[9])
+			if res[10] is not None:
+				self.alco_dur.insert('1.0', res[10])
+			if res[11] is not None:
+				self.alco_type.insert('1.0', res[11])
+			if res[12] is not None:
+				self.exercise_type.insert('1.0', res[12])
+			if res[13] is not None:
+				self.g_type.insert('1.0', res[13])
+			if res[14] is not None:
+				self.p_type.insert('1.0', res[14])
+			if res[15] is not None:
+				self.menarche.insert('1.0', res[15])
+			if res[16] is not None:
+				self.menopause.insert('1.0', res[16])
+			if res[17] is not None:
+				self.coitus.insert('1.0', res[17])
+			if res[18] is not None:
+				self.born.insert('1.0', res[18])
+			if res[19] is not None:
+				self.via.insert('1.0', res[19])
+			if res[20] is not None:
+				self.to_a_g.insert('1.0', res[20])
+			if res[21] is not None:
+				self.bm_p.insert('1.0', res[21])
+			if res[22] is not None:
+				self.bm_year.insert('1.0', res[22])
+			if res[23] is not None:
+				self.mb_compli.insert('1.0', res[23])
 
 			for i in range(len(self.famhist_cb)):
 				self.famhist_cb[i].config(state = "disabled")
@@ -2796,10 +2865,10 @@ class physical_examination_form(tk.Frame):
 		self.hr.place(x=175, y=y_value)
 
 		bp_label = tk.Label(form_frame, text="BP:", font=self.label_font, fg="#636363")
-		bp_label.place(x=225, y=y_value)
+		bp_label.place(x=220, y=y_value)
 
-		self.bp = tk.Text(form_frame, height = 1, width = 4, wrap="word")
-		self.bp.place(x=250, y=y_value)
+		self.bp = tk.Text(form_frame, height = 1, width = 6, wrap="word")
+		self.bp.place(x=245, y=y_value)
 
 		rr_label = tk.Label(form_frame, text="RR:", font=self.label_font, fg="#636363")
 		rr_label.place(x=300, y=y_value)
@@ -4045,12 +4114,18 @@ class assessment_table(tk.Frame):
 		res = cur.fetchone()
 
 		if res is not None:
-			self.drugs.insert('1.0', res[0])
-			self.diet.insert('1.0', res[1])
-			self.lifestyle.insert('1.0', res[2])
-			self.exer.insert('1.0', res[3])
-			self.referral.insert('1.0', res[4])
-			self.follow_up.insert('1.0', res[5])
+			if res[0] is not None:
+				self.drugs.insert('1.0', res[0])
+			if res[1] is not None:
+				self.diet.insert('1.0', res[1])
+			if res[2] is not None:
+				self.lifestyle.insert('1.0', res[2])
+			if res[3] is not None:
+				self.exer.insert('1.0', res[3])
+			if res[4] is not None:
+				self.referral.insert('1.0', res[4])
+			if res[5] is not None:
+				self.follow_up.insert('1.0', res[5])
 			self.drugs.config(state="disabled")
 			self.diet.config(state="disabled")
 			self.lifestyle.config(state="disabled")
@@ -4088,7 +4163,8 @@ class assessment_table(tk.Frame):
 
 		if res is not None:
 			for i in range(3):
-				self.strat_var[i].set(res[i])
+				if res[i] is not None:
+					self.strat_var[i].set(res[i])
 		else:
 			for i in range(3):
 				self.strat_var[i].set(0)
@@ -4146,6 +4222,7 @@ class family_apgar_form(tk.Frame):
 		self.avg_vote = []
 		self.vote_1 = 0
 		self.vote_2 = 0
+		self.avg_value = 0
 
 		for i in range(0, len(apgar_questions), 2):
 			cLabelFrame = tk.Frame(form_frame)
@@ -4221,16 +4298,22 @@ class family_apgar_form(tk.Frame):
 		tk.Label(form_frame, text="*Score: 0-hardly ever (halos hindi), 1-some of the time (minsan), 2-almost always (palagi)", font=self.label_font, fg="#636363").place(x=110, y=y_value+ 10)
 		tk.Label(form_frame, text="*Interpretation: 0-3 severely dysfunctional, 4-6 moderately dysfunctional, 7-10 highly functional", font=self.label_font, fg="#636363").place(x=110, y=y_value + 30)
 
+		self.sub_bttn = tk.Button(form_frame, text="Submit", command=lambda: self.submit(), height = 1, width = 12, bd = 0, bg = "#183873", fg = "#ffffff")
+		self.sub_bttn.place(x=660, y=y_value + 10)
+
 		self.res_bttn = tk.Button(form_frame, text="Show Results", command=lambda: controller.show_frame("family_apgar_form_res"), height = 1, width = 12, bd = 0, bg = "#183873", fg = "#ffffff")
-		self.res_bttn.place(x=820, y=y_value+ 10)
+		self.res_bttn.place(x=820, y=y_value + 10)
+		self.res_bttn.config(state = "disabled")
 
 	def load_data(self):
 		cur.execute(("SELECT fam_1_apgar_score, fam_2_apgar_score, avg_apgar_score FROM patientfamassessment WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 		if res is None:
 			self.res_bttn.config(state = "disabled")
+			self.sub_bttn.config(state = "normal")
 		else:
 			self.res_bttn.config(state = "normal")
+			self.sub_bttn.config(state = "disabled")
 
 		for i in range(5):
 			self.apgar_var[i][0].set(0)
@@ -4309,18 +4392,18 @@ class family_apgar_form(tk.Frame):
 		for i in range(5):
 			avg_value = (self.vote_1_arr[i] + self.vote_2_arr[i]) / 2
 			self.average[i]['text'] = str(avg_value)
-			self.avg_vote[i] = avg_value
+			self.avg_vote[i] = self.avg_value
 
-		avg_value = 0
+		self.avg_value = 0
 		for i in range(len(self.avg_vote)):
-			avg_value = avg_value + self.avg_vote[i]
+			self.avg_value = self.avg_value + self.avg_vote[i]
 
-		if avg_value <= 3:
-			self.overall_avg_txt['text'] = str(avg_value) +" - Severely dysfunctional" 
-		elif avg_value <= 6:
-			self.overall_avg_txt['text'] = str(avg_value) + " - Moderately dysfunctional" 
+		if self.avg_value <= 3:
+			self.overall_avg_txt['text'] = str(self.avg_value) +" - Severely dysfunctional" 
+		elif self.avg_value <= 6:
+			self.overall_avg_txt['text'] = str(self.avg_value) + " - Moderately dysfunctional" 
 		else:
-			self.overall_avg_txt['text'] = str(avg_value) + " - Highly functional"
+			self.overall_avg_txt['text'] = str(self.avg_value) + " - Highly functional"
 
 
 		if self.vote_1 <= 3:
@@ -4337,14 +4420,19 @@ class family_apgar_form(tk.Frame):
 		else:
 			self.overall_f2_txt['text'] = str(self.vote_2) + " - Highly functional"
 
+
+	def submit(self):
 		cur.execute(("SELECT fam_1_apgar_score, fam_2_apgar_score, avg_apgar_score FROM patientfamassessment WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 		if res is None:
-			cur.execute(("INSERT INTO patientfamassessment (fam_1_apgar_score, fam_2_apgar_score, avg_apgar_score, patient_id) VALUES (%s, %s, %s, %s)"), (int(self.vote_1), int(self.vote_2), int(avg_value), self.controller.patient_id.get()))
+			cur.execute(("INSERT INTO patientfamassessment (fam_1_apgar_score, fam_2_apgar_score, avg_apgar_score, patient_id) VALUES (%s, %s, %s, %s)"), (int(self.vote_1), int(self.vote_2), int(self.avg_value), self.controller.patient_id.get()))
 			mydb.commit()
 		else:
-			cur.execute(("UPDATE patientfamassessment SET fam_1_apgar_score = %s, fam_2_apgar_score = %s, avg_apgar_score = %s WHERE patient_id = %s"), (int(self.vote_1), int(self.vote_2), int(avg_value), self.controller.patient_id.get()))
+			cur.execute(("UPDATE patientfamassessment SET fam_1_apgar_score = %s, fam_2_apgar_score = %s, avg_apgar_score = %s WHERE patient_id = %s"), (int(self.vote_1), int(self.vote_2), int(self.avg_value), self.controller.patient_id.get()))
 			mydb.commit()
+
+		self.res_bttn.config(state = "normal")
+		self.sub_bttn.config(state = "disabled")
 
 class family_apgar_form_res(tk.Frame):
 
@@ -4398,26 +4486,29 @@ class family_apgar_form_res(tk.Frame):
 		res = cur.fetchone()
 
 		if res is not None:
-			if int(res[0]) <= 3:
-				self.fam_num_1_score['text'] = str(res[0]) +" - Severely dysfunctional" 
-			elif int(res[0]) <= 6:
-				self.fam_num_1_score['text'] = str(res[0]) + " - Moderately dysfunctional" 
-			else:
-				self.fam_num_1_score['text'] = str(res[0]) + " - Highly functional"
+			if res[0] is not None:
+				if int(res[0]) <= 3:
+					self.fam_num_1_score['text'] = str(res[0]) +" - Severely dysfunctional" 
+				elif int(res[0]) <= 6:
+					self.fam_num_1_score['text'] = str(res[0]) + " - Moderately dysfunctional" 
+				else:
+					self.fam_num_1_score['text'] = str(res[0]) + " - Highly functional"
 
-			if int(res[1]) <= 3:
-				self.fam_num_2_score['text']  = str(res[1]) +" - Severely dysfunctional" 
-			elif int(res[1]) <= 6:
-				self.fam_num_2_score['text']  = str(res[1]) + " - Moderately dysfunctional" 
-			else:
-				self.fam_num_2_score['text']  = str(res[1]) + " - Highly functional"
+			if res[1] is not None:
+				if int(res[1]) <= 3:
+					self.fam_num_2_score['text']  = str(res[1]) +" - Severely dysfunctional" 
+				elif int(res[1]) <= 6:
+					self.fam_num_2_score['text']  = str(res[1]) + " - Moderately dysfunctional" 
+				else:
+					self.fam_num_2_score['text']  = str(res[1]) + " - Highly functional"
 
-			if int(res[2]) <= 3:
-				self.average_score['text'] = str(res[2]) +" - Severely dysfunctional" 
-			elif int(res[2]) <= 6:
-				self.average_score['text'] = str(res[2]) + " - Moderately dysfunctional" 
-			else:
-				self.average_score['text'] = str(res[2]) + " - Highly functional"	
+			if res[2] is not None:
+				if int(res[2]) <= 3:
+					self.average_score['text'] = str(res[2]) +" - Severely dysfunctional" 
+				elif int(res[2]) <= 6:
+					self.average_score['text'] = str(res[2]) + " - Moderately dysfunctional" 
+				else:
+					self.average_score['text'] = str(res[2]) + " - Highly functional"	
 		else:
 			self.fam_num_1_score['text'] = ""
 			self.fam_num_2_score['text'] = ""
@@ -4463,6 +4554,7 @@ class followup_patient_form(tk.Frame):
 		f_reasons_label = tk.Label(form_frame, text="Reasons for Follow-up: ", font=self.label_font_2)
 		f_reasons_label.place(x=90, y=110)
 
+		self.reason = 0
 		self.r_var = []
 		self.r_cb_arr = []
 		self.r_var.append(tk.IntVar(self))
@@ -4507,22 +4599,26 @@ class followup_patient_form(tk.Frame):
 		if i == 0:
 			if cb_var_arr[i].get() == 1:
 				cb_arr[i+1].config(state="disabled")
+				self.reason = 0
 			else:
 				cb_arr[i+1].config(state="normal")
+				self.reason = 2
 		else:
 			if cb_var_arr[i].get() == 1:
 				cb_arr[i-1].config(state="disabled")
+				self.reason = 1
 			else:
 				cb_arr[i-1].config(state="normal")
+				self.reason = 2
 
 	def add_details(self):
 		cur.execute(("SELECT followup_date FROM patientfollowup WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 		if res is None:
-			cur.execute(("INSERT INTO patientfollowup (followup_date, reason_1, reason_2, followup_s, followup_med, patient_id) VALUES (%s, %s, %s, %s, %s, %s)"), (self.f_date_input.get_date().strftime('%Y-%m-%d'), self.r_var[0].get(), self.r_var[1].get(), self.f_s.get("1.0",'end-1c'), self.f_medication.get("1.0",'end-1c'), self.controller.patient_id.get()))
+			cur.execute(("INSERT INTO patientfollowup (followup_date, reason, followup_s, followup_med, patient_id) VALUES (%s, %s, %s, %s, %s)"), (self.f_date_input.get_date().strftime('%Y-%m-%d'), self.reason, self.f_s.get("1.0",'end-1c'), self.f_medication.get("1.0",'end-1c'), self.controller.patient_id.get()))
 			mydb.commit()
 		else:
-			cur.execute(("UPDATE patientfollowup SET followup_date = %s, reason_1 = %s, reason_2 = %s, followup_s = %s, followup_med = %s WHERE patient_id = %s"), (self.f_date_input.get_date().strftime('%Y-%m-%d'), self.r_var[0].get(), self.r_var[1].get(), self.f_s.get("1.0",'end-1c'), self.f_medication.get("1.0",'end-1c'), self.controller.patient_id.get()))
+			cur.execute(("UPDATE patientfollowup SET followup_date = %s, reason = %s, followup_s = %s, followup_med = %s WHERE patient_id = %s"), (self.f_date_input.get_date().strftime('%Y-%m-%d'), self.reason, self.f_s.get("1.0",'end-1c'), self.f_medication.get("1.0",'end-1c'), self.controller.patient_id.get()))
 			mydb.commit()
 
 		self.f_s.delete('1.0', 'end')
@@ -4539,47 +4635,46 @@ class followup_patient_form(tk.Frame):
 			self.p_name['text'] = ""
 			self.p_gender['text'] = ""
 
-		cur.execute(("SELECT followup_date, reason_1, reason_2, followup_s, followup_med FROM patientfollowup WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-		res = cur.fetchone()
-
+		self.f_date_input.set_date(dt.datetime.today())
+		for i in range(2):
+			self.r_var[i].set(0)
+		self.reason = 2
 		self.f_s.delete('1.0', 'end')
 		self.f_medication.delete('1.0', 'end')
 
-		if res is not None:
-			self.f_date_input.set_date(res[0])
-			if res[1] == 0:
-				self.r_var[0].set(0)
-				self.r_var[1].set(1)
-			elif res[1] == 1:
-				self.r_var[0].set(1)
-				self.r_var[1].set(0)
-			else:
-				self.r_var[0].set(0)
-				self.r_var[1].set(0)
+		# cur.execute(("SELECT followup_date, reason, followup_s, followup_med FROM patientfollowup WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+		# res = cur.fetchone()
 
-			if res[2] == 0:
-				self.r_var[0].set(0)
-				self.r_var[1].set(1)
-			elif res[1] == 1:
-				self.r_var[0].set(1)
-				self.r_var[1].set(0)
-			else:
-				self.r_var[0].set(0)
-				self.r_var[1].set(0)
+		# self.f_s.delete('1.0', 'end')
+		# self.f_medication.delete('1.0', 'end')
 
-			self.f_s.insert('1.0', res[3])
-			self.f_medication.insert('1.0', res[4])
-			self.f_s.config(state = "disabled")
-			self.f_medication.config(state = "disabled")
+		# if res is not None:
+		# 	self.f_date_input.set_date(res[0])
+		# 	if res[1] == 0:
+		# 		self.r_var[0].set(0)
+		# 		self.r_var[1].set(1)
+		# 	elif res[1] == 1:
+		# 		self.r_var[0].set(1)
+		# 		self.r_var[1].set(0)
+		# 	else:
+		# 		self.r_var[0].set(0)
+		# 		self.r_var[1].set(0)
+		# 	if res[2] is not None:
+		# 		self.f_s.insert('1.0', res[2])
+		# 		self.f_s.config(state = "disabled")
+		# 	if res[3] is not None:
+		# 		self.f_medication.insert('1.0', res[3])
+		# 		self.f_medication.config(state = "disabled")
 
-		else:
-			self.f_date_input.set_date(dt.datetime.today())
-			for i in range(2):
-				self.r_var[i].set(0)
-			self.f_s.delete('1.0', 'end')
-			self.f_medication.delete('1.0', 'end')
-			self.f_s.config(state = "normal")
-			self.f_medication.config(state = "normal")
+		# else:
+		# 	self.f_date_input.set_date(dt.datetime.today())
+		# 	for i in range(2):
+		# 		self.r_var[i].set(0)
+		# 	self.reason = 2
+		# 	self.f_s.delete('1.0', 'end')
+		# 	self.f_medication.delete('1.0', 'end')
+		# 	self.f_s.config(state = "normal")
+		# 	self.f_medication.config(state = "normal")
 
 class followup_patient_form_2(tk.Frame):
 
@@ -4599,6 +4694,8 @@ class followup_patient_form_2(tk.Frame):
 
 		y_value = 25
 
+		self.followup_date = self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')
+
 		pe_label = tk.Label(form_frame, text="O:", font=self.label_font_2, fg="#636363")
 		pe_label.place(x=25, y=y_value)
 
@@ -4609,10 +4706,10 @@ class followup_patient_form_2(tk.Frame):
 		self.hr.place(x=175, y=y_value)
 
 		bp_label = tk.Label(form_frame, text="BP:", font=self.label_font, fg="#636363")
-		bp_label.place(x=225, y=y_value)
+		bp_label.place(x=220, y=y_value)
 
-		self.bp = tk.Text(form_frame, height = 1, width = 4, wrap="word")
-		self.bp.place(x=250, y=y_value)
+		self.bp = tk.Text(form_frame, height = 1, width = 6, wrap="word")
+		self.bp.place(x=245, y=y_value)
 
 		rr_label = tk.Label(form_frame, text="RR:", font=self.label_font, fg="#636363")
 		rr_label.place(x=300, y=y_value)
@@ -4941,17 +5038,17 @@ class followup_patient_form_2(tk.Frame):
 		cur.execute(("SELECT followup_date FROM patientfollowup WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 		if res is None:
-			sql = "INSERT INTO patientfollowup (hr, bp, rr, temp, weight, patient_id) VALUES (%s, %s, %s, %s, %s, %s)"
-			val = (self.hr.get("1.0",'end-1c'),self.bp.get("1.0",'end-1c'), self.rr.get("1.0",'end-1c'), self.temp.get("1.0",'end-1c'), self.weight.get("1.0",'end-1c'), self.controller.patient_id.get())
+			sql = "INSERT INTO patientfollowup (followup_date, hr, bp, rr, temp, weight, patient_id) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+			val = (self.followup_date, self.hr.get("1.0",'end-1c'),self.bp.get("1.0",'end-1c'), self.rr.get("1.0",'end-1c'), self.temp.get("1.0",'end-1c'), self.weight.get("1.0",'end-1c'), self.controller.patient_id.get())
 			cur.execute(sql, val)
 			mydb.commit()
 		else:
 			sql = "UPDATE patientfollowup SET hr = %s, bp = %s, rr = %s, temp = %s, weight = %s WHERE patient_id = %s and followup_date = %s"
-			val = (self.hr.get("1.0",'end-1c'),self.bp.get("1.0",'end-1c'), self.rr.get("1.0",'end-1c'), self.temp.get("1.0",'end-1c'), self.weight.get("1.0",'end-1c'), self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d'))
+			val = (self.hr.get("1.0",'end-1c'),self.bp.get("1.0",'end-1c'), self.rr.get("1.0",'end-1c'), self.temp.get("1.0",'end-1c'), self.weight.get("1.0",'end-1c'), self.controller.patient_id.get(), self.followup_date)
 			cur.execute(sql, val)
 			mydb.commit()
 
-		cur.execute(("SELECT ge_1 FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+		cur.execute(("SELECT ge_1 FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 		res = cur.fetchone()
 		if res is None:
 			sql = "INSERT INTO patientfollowup (ge_1, patient_id) VALUES (%s, %s)"
@@ -4960,30 +5057,30 @@ class followup_patient_form_2(tk.Frame):
 			mydb.commit()
 		else:
 			sql = "UPDATE patientfollowup SET ge_1 = %s WHERE patient_id = %s and followup_date = %s"
-			val = (self.listvar[0], self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d'))
+			val = (self.listvar[0], self.controller.patient_id.get(), self.followup_date)
 			cur.execute(sql, val)
 			mydb.commit()
 
 		if self.ge_var[1].get() == 1:
-			cur.execute(("SELECT ge_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+			cur.execute(("SELECT ge_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 			res = cur.fetchone()
 			if res is None:
 				cur.execute(("INSERT INTO patientfollowup (ge_others, patient_id) VALUES (%s, %s)"), (self.ge_find.get("1.0",'end-1c'), self.controller.patient_id.get()))
 				mydb.commit()
 			else:
-				cur.execute(("UPDATE patientfollowup SET ge_others = %s WHERE patient_id = %s and followup_date = %s"), (self.ge_find.get("1.0",'end-1c'), self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+				cur.execute(("UPDATE patientfollowup SET ge_others = %s WHERE patient_id = %s and followup_date = %s"), (self.ge_find.get("1.0",'end-1c'), self.controller.patient_id.get(), self.followup_date))
 				mydb.commit()
 		else:
-			cur.execute(("SELECT ge_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+			cur.execute(("SELECT ge_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 			res = cur.fetchone()
 			if res is None:
 				cur.execute(("INSERT INTO patientfollowup (ge_others, patient_id) VALUES (%s, %s)"), (" ", self.controller.patient_id.get()))
 				mydb.commit()
 			else:
-				cur.execute(("UPDATE patientfollowup SET ge_others = %s WHERE patient_id = %s and followup_date = %s"), (" ", self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+				cur.execute(("UPDATE patientfollowup SET ge_others = %s WHERE patient_id = %s and followup_date = %s"), (" ", self.controller.patient_id.get(), self.followup_date))
 				mydb.commit()
 
-		cur.execute(("SELECT skin_1 FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+		cur.execute(("SELECT skin_1 FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 		res = cur.fetchone()
 		if res is None:
 			sql = "INSERT INTO patientfollowup (skin_1 patient_id) VALUES (%s, %s)"
@@ -4992,30 +5089,30 @@ class followup_patient_form_2(tk.Frame):
 			mydb.commit()
 		else:
 			sql = "UPDATE patientfollowup SET skin_1 = %s WHERE patient_id = %s and followup_date = %s"
-			val = (self.listvar[1], self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d'))
+			val = (self.listvar[1], self.controller.patient_id.get(), self.followup_date)
 			cur.execute(sql, val)
 			mydb.commit()
 
 		if self.sk_var[1].get() == 1:
-			cur.execute(("SELECT skin_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+			cur.execute(("SELECT skin_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 			res = cur.fetchone()
 			if res is None:
 				cur.execute(("INSERT INTO patientfollowup (skin_others, patient_id) VALUES (%s, %s)"), (self.sk_find.get("1.0",'end-1c'), self.controller.patient_id.get()))
 				mydb.commit()
 			else:
-				cur.execute(("UPDATE patientfollowup SET skin_others = %s WHERE patient_id = %s and followup_date = %s"), (self.sk_find.get("1.0",'end-1c'), self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+				cur.execute(("UPDATE patientfollowup SET skin_others = %s WHERE patient_id = %s and followup_date = %s"), (self.sk_find.get("1.0",'end-1c'), self.controller.patient_id.get(), self.followup_date))
 				mydb.commit()
 		else:
-			cur.execute(("SELECT skin_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+			cur.execute(("SELECT skin_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 			res = cur.fetchone()
 			if res is None:
 				cur.execute(("INSERT INTO patientfollowup (skin_others, patient_id) VALUES (%s, %s)"), (" ", self.controller.patient_id.get()))
 				mydb.commit()
 			else:
-				cur.execute(("UPDATE patientfollowup SET skin_others = %s WHERE patient_id = %s and followup_date = %s"), (" ", self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+				cur.execute(("UPDATE patientfollowup SET skin_others = %s WHERE patient_id = %s and followup_date = %s"), (" ", self.controller.patient_id.get(), self.followup_date))
 				mydb.commit()
 
-		cur.execute(("SELECT musculo_1 FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+		cur.execute(("SELECT musculo_1 FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 		res = cur.fetchone()
 		if res is None:
 			sql = "INSERT INTO patientfollowup (musculo_1, patient_id) VALUES (%s, %s)"
@@ -5024,7 +5121,7 @@ class followup_patient_form_2(tk.Frame):
 			mydb.commit()
 		else:
 			sql = "UPDATE patientfollowup SET musculo_1 = %s WHERE patient_id = %s and followup_date = %s"
-			val = (self.listvar[2], self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d'))
+			val = (self.listvar[2], self.controller.patient_id.get(), self.followup_date)
 			cur.execute(sql, val)
 			mydb.commit()
 
@@ -5035,19 +5132,19 @@ class followup_patient_form_2(tk.Frame):
 				cur.execute(("INSERT INTO patientfollowup (musculo_others, patient_id) VALUES (%s, %s)"), (self.mu_find.get("1.0",'end-1c'), self.controller.patient_id.get()))
 				mydb.commit()
 			else:
-				cur.execute(("UPDATE patientfollowup SET musculo_others = %s WHERE patient_id = %s and followup_date = %s"), (self.mu_find.get("1.0",'end-1c'), self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+				cur.execute(("UPDATE patientfollowup SET musculo_others = %s WHERE patient_id = %s and followup_date = %s"), (self.mu_find.get("1.0",'end-1c'), self.controller.patient_id.get(), self.followup_date))
 				mydb.commit()
 		else:
-			cur.execute(("SELECT musculo_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+			cur.execute(("SELECT musculo_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 			res = cur.fetchone()
 			if res is None:
 				cur.execute(("INSERT INTO patientfollowup (musculo_others, patient_id) VALUES (%s, %s)"), (" ", self.controller.patient_id.get()))
 				mydb.commit()
 			else:
-				cur.execute(("UPDATE patientfollowup SET musculo_others = %s WHERE patient_id = %s and followup_date = %s"), (" ", self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+				cur.execute(("UPDATE patientfollowup SET musculo_others = %s WHERE patient_id = %s and followup_date = %s"), (" ", self.controller.patient_id.get(), self.followup_date))
 				mydb.commit()
 
-		cur.execute(("SELECT heent_1 FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+		cur.execute(("SELECT heent_1 FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 		res = cur.fetchone()
 		if res is None:
 			sql = "INSERT INTO patientfollowup (heent_1, patient_id) VALUES (%s, %s)"
@@ -5056,30 +5153,30 @@ class followup_patient_form_2(tk.Frame):
 			mydb.commit()
 		else:
 			sql = "UPDATE patientfollowup SET heent_1 = %s WHERE patient_id = %s and followup_date = %s"
-			val = (self.listvar[3], self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d'))
+			val = (self.listvar[3], self.controller.patient_id.get(), self.followup_date)
 			cur.execute(sql, val)
 			mydb.commit()
 
 		if self.he_var[1].get() == 1:
-			cur.execute(("SELECT heent_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+			cur.execute(("SELECT heent_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 			res = cur.fetchone()
 			if res is None:
 				cur.execute(("INSERT INTO patientfollowup (heent_others, patient_id) VALUES (%s, %s)"), (self.he_find.get("1.0",'end-1c'), self.controller.patient_id.get()))
 				mydb.commit()
 			else:
-				cur.execute(("UPDATE patientfollowup SET heent_others = %s WHERE patient_id = %s and followup_date = %s"), (self.he_find.get("1.0",'end-1c'), self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+				cur.execute(("UPDATE patientfollowup SET heent_others = %s WHERE patient_id = %s and followup_date = %s"), (self.he_find.get("1.0",'end-1c'), self.controller.patient_id.get(), self.followup_date))
 				mydb.commit()
 		else:
-			cur.execute(("SELECT heent_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+			cur.execute(("SELECT heent_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 			res = cur.fetchone()
 			if res is None:
 				cur.execute(("INSERT INTO patientfollowup (heent_others, patient_id) VALUES (%s, %s)"), (" ", self.controller.patient_id.get()))
 				mydb.commit()
 			else:
-				cur.execute(("UPDATE patientfollowup SET heent_others = %s WHERE patient_id = %s and followup_date = %s"), (" ", self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+				cur.execute(("UPDATE patientfollowup SET heent_others = %s WHERE patient_id = %s and followup_date = %s"), (" ", self.controller.patient_id.get(), self.followup_date))
 				mydb.commit()
 
-		cur.execute(("SELECT respi_1 FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+		cur.execute(("SELECT respi_1 FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 		res = cur.fetchone()
 		if res is None:
 			sql = "INSERT INTO patientfollowup (respi_1, patient_id) VALUES (%s, %s)"
@@ -5088,30 +5185,30 @@ class followup_patient_form_2(tk.Frame):
 			mydb.commit()
 		else:
 			sql = "UPDATE patientfollowup SET respi_1 = %s WHERE patient_id = %s and followup_date = %s"
-			val = (self.listvar[4], self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d'))
+			val = (self.listvar[4], self.controller.patient_id.get(), self.followup_date)
 			cur.execute(sql, val)
 			mydb.commit()
 
 		if self.re_var[1].get() == 1:
-			cur.execute(("SELECT respi_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+			cur.execute(("SELECT respi_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 			res = cur.fetchone()
 			if res is None:
 				cur.execute(("INSERT INTO patientfollowup (respi_others, patient_id) VALUES (%s, %s)"), (self.re_find.get("1.0",'end-1c'), self.controller.patient_id.get()))
 				mydb.commit()
 			else:
-				cur.execute(("UPDATE patientfollowup SET respi_others = %s WHERE patient_id = %s and followup_date = %s"), (self.re_find.get("1.0",'end-1c'), self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+				cur.execute(("UPDATE patientfollowup SET respi_others = %s WHERE patient_id = %s and followup_date = %s"), (self.re_find.get("1.0",'end-1c'), self.controller.patient_id.get(), self.followup_date))
 				mydb.commit()
 		else:
-			cur.execute(("SELECT respi_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+			cur.execute(("SELECT respi_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 			res = cur.fetchone()
 			if res is None:
 				cur.execute(("INSERT INTO patientfollowup (respi_others, patient_id) VALUES (%s, %s)"), (" ", self.controller.patient_id.get()))
 				mydb.commit()
 			else:
-				cur.execute(("UPDATE patientfollowup SET respi_others = %s WHERE patient_id = %s and followup_date = %s"), (" ", self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+				cur.execute(("UPDATE patientfollowup SET respi_others = %s WHERE patient_id = %s and followup_date = %s"), (" ", self.controller.patient_id.get(), self.followup_date))
 				mydb.commit()
 
-		cur.execute(("SELECT cardio_1 FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+		cur.execute(("SELECT cardio_1 FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 		res = cur.fetchone()
 		if res is None:
 			sql = "INSERT INTO patientfollowup (cardio_1, patient_id) VALUES (%s, %s)"
@@ -5120,30 +5217,30 @@ class followup_patient_form_2(tk.Frame):
 			mydb.commit()
 		else:
 			sql = "UPDATE patientfollowup SET cardio_1 = %s WHERE patient_id = %s and followup_date = %s"
-			val = (self.listvar[5], self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d'))
+			val = (self.listvar[5], self.controller.patient_id.get(), self.followup_date)
 			cur.execute(sql, val)
 			mydb.commit()
 
 		if self.ca_var[1].get() == 1:
-			cur.execute(("SELECT cardio_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+			cur.execute(("SELECT cardio_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 			res = cur.fetchone()
 			if res is None:
 				cur.execute(("INSERT INTO patientfollowup (cardio_others, patient_id) VALUES (%s, %s)"), (self.ca_find.get("1.0",'end-1c'), self.controller.patient_id.get()))
 				mydb.commit()
 			else:
-				cur.execute(("UPDATE patientfollowup SET cardio_others = %s WHERE patient_id = %s and followup_date = %s"), (self.ca_find.get("1.0",'end-1c'), self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+				cur.execute(("UPDATE patientfollowup SET cardio_others = %s WHERE patient_id = %s and followup_date = %s"), (self.ca_find.get("1.0",'end-1c'), self.controller.patient_id.get(), self.followup_date))
 				mydb.commit()
 		else:
-			cur.execute(("SELECT cardio_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+			cur.execute(("SELECT cardio_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 			res = cur.fetchone()
 			if res is None:
 				cur.execute(("INSERT INTO patientfollowup (cardio_others, patient_id) VALUES (%s, %s)"), (" ", self.controller.patient_id.get()))
 				mydb.commit()
 			else:
-				cur.execute(("UPDATE patientfollowup SET cardio_others = %s WHERE patient_id = %s and followup_date = %s"), (" ", self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+				cur.execute(("UPDATE patientfollowup SET cardio_others = %s WHERE patient_id = %s and followup_date = %s"), (" ", self.controller.patient_id.get(), self.followup_date))
 				mydb.commit()
 
-		cur.execute(("SELECT gastro_1 FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+		cur.execute(("SELECT gastro_1 FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 		res = cur.fetchone()
 		if res is None:
 			sql = "INSERT INTO patientfollowup (gastro_1, patient_id) VALUES (%s, %s)"
@@ -5152,30 +5249,30 @@ class followup_patient_form_2(tk.Frame):
 			mydb.commit()
 		else:
 			sql = "UPDATE patientfollowup SET gastro_1 = %s WHERE patient_id = %s and followup_date = %s"
-			val = (self.listvar[6], self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d'))
+			val = (self.listvar[6], self.controller.patient_id.get(), self.followup_date)
 			cur.execute(sql, val)
 			mydb.commit()
 
 		if self.ga_var[1].get() == 1:
-			cur.execute(("SELECT gastro_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+			cur.execute(("SELECT gastro_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 			res = cur.fetchone()
 			if res is None:
 				cur.execute(("INSERT INTO patientfollowup (gastro_others, patient_id) VALUES (%s, %s)"), (self.ga_find.get("1.0",'end-1c'), self.controller.patient_id.get()))
 				mydb.commit()
 			else:
-				cur.execute(("UPDATE patientfollowup SET gastro_others = %s WHERE patient_id = %s and followup_date = %s"), (self.ga_find.get("1.0",'end-1c'), self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+				cur.execute(("UPDATE patientfollowup SET gastro_others = %s WHERE patient_id = %s and followup_date = %s"), (self.ga_find.get("1.0",'end-1c'), self.controller.patient_id.get(), self.followup_date))
 				mydb.commit()
 		else:
-			cur.execute(("SELECT gastro_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+			cur.execute(("SELECT gastro_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 			res = cur.fetchone()
 			if res is None:
 				cur.execute(("INSERT INTO patientfollowup (gastro_others, patient_id) VALUES (%s, %s)"), (" ", self.controller.patient_id.get()))
 				mydb.commit()
 			else:
-				cur.execute(("UPDATE patientfollowup SET gastro_others = %s WHERE patient_id = %s and followup_date = %s"), (" ", self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+				cur.execute(("UPDATE patientfollowup SET gastro_others = %s WHERE patient_id = %s and followup_date = %s"), (" ", self.controller.patient_id.get(), self.followup_date))
 				mydb.commit()
 
-		cur.execute(("SELECT genito_1 FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+		cur.execute(("SELECT genito_1 FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 		res = cur.fetchone()
 		if res is None:
 			sql = "INSERT INTO patientfollowup (genito_1, patient_id) VALUES (%s, %s)"
@@ -5184,30 +5281,30 @@ class followup_patient_form_2(tk.Frame):
 			mydb.commit()
 		else:
 			sql = "UPDATE patientfollowup SET genito_1 = %s WHERE patient_id = %s and followup_date = %s"
-			val = (self.listvar[7], self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d'))
+			val = (self.listvar[7], self.controller.patient_id.get(), self.followup_date)
 			cur.execute(sql, val)
 			mydb.commit()
 
 		if self.gn_var[1].get() == 1:
-			cur.execute(("SELECT genito_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+			cur.execute(("SELECT genito_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 			res = cur.fetchone()
 			if res is None:
 				cur.execute(("INSERT INTO patientfollowup (genito_others, patient_id) VALUES (%s, %s)"), (self.gn_find.get("1.0",'end-1c'), self.controller.patient_id.get()))
 				mydb.commit()
 			else:
-				cur.execute(("UPDATE patientfollowup SET genito_others = %s WHERE patient_id = %s and followup_date = %s"), (self.gn_find.get("1.0",'end-1c'), self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+				cur.execute(("UPDATE patientfollowup SET genito_others = %s WHERE patient_id = %s and followup_date = %s"), (self.gn_find.get("1.0",'end-1c'), self.controller.patient_id.get(), self.followup_date))
 				mydb.commit()
 		else:
-			cur.execute(("SELECT genito_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+			cur.execute(("SELECT genito_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 			res = cur.fetchone()
 			if res is None:
 				cur.execute(("INSERT INTO patientfollowup (genito_others, patient_id) VALUES (%s, %s)"), (" ", self.controller.patient_id.get()))
 				mydb.commit()
 			else:
-				cur.execute(("UPDATE patientfollowup SET genito_others = %s WHERE patient_id = %s and followup_date = %s"), (" ", self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+				cur.execute(("UPDATE patientfollowup SET genito_others = %s WHERE patient_id = %s and followup_date = %s"), (" ", self.controller.patient_id.get(), self.followup_date))
 				mydb.commit()
 
-		cur.execute(("SELECT ie_1 FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+		cur.execute(("SELECT ie_1 FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 		res = cur.fetchone()
 		if res is None:
 			sql = "INSERT INTO patientfollowup (ie_1, patient_id) VALUES (%s, %s)"
@@ -5216,30 +5313,30 @@ class followup_patient_form_2(tk.Frame):
 			mydb.commit()
 		else:
 			sql = "UPDATE patientfollowup SET ie_1 = %s WHERE patient_id = %s and followup_date = %s"
-			val = (self.listvar[8], self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d'))
+			val = (self.listvar[8], self.controller.patient_id.get(), self.followup_date)
 			cur.execute(sql, val)
 			mydb.commit()
 
 		if self.ie_var[1].get() == 1:
-			cur.execute(("SELECT ie_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+			cur.execute(("SELECT ie_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 			res = cur.fetchone()
 			if res is None:
 				cur.execute(("INSERT INTO patientfollowup (ie_others, patient_id) VALUES (%s, %s)"), (self.ie_find.get("1.0",'end-1c'), self.controller.patient_id.get()))
 				mydb.commit()
 			else:
-				cur.execute(("UPDATE patientfollowup SET ie_others = %s WHERE patient_id = %s and followup_date = %s"), (self.ie_find.get("1.0",'end-1c'), self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+				cur.execute(("UPDATE patientfollowup SET ie_others = %s WHERE patient_id = %s and followup_date = %s"), (self.ie_find.get("1.0",'end-1c'), self.controller.patient_id.get(), self.followup_date))
 				mydb.commit()
 		else:
-			cur.execute(("SELECT ie_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+			cur.execute(("SELECT ie_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 			res = cur.fetchone()
 			if res is None:
 				cur.execute(("INSERT INTO patientfollowup (ie_others, patient_id) VALUES (%s, %s)"), (" ", self.controller.patient_id.get()))
 				mydb.commit()
 			else:
-				cur.execute(("UPDATE patientfollowup SET ie_others = %s WHERE patient_id = %s and followup_date = %s"), (" ", self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+				cur.execute(("UPDATE patientfollowup SET ie_others = %s WHERE patient_id = %s and followup_date = %s"), (" ", self.controller.patient_id.get(), self.followup_date))
 				mydb.commit()
 
-		cur.execute(("SELECT dre_1 FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+		cur.execute(("SELECT dre_1 FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 		res = cur.fetchone()
 		if res is None:
 			sql = "INSERT INTO patientfollowup (dre_1, patient_id) VALUES (%s, %s)"
@@ -5248,30 +5345,30 @@ class followup_patient_form_2(tk.Frame):
 			mydb.commit()
 		else:
 			sql = "UPDATE patientfollowup SET dre_1 = %s WHERE patient_id = %s and followup_date = %s"
-			val = (self.listvar[9], self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d'))
+			val = (self.listvar[9], self.controller.patient_id.get(), self.followup_date)
 			cur.execute(sql, val)
 			mydb.commit()
 
 		if self.dre_var[1].get() == 1:
-			cur.execute(("SELECT dre_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+			cur.execute(("SELECT dre_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 			res = cur.fetchone()
 			if res is None:
 				cur.execute(("INSERT INTO patientfollowup (dre_others, patient_id) VALUES (%s, %s)"), (self.dre_find.get("1.0",'end-1c'), self.controller.patient_id.get()))
 				mydb.commit()
 			else:
-				cur.execute(("UPDATE patientfollowup SET dre_others = %s WHERE patient_id = %s and followup_date = %s"), (self.dre_find.get("1.0",'end-1c'), self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+				cur.execute(("UPDATE patientfollowup SET dre_others = %s WHERE patient_id = %s and followup_date = %s"), (self.dre_find.get("1.0",'end-1c'), self.controller.patient_id.get(), self.followup_date))
 				mydb.commit()
 		else:
-			cur.execute(("SELECT dre_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+			cur.execute(("SELECT dre_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 			res = cur.fetchone()
 			if res is None:
 				cur.execute(("INSERT INTO patientfollowup (dre_others, patient_id) VALUES (%s, %s)"), (" ", self.controller.patient_id.get()))
 				mydb.commit()
 			else:
-				cur.execute(("UPDATE patientfollowup SET dre_others = %s WHERE patient_id = %s and followup_date = %s"), (" ", self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+				cur.execute(("UPDATE patientfollowup SET dre_others = %s WHERE patient_id = %s and followup_date = %s"), (" ", self.controller.patient_id.get(), self.followup_date))
 				mydb.commit()
 
-		cur.execute(("SELECT neuro_1 FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+		cur.execute(("SELECT neuro_1 FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 		res = cur.fetchone()
 		if res is None:
 			sql = "INSERT INTO patientfollowup (neuro_1, patient_id) VALUES (%s, %s)"
@@ -5280,27 +5377,27 @@ class followup_patient_form_2(tk.Frame):
 			mydb.commit()
 		else:
 			sql = "UPDATE patientfollowup SET neuro_1 = %s WHERE patient_id = %s and followup_date = %s"
-			val = (self.listvar[10], self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d'))
+			val = (self.listvar[10], self.controller.patient_id.get(), self.followup_date)
 			cur.execute(sql, val)
 			mydb.commit()
 
 		if self.ne_var[1].get() == 1:
-			cur.execute(("SELECT neuro_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+			cur.execute(("SELECT neuro_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 			res = cur.fetchone()
 			if res is None:
 				cur.execute(("INSERT INTO patientfollowup (neuro_others, patient_id) VALUES (%s, %s)"), (self.ne_find.get("1.0",'end-1c'), self.controller.patient_id.get()))
 				mydb.commit()
 			else:
-				cur.execute(("UPDATE patientfollowup SET neuro_others = %s WHERE patient_id = %s and followup_date = %s"), (self.ne_find.get("1.0",'end-1c'), self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+				cur.execute(("UPDATE patientfollowup SET neuro_others = %s WHERE patient_id = %s and followup_date = %s"), (self.ne_find.get("1.0",'end-1c'), self.controller.patient_id.get(), self.followup_date))
 				mydb.commit()
 		else:
-			cur.execute(("SELECT neuro_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+			cur.execute(("SELECT neuro_others FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
 			res = cur.fetchone()
 			if res is None:
 				cur.execute(("INSERT INTO patientfollowup (neuro_others, patient_id) VALUES (%s, %s)"), (" ", self.controller.patient_id.get()))
 				mydb.commit()
 			else:
-				cur.execute(("UPDATE patientfollowup SET neuro_others = %s WHERE patient_id = %s and followup_date = %s"), (" ", self.controller.patient_id.get(), self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')))
+				cur.execute(("UPDATE patientfollowup SET neuro_others = %s WHERE patient_id = %s and followup_date = %s"), (" ", self.controller.patient_id.get(), self.followup_date))
 				mydb.commit()
 
 
@@ -5316,311 +5413,196 @@ class followup_patient_form_2(tk.Frame):
 		self.dre_find.delete('1.0', 'end') # clear the text field
 		self.ne_find.delete('1.0', 'end') # clear the text field
 
-	# def load_data(self):
-	# 	self.hr.delete('1.0', 'end')
-	# 	self.bp.delete('1.0', 'end')
-	# 	self.rr.delete('1.0', 'end')
-	# 	self.temp.delete('1.0', 'end')
-	# 	self.height.delete('1.0', 'end')
-	# 	self.bmi.delete('1.0', 'end')
-	# 	self.ibw.delete('1.0', 'end')
-	# 	self.hipcirc.delete('1.0', 'end')
-	# 	self.waistcirc.delete('1.0', 'end')
-	# 	self.headcirc.delete('1.0', 'end')
-	# 	self.abw.delete('1.0', 'end')
-		
-	# 	cur.execute(("SELECT hr, bp, rr, temp, weight FROM patientassessment WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-	# 	res = cur.fetchone()
-	# 	if res is not None:
-	# 		if res[0] is not None:
-	# 			self.hr.insert('1.0', res[0])
-	# 		if res[1] is not None:
-	# 			self.bp.insert('1.0', res[1])
-	# 		if res[2] is not None:
-	# 			self.rr.insert('1.0', res[2])
-	# 		if res[3] is not None:
-	# 			self.temp.insert('1.0', res[3])
-	# 		if res[4] is not None:
-	# 			self.height.insert('1.0', res[4])
-	# 		if res[5] is not None:
-	# 			self.bmi.insert('1.0', res[5])
-	# 		if res[6] is not None:
-	# 			self.ibw.insert('1.0', res[6])
-	# 		if res[7] is not None:
-	# 			self.hipcirc.insert('1.0', res[7])
-	# 		if res[8] is not None:
-	# 			self.waistcirc.insert('1.0', res[8])
-	# 		if res[9] is not None:
-	# 			self.headcirc.insert('1.0', res[9])
-	# 		if res[10] is not None:
-	# 			self.abw.insert('1.0', res[10])
+	def load_data(self):
+		self.followup_date = self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')
 
-	# 		self.hr.config(state="disabled")
-	# 		self.bp.config(state="disabled")
-	# 		self.rr.config(state="disabled")
-	# 		self.temp.config(state="disabled")
-	# 		self.height.config(state="disabled")
-	# 		self.bmi.config(state="disabled")
-	# 		self.ibw.config(state="disabled")
-	# 		self.hipcirc.config(state="disabled")
-	# 		self.waistcirc.config(state="disabled")
-	# 		self.headcirc.config(state="disabled")
-	# 		self.abw.config(state="disabled")
-	# 	else:
-	# 		self.hr.delete('1.0', 'end')
-	# 		self.bp.delete('1.0', 'end')
-	# 		self.rr.delete('1.0', 'end')
-	# 		self.temp.delete('1.0', 'end')
-	# 		self.height.delete('1.0', 'end')
-	# 		self.bmi.delete('1.0', 'end')
-	# 		self.ibw.delete('1.0', 'end')
-	# 		self.hipcirc.delete('1.0', 'end')
-	# 		self.waistcirc.delete('1.0', 'end')
-	# 		self.headcirc.delete('1.0', 'end')
-	# 		self.abw.delete('1.0', 'end')
+		self.hr.delete('1.0', 'end')
+		self.bp.delete('1.0', 'end')
+		self.rr.delete('1.0', 'end')
+		self.temp.delete('1.0', 'end')
+		self.weight.delete('1.0', 'end')
 
-	# 		self.hr.config(state="normal")
-	# 		self.bp.config(state="normal")
-	# 		self.rr.config(state="normal")
-	# 		self.temp.config(state="normal")
-	# 		self.height.config(state="normal")
-	# 		self.bmi.config(state="normal")
-	# 		self.ibw.config(state="normal")
-	# 		self.hipcirc.config(state="normal")
-	# 		self.waistcirc.config(state="normal")
-	# 		self.headcirc.config(state="normal")
-	# 		self.abw.config(state="normal")
+		for i in range(2):
+			self.ge_var[i].set(0)
+			self.sk_var[i].set(0)
+			self.mu_var[i].set(0)
+			self.he_var[i].set(0)
+			self.re_var[i].set(0)
+			self.ca_var[i].set(0)
+			self.ga_var[i].set(0)
+			self.gn_var[i].set(0)
+			self.ie_var[i].set(0)
+			self.dre_var[i].set(0)
+			self.ne_var[i].set(0)
 
-	# 	cur.execute(("SELECT ge_1, skin_1, musculo_1, heent_1, respi_1, cardio_1, gastro_1, genito_1, ie_1, dre_1, neuro_1 FROM patientassessment WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-	# 	res = cur.fetchone()
+		for i in range(11):
+			self.listvar[i] = 0
 
-	# 	if res is not None:
-	# 		if res[0] == 0:
-	# 			self.ge_var[0].set(1)
-	# 			self.ge_var[1].set(0)
-	# 		elif res[0] == 0:
-	# 			self.ge_var[0].set(0)
-	# 			self.ge_var[1].set(1)
-	# 		else:
-	# 			self.ge_var[0].set(0)
-	# 			self.ge_var[1].set(0)
+		self.ge_find.delete('1.0', 'end') # clear the text field
+		self.sk_find.delete('1.0', 'end') # clear the text field
+		self.mu_find.delete('1.0', 'end') # clear the text field
+		self.he_find.delete('1.0', 'end') # clear the text field
+		self.re_find.delete('1.0', 'end') # clear the text field
+		self.ca_find.delete('1.0', 'end') # clear the text field
+		self.ga_find.delete('1.0', 'end') # clear the text field
+		self.gn_find.delete('1.0', 'end') # clear the text field
+		self.ie_find.delete('1.0', 'end') # clear the text field
+		self.dre_find.delete('1.0', 'end') # clear the text field
+		self.ne_find.delete('1.0', 'end') # clear the text field
 
-	# 		if res[1] == 0:
-	# 			self.sk_var[0].set(1)
-	# 			self.sk_var[1].set(0)
-	# 		elif res[1] == 1:
-	# 			self.sk_var[0].set(0)
-	# 			self.sk_var[1].set(1)
-	# 		else:
-	# 			self.sk_var[0].set(0)
-	# 			self.sk_var[1].set(0)
+class followup_patient_form_res(tk.Frame):
 
-	# 		if res[2] == 0:
-	# 			self.mu_var[0].set(1)
-	# 			self.mu_var[1].set(0)
-	# 		elif res[2] == 1:
-	# 			self.mu_var[0].set(0)
-	# 			self.mu_var[1].set(1)
-	# 		else:
-	# 			self.mu_var[0].set(0)
-	# 			self.mu_var[1].set(0)
+	def __init__(self, parent, controller):
+		tk.Frame.__init__(self, parent)
+		self.controller = controller
+		menu_frame(self, self.controller, 3)
+		submenu_buttons_3(self, self.controller, 2)
 
-	# 		if res[3] == 0:
-	# 			self.he_var[0].set(1)
-	# 			self.he_var[1].set(0)
-	# 		elif res[3] == 1:
-	# 			self.he_var[0].set(0)
-	# 			self.he_var[1].set(1)
-	# 		else:
-	# 			self.he_var[0].set(0)
-	# 			self.he_var[1].set(0)
+		form_frame = tk.Frame(self, height = 720, width = 1000)
+		form_frame.pack(side="left")
 
-	# 		if res[4] == 0:
-	# 			self.re_var[0].set(1)
-	# 			self.re_var[1].set(0)
-	# 		elif res[4] == 1:
-	# 			self.re_var[0].set(0)
-	# 			self.re_var[1].set(1)
-	# 		else:
-	# 			self.re_var[0].set(0)
-	# 			self.re_var[1].set(0)
+		self.title_font = tkfont.Font(family='Times New Roman', size=10, weight="bold")
+		self.label_font = tkfont.Font(family='Helvetica', size = 8)
+		self.label_font_2 = tkfont.Font(family='Helvetica', size = 8, weight="bold")
+		self.notes_font = tkfont.Font(family='Helvetica', size = 8, slant="italic")
 
-	# 		if res[5] == 0:
-	# 			self.ca_var[0].set(1)
-	# 			self.ca_var[1].set(0)
-	# 		elif res[5] == 1:
-	# 			self.ca_var[0].set(0)
-	# 			self.ca_var[1].set(1)
-	# 		else:
-	# 			self.ca_var[0].set(0)
-	# 			self.ca_var[1].set(0)
+		self.tree = ttk.Treeview(form_frame, height = 16)
+		self.tree.heading("#0", text="Follow-up Records")
+		self.tree.column("#0", minwidth=150, width=850, stretch="no")
+		vsb = ttk.Scrollbar(orient="vertical", command=self.tree.yview)
+		self.tree.configure(yscrollcommand=vsb.set)
+		self.tree.place(x=65, y=25)
 
-	# 		if res[6] == 0:
-	# 			self.ga_var[0].set(1)
-	# 			self.ga_var[1].set(0)
-	# 		elif res[6] == 1:
-	# 			self.ga_var[0].set(0)
-	# 			self.ga_var[1].set(1)
-	# 		else:
-	# 			self.ga_var[0].set(0)
-	# 			self.ga_var[1].set(0)
+		self.tree_2 = ttk.Treeview(form_frame, height = 9)
+		self.tree_2.heading("#0", text="Assessment Records")
+		self.tree_2.column("#0", minwidth=150, width=850, stretch="no")
+		vsb_2 = ttk.Scrollbar(orient="vertical", command=self.tree_2.yview)
+		self.tree_2.configure(yscrollcommand=vsb_2.set)
+		self.tree_2.place(x=65, y=400)
 
-	# 		if res[7] == 0:
-	# 			self.gn_var[0].set(1)
-	# 			self.gn_var[1].set(0)
-	# 		elif res[7] == 1:
-	# 			self.gn_var[0].set(0)
-	# 			self.gn_var[1].set(1)
-	# 		else:
-	# 			self.gn_var[0].set(0)
-	# 			self.gn_var[1].set(0)
+	def load_data(self):
 
-	# 		if res[8] == 0:
-	# 			self.ie_var[0].set(1)
-	# 			self.ie_var[1].set(0)
-	# 		elif res[8] == 1:
-	# 			self.ie_var[0].set(0)
-	# 			self.ie_var[1].set(1)
-	# 		else:
-	# 			self.ie_var[0].set(0)
-	# 			self.ie_var[1].set(0)
+		cur.execute(("SELECT followup_date, reason, followup_s, followup_med, hr, bp, rr, temp, weight, ge_1, ge_others, skin_1, skin_others, musculo_1, musculo_others, heent_1, heent_others, respi_1, respi_others, cardio_1, cardio_others, gastro_1, gastro_others, genito_1, genito_others, ie_1, ie_others, dre_1, dre_others, neuro_1, neuro_others, ti_drugs, ti_diet, ti_lifestyle, ti_exer FROM patientfollowup WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+		res = cur.fetchall()
 
-	# 		if res[9] == 0:
-	# 			self.dre_var[0].set(1)
-	# 			self.dre_var[1].set(0)
-	# 		elif res[9] == 1:
-	# 			self.dre_var[0].set(0)
-	# 			self.dre_var[1].set(1)
-	# 		else:
-	# 			self.dre_var[0].set(0)
-	# 			self.dre_var[1].set(0)
+		self.tree.delete(*self.tree.get_children())
 
-	# 		if res[10] == 0:
-	# 			self.ne_var[0].set(1)
-	# 			self.ne_var[1].set(0)
-	# 		elif res[10] == 1:
-	# 			self.ne_var[0].set(0)
-	# 			self.ne_var[1].set(1)
-	# 		else:
-	# 			self.ne_var[0].set(0)
-	# 			self.ne_var[1].set(0)
+		for i in range(len(res)):
+			if res[i][0] is not None:
+				id = self.tree.insert('', 'end', text=res[i][0])
+				sub_id_1 = self.tree.insert(id, 'end', text="Reasons for follow-up")
+				if res[i][1] == 0:
+					self.tree.insert(sub_id_1, 'end', text="continuing care from previous visit")
+				elif res[i][1] == 1:
+					self.tree.insert(sub_id_1, 'end', text="continuing care from previous visit")
+				else:
+					self.tree.insert(sub_id_1, 'end', text="")
+				sub_id_2 = self.tree.insert(id, 'end', text="S")
+				self.tree.insert(sub_id_2, 'end', text=res[i][2])
+				sub_id_3 = self.tree.insert(id, 'end', text="Present Medications")
+				self.tree.insert(sub_id_3, 'end', text=res[i][3])
+				sub_id_4 = self.tree.insert(id, 'end', text="HR")
+				self.tree.insert(sub_id_4, 'end', text=res[i][4])
+				sub_id_5 = self.tree.insert(id, 'end', text="BP")
+				self.tree.insert(sub_id_5, 'end', text=res[i][5])
+				sub_id_6 = self.tree.insert(id, 'end', text="RR")
+				self.tree.insert(sub_id_6, 'end', text=res[i][6])
+				sub_id_7 = self.tree.insert(id, 'end', text="Temperature")
+				self.tree.insert(sub_id_7, 'end', text=res[i][7])
+				sub_id_8 = self.tree.insert(id, 'end', text="Weight")
+				self.tree.insert(sub_id_8, 'end', text=res[i][8])
 
-	# 	else:
-	# 		for i in range(2):
-	# 			self.ge_var[i].set(0)
-	# 			self.sk_var[i].set(0)
-	# 			self.mu_var[i].set(0)
-	# 			self.he_var[i].set(0)
-	# 			self.re_var[i].set(0)
-	# 			self.ca_var[i].set(0)
-	# 			self.ga_var[i].set(0)
-	# 			self.gn_var[i].set(0)
-	# 			self.ie_var[i].set(0)
-	# 			self.dre_var[i].set(0)
-	# 			self.ne_var[i].set(0)
+				sub_id_9 = self.tree.insert(id, 'end', text="General Survey")
+				if res[i][9] == 0:
+					self.tree.insert(sub_id_9, 'end', text="No significant findings")
+				else:
+					self.tree.insert(sub_id_9, 'end', text=res[i][10])
 
-	# 		for i in range(11):
-	# 			self.listvar[i] = 0
+				sub_id_10 = self.tree.insert(id, 'end', text="Skin/Integument")
+				if res[i][11] == 0:
+					self.tree.insert(sub_id_10, 'end', text="No significant findings")
+				else:
+					self.tree.insert(sub_id_10, 'end', text=res[i][12])
 
-	# 	self.ge_find.delete('1.0', 'end') # clear the text field
-	# 	self.sk_find.delete('1.0', 'end') # clear the text field
-	# 	self.mu_find.delete('1.0', 'end') # clear the text field
-	# 	self.he_find.delete('1.0', 'end') # clear the text field
-	# 	self.re_find.delete('1.0', 'end') # clear the text field
-	# 	self.ca_find.delete('1.0', 'end') # clear the text field
-	# 	self.ga_find.delete('1.0', 'end') # clear the text field
-	# 	self.gn_find.delete('1.0', 'end') # clear the text field
-	# 	self.ie_find.delete('1.0', 'end') # clear the text field
-	# 	self.dre_find.delete('1.0', 'end') # clear the text field
-	# 	self.ne_find.delete('1.0', 'end') # clear the text field
+				sub_id_11 = self.tree.insert(id, 'end', text="Musculoskeletal")
+				if res[i][13] == 0:
+					self.tree.insert(sub_id_11, 'end', text="No significant findings")
+				else:
+					self.tree.insert(sub_id_11, 'end', text=res[i][14])
 
-	# 	cur.execute(("SELECT ge_others, skin_others, musculo_others, heent_others, respi_others, cardio_others, gastro_others, genito_others, ie_others, dre_others, neuro_others FROM patientassessment WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-	# 	res = cur.fetchone()
+				sub_id_12 = self.tree.insert(id, 'end', text="HEENT")
+				if res[i][15] == 0:
+					self.tree.insert(sub_id_12, 'end', text="No significant findings")
+				else:
+					self.tree.insert(sub_id_12, 'end', text=res[i][16])
 
-	# 	if res is not None:
-	# 		if res[0] is not None:
-	# 			self.ge_find.insert('1.0', res[0])
-	# 		if res[1] is not None:
-	# 			self.sk_find.insert('1.0', res[1])
-	# 		if res[2] is not None:
-	# 			self.mu_find.insert('1.0', res[2])
-	# 		if res[3] is not None:
-	# 			self.he_find.insert('1.0', res[3])
-	# 		if res[4] is not None:
-	# 			self.re_find.insert('1.0', res[4])
-	# 		if res[5] is not None:
-	# 			self.ca_find.insert('1.0', res[5])
-	# 		if res[6] is not None:
-	# 			self.ga_find.insert('1.0', res[6])
-	# 		if res[7] is not None:
-	# 			self.gn_find.insert('1.0', res[7])
-	# 		if res[8] is not None:
-	# 			self.ie_find.insert('1.0', res[8])
-	# 		if res[9] is not None:
-	# 			self.dre_find.insert('1.0', res[9])
-	# 		if res[10] is not None:
-	# 			self.ne_find.insert('1.0', res[10])
+				sub_id_13 = self.tree.insert(id, 'end', text="Respiratory")
+				if res[i][17] == 0:
+					self.tree.insert(sub_id_13, 'end', text="No significant findings")
+				else:
+					self.tree.insert(sub_id_13, 'end', text=res[i][18])
 
-	# 		self.ge_find.config(state = "disabled")
-	# 		self.sk_find.config(state = "disabled")
-	# 		self.mu_find.config(state = "disabled")
-	# 		self.he_find.config(state = "disabled")
-	# 		self.re_find.config(state = "disabled")
-	# 		self.ca_find.config(state = "disabled")
-	# 		self.ga_find.config(state = "disabled")
-	# 		self.gn_find.config(state = "disabled")
-	# 		self.ie_find.config(state = "disabled")
-	# 		self.dre_find.config(state = "disabled")
-	# 		self.ne_find.config(state = "disabled")
-	# 		for i in range(2):
-	# 			self.ge_cb[i].config(state = "disabled")
-	# 			self.sk_cb[i].config(state = "disabled")
-	# 			self.mu_cb[i].config(state = "disabled")
-	# 			self.he_cb[i].config(state = "disabled")
-	# 			self.re_cb[i].config(state = "disabled")
-	# 			self.ca_cb[i].config(state = "disabled")
-	# 			self.ga_cb[i].config(state = "disabled")
-	# 			self.gn_cb[i].config(state = "disabled")
-	# 			self.ie_cb[i].config(state = "disabled")
-	# 			self.dre_cb[i].config(state = "disabled")
-	# 			self.ne_cb[i].config(state = "disabled")
-	# 	else:
-	# 		self.ge_find.delete('1.0', 'end') # clear the text field
-	# 		self.sk_find.delete('1.0', 'end') # clear the text field
-	# 		self.mu_find.delete('1.0', 'end') # clear the text field
-	# 		self.he_find.delete('1.0', 'end') # clear the text field
-	# 		self.re_find.delete('1.0', 'end') # clear the text field
-	# 		self.ca_find.delete('1.0', 'end') # clear the text field
-	# 		self.ga_find.delete('1.0', 'end') # clear the text field
-	# 		self.gn_find.delete('1.0', 'end') # clear the text field
-	# 		self.ie_find.delete('1.0', 'end') # clear the text field
-	# 		self.dre_find.delete('1.0', 'end') # clear the text field
-	# 		self.ne_find.delete('1.0', 'end') # clear the text field
+				sub_id_14 = self.tree.insert(id, 'end', text="Cardiovascular")
+				if res[i][19] == 0:
+					self.tree.insert(sub_id_14, 'end', text="No significant findings")
+				else:
+					self.tree.insert(sub_id_14, 'end', text=res[i][20])
 
-	# 		self.ge_find.config(state = "normal")
-	# 		self.sk_find.config(state = "normal")
-	# 		self.mu_find.config(state = "normal")
-	# 		self.he_find.config(state = "normal")
-	# 		self.re_find.config(state = "normal")
-	# 		self.ca_find.config(state = "normal")
-	# 		self.ga_find.config(state = "normal")
-	# 		self.gn_find.config(state = "normal")
-	# 		self.ie_find.config(state = "normal")
-	# 		self.dre_find.config(state = "normal")
-	# 		self.ne_find.config(state = "normal")
+				sub_id_15 = self.tree.insert(id, 'end', text="Gastrointestinal")
+				if res[i][21] == 0:
+					self.tree.insert(sub_id_15, 'end', text="No significant findings")
+				else:
+					self.tree.insert(sub_id_15, 'end', text=res[i][22])
 
-	# 		for i in range(2):
-	# 			self.ge_cb[i].config(state = "normal")
-	# 			self.sk_cb[i].config(state = "normal")
-	# 			self.mu_cb[i].config(state = "normal")
-	# 			self.he_cb[i].config(state = "normal")
-	# 			self.re_cb[i].config(state = "normal")
-	# 			self.ca_cb[i].config(state = "normal")
-	# 			self.ga_cb[i].config(state = "normal")
-	# 			self.gn_cb[i].config(state = "normal")
-	# 			self.ie_cb[i].config(state = "normal")
-	# 			self.dre_cb[i].config(state = "normal")
-	# 			self.ne_cb[i].config(state = "normal")
+				sub_id_16 = self.tree.insert(id, 'end', text="Genitourinary")
+				if res[i][23] == 0:
+					self.tree.insert(sub_id_16, 'end', text="No significant findings")
+				else:
+					self.tree.insert(sub_id_16, 'end', text=res[i][24])
+
+				sub_id_17 = self.tree.insert(id, 'end', text="IE")
+				if res[i][25] == 0:
+					self.tree.insert(sub_id_17, 'end', text="No significant findings")
+				else:
+					self.tree.insert(sub_id_17, 'end', text=res[i][26])
+
+				sub_id_18 = self.tree.insert(id, 'end', text="DRE")
+				if res[i][27] == 0:
+					self.tree.insert(sub_id_18, 'end', text="No significant findings")
+				else:
+					self.tree.insert(sub_id_18, 'end', text=res[i][28])
+
+				sub_id_19 = self.tree.insert(id, 'end', text="Neurolopsych")
+				if res[i][29] == 0:
+					self.tree.insert(sub_id_19, 'end', text="No significant findings")
+				else:
+					self.tree.insert(sub_id_19, 'end', text=res[i][30])
+
+				sub_id_20 = self.tree.insert(id, 'end', text="Therapeutic Intervention - Drugs")
+				self.tree.insert(sub_id_20, 'end', text=res[i][31])
+
+				sub_id_21 = self.tree.insert(id, 'end', text="Therapeutic Intervention - Diet")
+				self.tree.insert(sub_id_21, 'end', text=res[i][32])
+
+				sub_id_22 = self.tree.insert(id, 'end', text="Therapeutic Intervention - Lifestyle")
+				self.tree.insert(sub_id_22, 'end', text=res[i][33])
+
+				sub_id_23 = self.tree.insert(id, 'end', text="Therapeutic Intervention - Exercise")
+				self.tree.insert(sub_id_23, 'end', text=res[i][34])
+
+		cur.execute(("SELECT followup_date, assessment, icd_code, dpra FROM patientfollowuptree WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+		res = cur.fetchall()
+
+		self.tree_2.delete(*self.tree_2.get_children())
+
+		for i in range(len(res)):
+			id = self.tree.insert('', 'end', text=res[i][0])
+			sub_id_2 = self.tree.insert(id, 'end', text="Assessment")
+			self.tree.insert(sub_id_1, 'end', text=res[i][1])
+			sub_id_2 = self.tree.insert(id, 'end', text="ICD Code")
+			self.tree.insert(sub_id_1, 'end', text=res[i][2])
+			sub_id_3 = self.tree.insert(id, 'end', text="Diagnostic/Prognostic Risk Assessments")
+			self.tree.insert(sub_id_2, 'end', text=res[i][3])
 
 class followup_assessment_table(tk.Frame):
 
@@ -5637,6 +5619,8 @@ class followup_assessment_table(tk.Frame):
 		self.label_font = tkfont.Font(family='Helvetica', size = 8)
 		self.label_font_2 = tkfont.Font(family='Helvetica', size = 8, weight="bold")
 		self.notes_font = tkfont.Font(family='Helvetica', size = 8, slant="italic")
+
+		self.followup_date = self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')
 
 		assess_label = tk.Label(form_frame, text="Assessment", font=self.label_font, fg="#636363")
 		assess_label.place(x=65, y=25)
@@ -5692,47 +5676,58 @@ class followup_assessment_table(tk.Frame):
 		self.next_button = tk.Button(form_frame, text="Prev Page", command=lambda: controller.show_frame("followup_patient_form_2"), height = 2, width = 10, bd = 0, bg = "#0060ba", fg = "#ffffff", activebackground = "#cf0007")
 		self.next_button.place(x=875, y=25)
 
+	def load_data(self):
+		self.followup_date = self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')
+
+		self.assess.delete('1.0', 'end')
+		self.icd_code.delete('1.0', 'end')
+		self.dpra.delete('1.0', 'end')
+		self.drugs.delete('1.0', 'end')
+		self.diet.delete('1.0', 'end')
+		self.lifestyle.delete('1.0', 'end')
+		self.exer.delete('1.0', 'end')
 
 	def add_follow_up(self):
 		## include physical examination details
 
-		print(self.drugs.get("1.0",'end-1c')) # get the string on the text field
+		self.controller.get_page("followup_patient_form_2").add_details()
+
+		cur.execute(("SELECT log_id FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
+		res = cur.fetchone()
+		if res is None:
+			sql = "INSERT INTO patientfollowup (ti_drugs, ti_diet, ti_lifestyle, ti_exer, patient_id) VALUES (%s, %s, %s, %s, %s)"
+			val = (self.drugs.get("1.0",'end-1c'), self.diet.get("1.0",'end-1c'), self.lifestyle.get("1.0",'end-1c'), self.exer.get("1.0",'end-1c'), self.controller.patient_id.get())
+			cur.execute(sql, val)
+			mydb.commit()
+		else:
+			sql = "UPDATE patientfollowup SET ti_drugs = %s, ti_diet = %s, ti_lifestyle = %s, ti_exer = %s WHERE patient_id = %s and followup_date = %s"
+			val = (self.drugs.get("1.0",'end-1c'), self.diet.get("1.0",'end-1c'), self.lifestyle.get("1.0",'end-1c'), self.exer.get("1.0",'end-1c'), self.controller.patient_id.get(), self.followup_date)
+			cur.execute(sql, val)
+			mydb.commit()
+
 		self.drugs.delete('1.0', 'end') # clear the text field
-
-		print(self.diet.get("1.0",'end-1c')) # get the string on the text field
 		self.diet.delete('1.0', 'end') # clear the text field
-
-		print(self.lifestyle.get("1.0",'end-1c')) # get the string on the text field
 		self.lifestyle.delete('1.0', 'end') # clear the text field
-
-		print(self.exer.get("1.0",'end-1c')) # get the string on the text field
 		self.exer.delete('1.0', 'end') # clear the text field
 
-		print(self.referral.get("1.0",'end-1c')) # get the string on the text field
-		self.referral.delete('1.0', 'end') # clear the text field
-
-		print(self.follow_up.get("1.0",'end-1c')) # get the string on the text field
-		self.follow_up.delete('1.0', 'end') # clear the text field
-
-		if self.strat_var[0].get() == 1:
-			print("Advice")
-			self.strat_var[0] = tk.IntVar(self)
-
-		if self.strat_var[1].get() == 1:
-			print("Flyers/pamphlets")
-			self.strat_var[1] = tk.IntVar(self)
-
-		if self.strat_var[2].get() == 1:
-			print(self.health_strat_others.get("1.0",'end-1c')) # get the string on the text field
-			self.health_strat_others.delete('1.0', 'end')
-			self.strat_var[2] = tk.IntVar(self)
+		self.controller.show_frame("followup_patient_form")
 
 	def add_to_table(self, assessment, icd, dpra):
+
+		sql = "INSERT INTO patientfollowuptree (followup_date, assessment, icd_code, dpra, patient_id) VALUES (%s, %s, %s, %s, %s)"
+		val = (self.followup_date, assessment, icd, dpra, self.controller.patient_id.get())
+		cur.execute(sql, val)
+		mydb.commit()
+
 		id = self.tree.insert('', 'end', text="Assessment: " + assessment)
 		sub_id_1 = self.tree.insert(id, 'end', text="ICD Code")
 		self.tree.insert(sub_id_1, 'end', text=icd)
 		sub_id_2 = self.tree.insert(id, 'end', text="Diagnostic/Prognostic Risk Assessments")
 		self.tree.insert(sub_id_2, 'end', text=dpra)
+
+		self.assess.delete('1.0', 'end')
+		self.icd_code.delete('1.0', 'end')
+		self.dpra.delete('1.0', 'end')
 
 class ReferralForm(tk.Frame):
 
@@ -5740,7 +5735,7 @@ class ReferralForm(tk.Frame):
 		tk.Frame.__init__(self, parent)
 		self.controller = controller
 		menu_frame(self, self.controller, 5)
-		submenu_buttons_3(self, self.controller, 2)
+		submenu_buttons_3(self, self.controller, 3)
 
 		form_frame = tk.Frame(self, height = 720, width = 1000)
 		form_frame.pack(side="left")
@@ -5776,7 +5771,9 @@ class ReferralForm(tk.Frame):
 		r_referral_label = tk.Label(form_frame, text="Reason for Referral:", font=self.label_font_2)
 		r_referral_label.place(x=90, y=145)
 
-		tk.Button(form_frame, text="Add Referral", command=lambda: self.add_referral(self.r_date_input.get_date(), self.referring_phys.get("1.0",'end-1c'), self.phys_referred.get("1.0",'end-1c'), self.r_referral.get("1.0",'end-1c')), height = 2, width = 16, bd = 0, bg = "#0060ba", fg = "#ffffff", activebackground = "#cf0007").place(x=770, y=115)
+		tk.Button(form_frame, text="Add Referral", command=lambda: self.add_referral(self.r_date_input.get_date().strftime('%Y-%m-%d'), self.referring_phys.get("1.0",'end-1c'), self.phys_referred.get("1.0",'end-1c'), self.r_referral.get("1.0",'end-1c')), height = 2, width = 16, bd = 0, bg = "#0060ba", fg = "#ffffff", activebackground = "#cf0007").place(x=770, y=100)
+		tk.Button(form_frame, text="Show Referrals", command=lambda: self.show_referral(), height = 2, width = 16, bd = 0, bg = "#0060ba", fg = "#ffffff", activebackground = "#cf0007").place(x=770, y=140)
+		
 		tk.Label(form_frame, text="________"*17, font=self.label_font, fg="#636363").place(x=90, y=220)
 
 		page_subtitle_2 = tk.Label(form_frame, text="Clinical Summary", font=self.title_font)
@@ -5784,12 +5781,12 @@ class ReferralForm(tk.Frame):
 
 		p_name_label = tk.Label(form_frame, text="Name of Patient:", font=self.label_font_2)
 		p_name_label.place(x=90, y=255)
-		self.p_name = tk.Label(form_frame, text="<insert patient name here>", font=self.label_font)
+		self.p_name = tk.Label(form_frame, text="", font=self.label_font)
 		self.p_name.place(x=200, y=255)
 
 		p_agegender_label = tk.Label(form_frame, text="Age/Gender:", font=self.label_font_2)
 		p_agegender_label.place(x=90, y=275)
-		self.p_agegender = tk.Label(form_frame, text="<insert patient age and gender here>", font=self.label_font)
+		self.p_agegender = tk.Label(form_frame, text="", font=self.label_font)
 		self.p_agegender.place(x=200, y=275)
 
 		p_working_impre_label = tk.Label(form_frame, text="Working Impression:", font=self.label_font_2)
@@ -5812,29 +5809,135 @@ class ReferralForm(tk.Frame):
 		self.p_summ_med = tk.Text(form_frame, height = 4, width = 82, wrap="word")
 		self.p_summ_med.place(x=92, y=535)
 
-		tk.Button(form_frame, text="Add Summary", command=lambda: self.add_summary(self.p_name['text'], self.p_agegender['text'], self.p_working_impre.get("1.0",'end-1c'), self.p_brief_hist.get("1.0",'end-1c'), self.p_summ_lab.get("1.0",'end-1c'), self.p_summ_med.get("1.0",'end-1c')), height = 2, width = 16, bd = 0, bg = "#0060ba", fg = "#ffffff", activebackground = "#cf0007").place(x=770, y=415)
+		tk.Button(form_frame, text="Edit Summary", command=lambda: self.edit_summary(), height = 2, width = 16, bd = 0, bg = "#0060ba", fg = "#ffffff", activebackground = "#cf0007").place(x=790, y=455)
+		tk.Button(form_frame, text="Add Summary", command=lambda: self.add_summary(self.p_name['text'], self.p_agegender['text'], self.p_working_impre.get("1.0",'end-1c'), self.p_brief_hist.get("1.0",'end-1c'), self.p_summ_lab.get("1.0",'end-1c'), self.p_summ_med.get("1.0",'end-1c')), height = 2, width = 16, bd = 0, bg = "#0060ba", fg = "#ffffff", activebackground = "#cf0007").place(x=790, y=415)
 
 	def add_referral(self, date, referring_phys, phys_referred, reason):
-		print(date)
-		print(referring_phys)
-		print(phys_referred)
-		print(reason)
+
+		# cur.execute(("SELECT date_of_followup FROM patientreferral WHERE patient_id = %s and date_of_followup = %s"), (self.controller.patient_id.get(), date))
+		# res = cur.fetchone()
+		# if res is None:
+		# 	sql = "INSERT INTO patientreferral (date_of_followup, referring_phys, phys_referred_to, reasons, patient_id) VALUES (%s, %s, %s, %s, %s)"
+		# 	val = (date, referring_phys, phys_referred, reason, self.controller.patient_id.get())
+		# 	cur.execute(sql, val)
+		# 	mydb.commit()
+		# else:
+		# 	sql = "UPDATE patientreferral SET date_of_followup = %s, referring_phys = %s, phys_referred_to = %s, reasons = %s WHERE patient_id = %s and date_of_followup = %s"
+		# 	val = (referring_phys, phys_referred, reason, self.controller.patient_id.get(), date)
+		# 	mydb.commit()
+
+		sql = "INSERT INTO patientreferral (date_of_followup, referring_phys, phys_referred_to, reasons, patient_id) VALUES (%s, %s, %s, %s, %s)"
+		val = (date, referring_phys, phys_referred, reason, self.controller.patient_id.get())
+		cur.execute(sql, val)
+		mydb.commit()
+
+		self.r_date_input.set_date(dt.datetime.today())
 		self.referring_phys.delete('1.0', 'end')
 		self.phys_referred.delete('1.0', 'end')
 		self.r_referral.delete('1.0', 'end')
 
+	def show_referral(self):
+		self.controller.show_frame("ReferralForm_res")
+
 	def add_summary(self, name, agegender, working_impre, brief_hist, summ_lab, summ_med):
-		print(name)
-		print(agegender)
-		print(working_impre)
-		print(brief_hist)
-		print(summ_lab)
-		print(summ_med)
+		cur.execute(("SELECT log_id FROM patientsummary WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+		res = cur.fetchone()
+		if res is None:
+			sql = "INSERT INTO patientsummary (impression, brief_history, summ_lab, summ_meds, patient_id) VALUES (%s, %s, %s, %s, %s)"
+			val = (working_impre, brief_hist, summ_lab, summ_med, self.controller.patient_id.get())
+			cur.execute(sql, val)
+			mydb.commit()
+		else:
+			sql = "UPDATE patientsummary SET impression = %s, brief_history = %s, summ_lab = %s, summ_meds = %s WHERE patient_id = %s"
+			val = (working_impre, brief_hist, summ_lab, summ_med, self.controller.patient_id.get())
+			mydb.commit()
+
+		self.p_working_impre.config(state="disabled")
+		self.p_brief_hist.config(state="disabled")
+		self.p_summ_lab.config(state="disabled")
+		self.p_summ_med.config(state="disabled")
+
+	def edit_summary(self):
+		self.p_working_impre.config(state="normal")
+		self.p_brief_hist.config(state="normal")
+		self.p_summ_lab.config(state="normal")
+		self.p_summ_med.config(state="normal")
+
+	def load_data(self):
 		self.p_working_impre.delete('1.0', 'end')
 		self.p_brief_hist.delete('1.0', 'end')
 		self.p_summ_lab.delete('1.0', 'end')
 		self.p_summ_med.delete('1.0', 'end')
 
+		cur.execute(("SELECT last_name, first_name, middle_name, age, gender FROM patient WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+		res = cur.fetchone()
+
+		if res is not None:
+			self.p_name['text'] = res[0] + ", " + res[1] + " " + res[2]
+			self.p_agegender['text'] =  str(res[3]) + " / " + res[4]
+		else:
+			self.p_name['text'] = ""
+			self.p_agegender['text'] = ""
+
+		cur.execute(("SELECT log_id, impression, brief_history, summ_lab, summ_meds FROM patientsummary WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+		res = cur.fetchone()
+		if res is not None:
+			self.p_working_impre.insert('1.0', res[1])
+			self.p_brief_hist.insert('1.0', res[2])
+			self.p_summ_lab.insert('1.0', res[3])
+			self.p_summ_med.insert('1.0', res[4])
+			self.p_working_impre.config(state="disabled")
+			self.p_brief_hist.config(state="disabled")
+			self.p_summ_lab.config(state="disabled")
+			self.p_summ_med.config(state="disabled")
+		else:
+			self.p_working_impre.delete('1.0', 'end')
+			self.p_brief_hist.delete('1.0', 'end')
+			self.p_summ_lab.delete('1.0', 'end')
+			self.p_summ_med.delete('1.0', 'end')
+			self.p_working_impre.config(state="normal")
+			self.p_brief_hist.config(state="normal")
+			self.p_summ_lab.config(state="normal")
+			self.p_summ_med.config(state="normal")
+
+class ReferralForm_res(tk.Frame):
+
+	def __init__(self, parent, controller):
+		tk.Frame.__init__(self, parent)
+		self.controller = controller
+		menu_frame(self, self.controller, 3)
+		submenu_buttons_3(self, self.controller, 2)
+
+		form_frame = tk.Frame(self, height = 720, width = 1000)
+		form_frame.pack(side="left")
+
+		self.title_font = tkfont.Font(family='Times New Roman', size=10, weight="bold")
+		self.label_font = tkfont.Font(family='Helvetica', size = 8)
+		self.label_font_2 = tkfont.Font(family='Helvetica', size = 8, weight="bold")
+		self.notes_font = tkfont.Font(family='Helvetica', size = 8, slant="italic")
+
+		self.tree = ttk.Treeview(form_frame, height = 25)
+		self.tree.heading("#0", text="Referral Records")
+		self.tree.column("#0", minwidth=150, width=850, stretch="no")
+		vsb = ttk.Scrollbar(orient="vertical", command=self.tree.yview)
+		self.tree.configure(yscrollcommand=vsb.set)
+		self.tree.place(x=65, y=25)
+
+	def load_data(self):
+
+		cur.execute(("SELECT date_of_followup, referring_phys, phys_referred_to, reasons FROM patientreferral WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+		res = cur.fetchall()
+
+		self.tree.delete(*self.tree.get_children())
+
+		for i in range(len(res)):
+			if res[i][0] is not None:
+				id = self.tree.insert('', 'end', text=str(res[i][0]) + " - Referring Physicians: " + res[i][1])
+				sub_id_1 = self.tree.insert(id, 'end', text="Physician Referred to")
+				self.tree.insert(sub_id_1, 'end', text=res[i][2])
+				sub_id_2 = self.tree.insert(id, 'end', text="Reason for Referral")
+				self.tree.insert(sub_id_2, 'end', text=res[i][3])
+				
 if __name__ == "__main__":
 	mydb = mysql.connector.connect(
 		host = "localhost",
@@ -5847,6 +5950,6 @@ if __name__ == "__main__":
 
 	app = MedSystem()
 	app.title("Family Oriented Medical Record")
-	app.geometry("1200x700")
+	app.geometry("1200x710")
 	app.resizable(width=False, height=False)
 	app.mainloop()
