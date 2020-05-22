@@ -1,11 +1,11 @@
 # Family-Oriented-Medical-Record
 
 ## Installing Database:
-** run _medicalrecord.sql_ as source in MySQL **
+**run _medicalrecord.sql_ as source in MySQL**
 > source medicalrecord.sql
 
 ## Running the program:
-** run _medicalrecord.py_ **
+**run _medicalrecord.py_**
 1. on Windows
 > py medicalrecord.py
 
@@ -17,7 +17,7 @@
 > python medicalrecord.py
 
 ## Reminder
-** Make sure that _pip_ is installed**
+**Make sure that _pip_ is installed**
 
 List of imported libraries and modules:
 1. tkinter
