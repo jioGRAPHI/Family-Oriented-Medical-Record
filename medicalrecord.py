@@ -193,6 +193,7 @@ class LandingPage(tk.Frame):
 		self.list_of_patients.clear()
 		self.list_of_patients_id.clear()
 		self.w.delete('0', 'end')
+		self.controller.patient_id.set("")
 
 		cur.execute("SELECT patient_id, last_name, first_name, middle_name FROM patient")
 		OPTIONS = cur.fetchall()
@@ -2902,7 +2903,7 @@ class review_of_systems_form_2(tk.Frame):
 			self.alcohol_cb[0].config(state = "normal")
 			self.alcohol_cb[1].config(state = "normal")
 			self.exercise_cb[0].config(state = "normal")
-			self.exercise_cb[1].config(state = "normal", bg = "#ffffff")
+			self.exercise_cb[1].config(state = "normal")
 			self.medhist_illness.config(state = "normal", bg = "#ffffff")
 			self.medhist_hospt.config(state = "normal", bg = "#ffffff")
 			self.medhist_allergy.config(state = "normal", bg = "#ffffff")
@@ -4776,6 +4777,7 @@ class followup_patient_form(tk.Frame):
 		self.f_date_input.set_date(dt.datetime.today())
 		for i in range(2):
 			self.r_var[i].set(0)
+			self.r_cb_arr[i].config(state="normal")
 		self.reason = 2
 		self.f_s.delete('1.0', 'end')
 		self.f_medication.delete('1.0', 'end')
@@ -5598,7 +5600,7 @@ class followup_patient_form_res(tk.Frame):
 				if res[i][1] == 0:
 					self.tree.insert(sub_id_1, 'end', text="continuing care from previous visit")
 				elif res[i][1] == 1:
-					self.tree.insert(sub_id_1, 'end', text="continuing care from previous visit")
+					self.tree.insert(sub_id_1, 'end', text="new complaint")
 				else:
 					self.tree.insert(sub_id_1, 'end', text="")
 				sub_id_2 = self.tree.insert(id, 'end', text="S")
