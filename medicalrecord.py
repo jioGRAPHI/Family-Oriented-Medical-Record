@@ -44,19 +44,8 @@ def menu_frame(self, controller, num):
 	else:
 		bttn5.config(height = 3, width = 30, bd = 0, wraplength = 180, bg = "SystemButtonFace")
 
-	# if self.controller.flag.get() == 0:
-	# 	bttn1.config(state = "disabled")
-	# 	bttn2.config(state = "disabled")
-	# 	bttn4.config(state = "disabled")
-	# 	bttn5.config(state = "disabled")
-	# else:
-	# 	bttn1.config(state = "normal")
-	# 	bttn2.config(state = "normal")
-	# 	bttn4.config(state = "normal")
-	# 	bttn5.config(state = "normal")
-
 def submenu_buttons_1(self, controller, num):
-	side_menu_frame = tk.Frame(self, height = 720, width = 200) # , bg = "#cfedc5"
+	side_menu_frame = tk.Frame(self, height = 720, width = 200)
 	side_menu_frame.pack(side="left")
 
 	b1 = tk.Button(side_menu_frame, text="Consultation Record", command=lambda: controller.show_frame("FirstConsForm"), height = 3, width = 25, bd = 0, bg = "#183873", fg = "#ffffff", wraplength = 150)
@@ -84,7 +73,7 @@ def submenu_buttons_2(self, controller, num):
 		b2.config(bg = "#2553a8")
 
 def submenu_buttons_3(self, controller, num):
-	side_menu_frame = tk.Frame(self, height = 720, width = 200) # , bg = "#cfedc5"
+	side_menu_frame = tk.Frame(self, height = 720, width = 200)
 	side_menu_frame.pack(side="left")
 
 	b1 = tk.Button(side_menu_frame, text="Follow-up Patient Record", command=lambda: controller.show_frame("followup_patient_form"), height = 3, width = 25, bd = 0, bg = "#183873", fg = "#ffffff", wraplength = 150)
@@ -115,10 +104,9 @@ class MedSystem(tk.Tk):
 		self.label_font = tkfont.Font(family='Helvetica', size=10)
 
 		self.patient_id = tk.StringVar(self)
-		# self.flag = tk.IntVar(self) # flag to determine if user is adding new data or editing existing
 
 		self.frames = {}
-		for F in (LandingPage, PatientForm, GeriaticForm, FirstConsForm, FamAssessForm, ReferralForm, ReferralForm_res, review_of_systems_form, review_of_systems_form_2, physical_examination_form, assessment_table, family_apgar_form, family_apgar_form_res,followup_patient_form, followup_patient_form_2,followup_assessment_table,followup_patient_form_res):
+		for F in (LandingPage, PatientForm, GeriaticForm, GeriaticFormRes, FirstConsForm, FamAssessForm, ReferralForm, ReferralForm_res, review_of_systems_form, review_of_systems_form_2, physical_examination_form, assessment_table, family_apgar_form, family_apgar_form_res,followup_patient_form, followup_patient_form_2,followup_assessment_table,followup_patient_form_res):
 			page_name = F.__name__
 			frame = F(parent=container, controller=self)
 			self.frames[page_name] = frame
@@ -135,11 +123,19 @@ class MedSystem(tk.Tk):
 		if page_name == "LandingPage":
 			LandingPage = self.get_page("LandingPage")
 			LandingPage.load_patients()
-		else:
+			frame = self.frames[page_name]
+			frame.tkraise()
+		elif page_name == "FirstConsForm" or page_name == "review_of_systems_form" or page_name == "review_of_systems_form_2":
 			self.get_page(page_name).load_data()
-
-		frame = self.frames[page_name]
-		frame.tkraise()
+			frame = self.frames[page_name]
+			frame.tkraise()
+		else:
+			if self.patient_id.get() == "":
+				messagebox.showwarning("Warning", "No patient selected! Please select one or create a new record before proceeding")
+			else:
+				self.get_page(page_name).load_data()
+				frame = self.frames[page_name]
+				frame.tkraise()
 
 class LandingPage(tk.Frame):
 
@@ -170,13 +166,15 @@ class LandingPage(tk.Frame):
 		self.load_patients()
 
 	def continue_login(self):
-		for F in (PatientForm, GeriaticForm, FirstConsForm, FamAssessForm, review_of_systems_form, review_of_systems_form_2, family_apgar_form, family_apgar_form_res):
-			page_name = F.__name__
-			p = self.controller.get_page(page_name)
-			p.load_data()
+		if self.controller.patient_id.get() == "":
+			messagebox.showwarning("Warning", "Please select a patient")
+		else:
+			for F in (PatientForm, GeriaticForm, FirstConsForm, FamAssessForm, review_of_systems_form, review_of_systems_form_2, family_apgar_form, family_apgar_form_res):
+				page_name = F.__name__
+				p = self.controller.get_page(page_name)
+				p.load_data()
 
-		# self.controller.flag.set(1)
-		self.controller.show_frame("PatientForm")
+			self.controller.show_frame("PatientForm")
 
 	def add_new(self):
 		self.controller.patient_id = tk.StringVar()
@@ -233,7 +231,7 @@ class PatientForm(tk.Frame):
 
 		date_label = tk.Label(self, text="Date", font=self.label_font, fg="#636363")
 		date_label.place(x=50, y=200)
-		self.date_input = DateEntry(self, style = "my.DateEntry", locale = "en_US", date_pattern = "yyyy/mm/dd") # working
+		self.date_input = DateEntry(self, style = "my.DateEntry", locale = "en_US", date_pattern = "yyyy/mm/dd")
 		self.date_input.place(x=50, y=220)
 
 		diag_label = tk.Label(self, text="Diagnosis", font=self.label_font, fg="#636363")
@@ -354,6 +352,7 @@ class GeriaticForm(tk.Frame):
 
 		y_value = 175
 		self.score = 0
+		self.list_of_scores = []
 		self.lob = []
 		self.losl = []
 		for i in range(len(self.questions)):
@@ -370,6 +369,7 @@ class GeriaticForm(tk.Frame):
 
 			b.append(yes_b)
 			b.append(no_b)
+			self.list_of_scores.append(0)
 			self.lob.append(b)
 			self.losl.append(score_label)
 
@@ -380,6 +380,13 @@ class GeriaticForm(tk.Frame):
 		self.total_score_value = tk.Label(self, text="", font=self.label_font)
 		self.total_score_value.place(x=980, y=635)
 
+		self.sub_bttn = tk.Button(self, text="Submit", command=lambda: self.submit(), height = 1, width = 12, bd = 0, bg = "#183873", fg = "#ffffff")
+		self.sub_bttn.place(x=90, y=635)
+
+		self.res_bttn = tk.Button(self, text="Show Results", command=lambda: controller.show_frame("GeriaticFormRes"), height = 1, width = 12, bd = 0, bg = "#183873", fg = "#ffffff")
+		self.res_bttn.place(x=90, y=660)
+		self.res_bttn.config(state = "disabled")
+
 	def load_data(self):
 		cur.execute(("SELECT last_name, first_name, middle_name FROM patient WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
@@ -389,11 +396,24 @@ class GeriaticForm(tk.Frame):
 		else:
 			self.patient_name_label['text'] = ""
 
+		cur.execute(("SELECT depression_score FROM patientdepressionscale WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+		res = cur.fetchone()
+		if res is None:
+			self.res_bttn.config(state = "disabled")
+		else:
+			self.res_bttn.config(state = "normal")
+
+		for i in range(15):
+			self.list_of_scores[i] = 0
+			self.score = 0
+			self.losl[i]['text'] = "" 
+
 		self.score = 0
 		for i in range(len(self.questions)):
-			(self.lob[i][1]).config(state = "normal", bg = "SystemButtonFace", fg = "#000000")
-			(self.lob[i][0]).config(state = "normal", bg = "SystemButtonFace", fg = "#000000")
+			(self.lob[i][1]).config(state = "normal", bg = "SystemButtonFace", fg = "#000000", bd = 1)
+			(self.lob[i][0]).config(state = "normal", bg = "SystemButtonFace", fg = "#000000", bd = 1)
 			self.losl[i]['text'] = ""
+			self.total_score_value['text'] = ""
 
 	def set_score(self, vote, i):
 		self.score = self.score + vote
@@ -401,21 +421,126 @@ class GeriaticForm(tk.Frame):
 			(self.lob[i][1]).config(state = "disabled", bd = 0)
 			(self.lob[i][0]).config(bg = "#0060ba", fg = "#ffffff")
 			self.losl[i]['text'] = "Score 1 point for yes" 
+			self.list_of_scores[i] = 1
 		else:
 			(self.lob[i][0]).config(state = "disabled", bd = 0)
 			(self.lob[i][1]).config(bg = "#0060ba", fg = "#ffffff")
 			self.losl[i]['text'] = "Score 1 point for no"
+			self.list_of_scores[i] = 0
 		if self.score >= 0:
 			self.total_score_value['text'] = str(self.score) 
 
-			cur.execute(("SELECT depression_score FROM patientdepressionscale WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-			res = cur.fetchone()
-			if res is None:
-				cur.execute(("INSERT INTO patientdepressionscale (depression_score, patient_id) VALUES (%s, %s)"), (int(self.score), self.controller.patient_id.get()))
-				mydb.commit()
-			else:
-				cur.execute(("UPDATE patientdepressionscale SET depression_score = %s WHERE patient_id = %s"), (int(self.score), self.controller.patient_id.get()))
-				mydb.commit()
+	def submit(self):
+		cur.execute(("SELECT depression_score FROM patientdepressionscale WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+		res = cur.fetchone()
+		if res is None:
+			cur.execute(("INSERT INTO patientdepressionscale (q_1, q_2, q_3, q_4, q_5, q_6, q_7, q_8, q_9, q_10, q_11, q_12, q_13, q_14, q_15, depression_score, patient_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"), 
+				(self.list_of_scores[0], self.list_of_scores[1], self.list_of_scores[2], self.list_of_scores[3], self.list_of_scores[4], self.list_of_scores[5], 
+					self.list_of_scores[6], self.list_of_scores[7], self.list_of_scores[8], self.list_of_scores[9], self.list_of_scores[10], self.list_of_scores[11], 
+					self.list_of_scores[12], self.list_of_scores[13], self.list_of_scores[14], int(self.score), self.controller.patient_id.get()))
+			mydb.commit()
+		else:
+			cur.execute(("UPDATE patientdepressionscale SET q_1 = %s, q_2 = %s, q_3 = %s, q_4 = %s, q_5 = %s, q_6 = %s, q_7 = %s, q_8 = %s, q_9 = %s, q_10 = %s, q_11 = %s, q_12 = %s, q_13 = %s, q_14 = %s, q_15 = %s, depression_score = %s WHERE patient_id = %s"), 
+				(self.list_of_scores[0], self.list_of_scores[1], self.list_of_scores[2], self.list_of_scores[3], self.list_of_scores[4], self.list_of_scores[5], 
+					self.list_of_scores[6], self.list_of_scores[7], self.list_of_scores[8], self.list_of_scores[9], self.list_of_scores[10], self.list_of_scores[11], 
+					self.list_of_scores[12], self.list_of_scores[13], self.list_of_scores[14], int(self.score), self.controller.patient_id.get()))
+			mydb.commit()
+
+		self.res_bttn.config(state = "normal")
+
+class GeriaticFormRes(tk.Frame):
+
+	def __init__(self, parent, controller):
+		tk.Frame.__init__(self, parent)
+		self.controller = controller
+		menu_frame(self, self.controller, 2)
+
+		self.title_font = tkfont.Font(family='Times New Roman', size=12, weight="bold")
+		self.subtitle_font = tkfont.Font(family='Helvetica', size=10, weight="bold")
+		self.label_font = tkfont.Font(family='Helvetica', size=10)
+
+		page_title = tk.Label(self, text="Geriatric Depression Scale – Short Form", font=self.title_font)
+		page_title.place(x=460, y=68)
+
+		self.patient_name_label = tk.Label(self, text="", font=self.title_font)
+		self.patient_name_label.place(x=90, y=110)
+
+		question_label = tk.Label(self, text="Question", font=self.subtitle_font)
+		question_label.place(x=190, y=145)
+		score_label = tk.Label(self, text="SCORE", font=self.subtitle_font)
+		score_label.place(x=970, y=145)
+
+		#  form starts here
+		
+		with open("./data/geriatic_questions.txt", 'r') as f:
+			self.questions = f.read().splitlines()
+		f.close()
+
+		y_value = 175
+		self.score = 0
+		self.list_of_scores = []
+		self.lob = []
+		self.losl = []
+		for i in range(len(self.questions)):
+			b = []
+			question_label = tk.Label(self, text=str(i + 1) + ".) " + self.questions[i], font=self.label_font)
+			question_label.place(x=90, y=y_value)
+
+			yes_b = tk.Button(self, text="Yes", height = 1, width = 5, bd = 1)
+			yes_b.place(x=690, y=y_value) 
+			no_b = tk.Button(self, text="No", height = 1, width = 5, bd = 1)
+			no_b.place(x=790, y=y_value)
+			score_label = tk.Label(self, text="", font=self.label_font)
+			score_label.place(x=940, y=y_value)
+
+			b.append(yes_b)
+			b.append(no_b)
+			self.list_of_scores.append(0)
+			self.lob.append(b)
+			self.losl.append(score_label)
+
+			y_value = y_value + 30
+
+		self.total_score = tk.Label(self, text="Total: ", font=self.subtitle_font)
+		self.total_score.place(x=940, y=635)
+		self.total_score_value = tk.Label(self, text="", font=self.label_font)
+		self.total_score_value.place(x=980, y=635)
+
+		self.res_bttn = tk.Button(self, text="Return", command=lambda: controller.show_frame("GeriaticForm"), height = 1, width = 12, bd = 0, bg = "#183873", fg = "#ffffff")
+		self.res_bttn.place(x=90, y=635)
+
+	def load_data(self):
+		cur.execute(("SELECT last_name, first_name, middle_name FROM patient WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+		res = cur.fetchone()
+
+		if res is not None:
+			self.patient_name_label['text'] = res[0] + ", " + res[1] + " " + res[2]
+		else:
+			self.patient_name_label['text'] = ""
+
+		cur.execute(("SELECT q_1, q_2, q_3, q_4, q_5, q_6, q_7, q_8, q_9, q_10, q_11, q_12, q_13, q_14, q_15, depression_score FROM patientdepressionscale WHERE patient_id = %s"), (self.controller.patient_id.get(),))
+		res = cur.fetchone()
+
+		if res is not None:
+			for i in range(15):
+				if res[i] == 1:
+					(self.lob[i][1]).config(state = "disabled", bd = 0)
+					(self.lob[i][0]).config(state = "disabled", bg = "#0060ba", fg = "#ffffff")
+					self.losl[i]['text'] = "Score 1 point for yes" 
+				else:
+					(self.lob[i][0]).config(state = "disabled", bd = 0)
+					(self.lob[i][1]).config(state = "disabled", bg = "#0060ba", fg = "#ffffff")
+					self.losl[i]['text'] = "Score 1 point for no"
+				if res[15] > 0:
+					self.total_score_value['text'] = str(res[15]) 
+				else:
+					self.total_score_value['text'] = "0"
+		else:
+			self.total_score_value['text'] = ""
+			for i in range(len(self.questions)):
+				(self.lob[i][1]).config(state = "disabled", bg = "SystemButtonFace", fg = "#000000")
+				(self.lob[i][0]).config(state = "disabled", bg = "SystemButtonFace", fg = "#000000")
+				self.losl[i]['text'] = ""
 
 class FirstConsForm(tk.Frame):
 
@@ -551,14 +676,15 @@ class FirstConsForm(tk.Frame):
 			if res[9] is not None:
 				self.p_occup.insert('1.0', res[9])
 			
-			self.p_fname.config(state = "disabled")
-			self.p_mname.config(state = "disabled")
-			self.p_addr.config(state = "disabled")
-			self.p_age.config(state = "disabled")
-			self.p_gender.config(state = "disabled")
-			self.p_civil_stat.config(state = "disabled")
-			self.p_contact.config(state = "disabled")
-			self.p_occup.config(state = "disabled")
+			self.p_lname.config(state = "disabled", bg = "#e8e8e8")
+			self.p_fname.config(state = "disabled", bg = "#e8e8e8")
+			self.p_mname.config(state = "disabled", bg = "#e8e8e8")
+			self.p_addr.config(state = "disabled", bg = "#e8e8e8")
+			self.p_age.config(state = "disabled", bg = "#e8e8e8")
+			self.p_gender.config(state = "disabled", bg = "#e8e8e8")
+			self.p_civil_stat.config(state = "disabled", bg = "#e8e8e8")
+			self.p_contact.config(state = "disabled", bg = "#e8e8e8")
+			self.p_occup.config(state = "disabled", bg = "#e8e8e8")
 			self.p_bday.config(state = "disabled")
 
 		else:
@@ -571,15 +697,15 @@ class FirstConsForm(tk.Frame):
 			self.p_civil_stat.delete('1.0', 'end')
 			self.p_contact.delete('1.0', 'end')
 			self.p_occup.delete('1.0', 'end')
-			self.p_lname.config(state = "normal")
-			self.p_fname.config(state = "normal")
-			self.p_mname.config(state = "normal")
-			self.p_addr.config(state = "normal")
-			self.p_age.config(state = "normal")
-			self.p_gender.config(state = "normal")
-			self.p_civil_stat.config(state = "normal")
-			self.p_contact.config(state = "normal")
-			self.p_occup.config(state = "normal")
+			self.p_lname.config(state = "normal", bg = "#ffffff")
+			self.p_fname.config(state = "normal", bg = "#ffffff")
+			self.p_mname.config(state = "normal", bg = "#ffffff")
+			self.p_addr.config(state = "normal", bg = "#ffffff")
+			self.p_age.config(state = "normal", bg = "#ffffff")
+			self.p_gender.config(state = "normal", bg = "#ffffff")
+			self.p_civil_stat.config(state = "normal", bg = "#ffffff")
+			self.p_contact.config(state = "normal", bg = "#ffffff")
+			self.p_occup.config(state = "normal", bg = "#ffffff")
 			self.p_bday.config(state = "normal")
 
 		cur.execute(("SELECT date_of_consult, complaint, history_of_illness, context, present_medication FROM patientconsultation WHERE patient_id = %s"), (self.controller.patient_id.get(),))
@@ -598,10 +724,10 @@ class FirstConsForm(tk.Frame):
 				self.p_pres_med.insert('1.0', res[4])
 
 			self.p_datecons.config(state = "disabled")
-			self.p_compliant.config(state = "disabled")
-			self.p_hist_illness.config(state = "disabled")
-			self.p_context.config(state = "disabled")
-			self.p_pres_med.config(state = "disabled")
+			self.p_compliant.config(state = "disabled", bg = "#e8e8e8")
+			self.p_hist_illness.config(state = "disabled", bg = "#e8e8e8")
+			self.p_context.config(state = "disabled", bg = "#e8e8e8")
+			self.p_pres_med.config(state = "disabled", bg = "#e8e8e8")
 
 		else:
 			self.p_datecons.set_date(dt.datetime.today())
@@ -611,21 +737,21 @@ class FirstConsForm(tk.Frame):
 			self.p_pres_med.delete('1.0', 'end')
 
 			self.p_datecons.config(state = "normal")
-			self.p_compliant.config(state = "normal")
-			self.p_hist_illness.config(state = "normal")
-			self.p_context.config(state = "normal")
-			self.p_pres_med.config(state = "normal")
+			self.p_compliant.config(state = "normal", bg = "#ffffff")
+			self.p_hist_illness.config(state = "normal", bg = "#ffffff")
+			self.p_context.config(state = "normal", bg = "#ffffff")
+			self.p_pres_med.config(state = "normal", bg = "#ffffff")
 
 	def edit_details(self):
-		self.p_lname.config(state = "normal")
-		self.p_fname.config(state = "normal")
-		self.p_mname.config(state = "normal")
-		self.p_addr.config(state = "normal")
-		self.p_age.config(state = "normal")
-		self.p_gender.config(state = "normal")
-		self.p_civil_stat.config(state = "normal")
-		self.p_contact.config(state = "normal")
-		self.p_occup.config(state = "normal")
+		self.p_lname.config(state = "normal", bg = "#ffffff")
+		self.p_fname.config(state = "normal", bg = "#ffffff")
+		self.p_mname.config(state = "normal", bg = "#ffffff")
+		self.p_addr.config(state = "normal", bg = "#ffffff")
+		self.p_age.config(state = "normal", bg = "#ffffff")
+		self.p_gender.config(state = "normal", bg = "#ffffff")
+		self.p_civil_stat.config(state = "normal", bg = "#ffffff")
+		self.p_contact.config(state = "normal", bg = "#ffffff")
+		self.p_occup.config(state = "normal", bg = "#ffffff")
 		self.p_bday.config(state = "normal")
 
 class FamAssessForm(tk.Frame):
@@ -662,9 +788,12 @@ class FamAssessForm(tk.Frame):
 		ecomap_label = tk.Label(form_frame, text="C. ECOMAP", font=self.label_font, fg="#636363")
 		ecomap_label.place(x=660, y=60)
 
-		tk.Button(form_frame, text="Add Details", command=lambda: self.add_details_map(self.genogram.get('1.0', 'end-1c'), self.fammap.get('1.0', 'end-1c'), self.ecomap.get('1.0', 'end-1c')), height = 2, width = 25, bd = 0, bg = "#259400", fg = "#ffffff", activebackground = "#cf0007").place(x=405, y=230)
+		tk.Button(form_frame, text="Add Details", command=lambda: self.add_details_map(self.genogram.get('1.0', 'end-1c'), self.fammap.get('1.0', 'end-1c'), self.ecomap.get('1.0', 'end-1c')), height = 2, width = 15, bd = 0, bg = "#259400", fg = "#ffffff", activebackground = "#cf0007").place(x=335, y=230)
+		self.edit_bttn = tk.Button(form_frame, text="Edit", command=lambda: self.edit(), height = 2, width = 15, bd = 0, bg = "#183873", fg = "#ffffff", activebackground = "#cf0007")
+		self.edit_bttn.place(x=525, y=230)
+		self.edit_bttn.config(state = "disabled")
 
-		tk.Label(form_frame, text="________"*17, font=self.label_font, fg="#636363").place(x=90, y=275)
+		tk.Label(form_frame, text="________"*17, font=self.label_font, fg="#636363").place(x=605, y=275)
 
 		fam_wellness_label = tk.Label(form_frame, text="Family Wellness Plan", font=self.label_font_2)
 		fam_wellness_label.place(x=90, y=280)
@@ -723,8 +852,11 @@ class FamAssessForm(tk.Frame):
 		self.tree.place(x=110, y=410)
 
 		tk.Button(form_frame, text="Add", command=lambda: self.add_details(self.fam_member.get('1.0', 'end-1c'), self.screening_var, self.immunization_var, self.lifestyle_var, self.counseling_var), height = 2, width = 5, bd = 0, bg = "#259400", fg = "#ffffff", activebackground = "#cf0007").place(x=850, y=320)
-		# add family members
-		# tk.Button(self, text="VIEW RECORDS", command=lambda: controller.show_frame("PatientFormView"), height = 2, width = 25, bd = 0, bg = "#0060ba", fg = "#ffffff", activebackground = "#ffffff", activeforeground = "#000000").place(x=510, y=380)
+
+	def edit(self):
+		self.genogram.config(state = "normal", bg = "#ffffff")
+		self.fammap.config(state = "normal", bg = "#ffffff")
+		self.ecomap.config(state = "normal", bg = "#ffffff")
 
 	def set_var(self, i):
 		if self.b_var[i] == 0:
@@ -775,14 +907,12 @@ class FamAssessForm(tk.Frame):
 			cur.execute(("UPDATE patientfamassessment SET genogram = %s, family_map = %s, ecomap = %s WHERE patient_id = %s"), (genogram, fammap, ecomap, self.controller.patient_id.get()))
 			mydb.commit()
 
-
-		self.genogram.delete('1.0', 'end')
-		self.fammap.delete('1.0', 'end')
-		self.ecomap.delete('1.0', 'end')
+		self.genogram.config(state = "disabled", bg = "#c4c4c4")
+		self.fammap.config(state = "disabled", bg = "#c4c4c4")
+		self.ecomap.config(state = "disabled", bg = "#c4c4c4")
+		self.edit_bttn.config(state = "normal")
 
 	def add_details(self, name, scr_in, if_in, lf_in, c_in):
-		# add details to new patient id if records does not exist, if it exists, append
-		# print(date_in.get_date())
 		if name == "":
 			messagebox.showwarning("Warning", "Please input a family member")
 		else:
@@ -841,6 +971,10 @@ class FamAssessForm(tk.Frame):
 				self.fammap.insert('1.0', res[1])
 			if res[2] is not None:
 				self.ecomap.insert('1.0', res[2])
+			self.genogram.config(state = "disabled", bg = "#e8e8e8")
+			self.fammap.config(state = "disabled", bg = "#e8e8e8")
+			self.ecomap.config(state = "disabled", bg = "#e8e8e8")
+			self.edit_bttn.config(state = "normal")
 		else:
 			self.genogram.delete('1.0', 'end')
 			self.fammap.delete('1.0', 'end')
@@ -1150,9 +1284,6 @@ class review_of_systems_form(tk.Frame):
 		self.other_skin = tk.Text(form_frame, height = 1, width = 20, wrap="word")
 		self.other_skin.place(x=600, y=y_value)
 
-
-		# tk.Button(form_frame, text="ADD", command=lambda: self.add_details(), height = 2, width = 10, bd = 0, bg = "#259400", fg = "#ffffff", activebackground = "#cf0007").place(x=875, y=65)
-
 		self.next_button = tk.Button(form_frame, text="Next Page", command=lambda: controller.show_frame("review_of_systems_form_2"), height = 2, width = 10, bd = 0, bg = "#0060ba", fg = "#ffffff", activebackground = "#cf0007")
 		self.next_button.place(x=875, y=65)
 
@@ -1160,7 +1291,6 @@ class review_of_systems_form(tk.Frame):
 		self.next_button.place(x=875, y=25)
 
 	def add_details(self):
-		# self.controller.frames["review_of_systems_form_2"].next_button.config(state="disabled")
 		cur.execute(("SELECT heent_1, heent_2, heent_3, heent_4, heent_5, heent_6, heent_7, heent_8 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
 		if res is None:
@@ -1485,55 +1615,55 @@ class review_of_systems_form(tk.Frame):
 		for i in range(len(self.heent_var)):
 			if i >= len(self.heent_opt):
 				if self.heent_var[i].get() == 1:
-					self.other_heent.delete('1.0', 'end') # clear the text field
+					self.other_heent.delete('1.0', 'end') 
 			self.heent_var[i] = tk.IntVar(self)
 
 		for i in range(len(self.respi_var)):
 			if i >= len(self.respi_opt):
 				if self.respi_var[i].get() == 1:
-					self.other_respi.delete('1.0', 'end') # clear the text field
+					self.other_respi.delete('1.0', 'end') 
 			self.respi_var[i] = tk.IntVar(self)
 
 		for i in range(len(self.cardio_var)):
 			if i >= len(self.cardio_opt):
 				if self.cardio_var[i].get() == 1:
-					self.other_cardio.delete('1.0', 'end') # clear the text field
+					self.other_cardio.delete('1.0', 'end') 
 			self.cardio_var[i] = tk.IntVar(self)
 
 		for i in range(len(self.gastro_var)):
 			if i >= len(self.gastro_opt):
 				if self.gastro_var[i].get() == 1:
-					self.other_gastro.delete('1.0', 'end') # clear the text field
+					self.other_gastro.delete('1.0', 'end') 
 			self.gastro_var[i] = tk.IntVar(self)
 
 		for i in range(len(self.genito_var)):
 			if i >= len(self.genito_opt):
 				if self.genito_var[i].get() == 1:
-					self.other_genito.delete('1.0', 'end') # clear the text field
+					self.other_genito.delete('1.0', 'end') 
 			self.genito_var[i] = tk.IntVar(self)
 
 		for i in range(len(self.meta_var)):
 			if i >= len(self.meta_opt):
 				if self.meta_var[i].get() == 1:
-					self.other_meta.delete('1.0', 'end') # clear the text field
+					self.other_meta.delete('1.0', 'end') 
 			self.meta_var[i] = tk.IntVar(self)
 
 		for i in range(len(self.neuro_var)):
 			if i >= len(self.neuro_opt):
 				if self.neuro_var[i].get() == 1:
-					self.other_neuro.delete('1.0', 'end') # clear the text field
+					self.other_neuro.delete('1.0', 'end') 
 			self.neuro_var[i] = tk.IntVar(self)
 
 		for i in range(len(self.musculo_var)):
 			if i >= len(self.musculo_opt):
 				if self.musculo_var[i].get() == 1:
-					self.other_musculo.delete('1.0', 'end') # clear the text field
+					self.other_musculo.delete('1.0', 'end') 
 			self.musculo_var[i] = tk.IntVar(self)
 
 		for i in range(len(self.skin_var)):
 			if i >= len(self.skin_opt):
 				if self.skin_var[i].get() == 1:
-					self.other_skin.delete('1.0', 'end') # clear the text field
+					self.other_skin.delete('1.0', 'end') 
 			self.skin_var[i] = tk.IntVar(self)
 
 	def load_data(self):
@@ -1689,15 +1819,15 @@ class review_of_systems_form(tk.Frame):
 				self.other_skin.insert('1.0', res[8])
 			
 
-			self.other_heent.config(state = "disabled")
-			self.other_respi.config(state = "disabled")
-			self.other_cardio.config(state = "disabled")
-			self.other_gastro.config(state = "disabled")
-			self.other_genito.config(state = "disabled")
-			self.other_meta.config(state = "disabled")
-			self.other_neuro.config(state = "disabled")
-			self.other_musculo.config(state = "disabled")
-			self.other_skin.config(state = "disabled")
+			self.other_heent.config(state = "disabled", bg = "#e8e8e8")
+			self.other_respi.config(state = "disabled", bg = "#e8e8e8")
+			self.other_cardio.config(state = "disabled", bg = "#e8e8e8")
+			self.other_gastro.config(state = "disabled", bg = "#e8e8e8")
+			self.other_genito.config(state = "disabled", bg = "#e8e8e8")
+			self.other_meta.config(state = "disabled", bg = "#e8e8e8")
+			self.other_neuro.config(state = "disabled", bg = "#e8e8e8")
+			self.other_musculo.config(state = "disabled", bg = "#e8e8e8")
+			self.other_skin.config(state = "disabled", bg = "#e8e8e8")
 		else:
 			self.other_heent.delete('1.0', 'end')
 			self.other_respi.delete('1.0', 'end')
@@ -1708,15 +1838,15 @@ class review_of_systems_form(tk.Frame):
 			self.other_neuro.delete('1.0', 'end')
 			self.other_musculo.delete('1.0', 'end')
 			self.other_skin.delete('1.0', 'end')
-			self.other_heent.config(state = "normal")
-			self.other_respi.config(state = "normal")
-			self.other_cardio.config(state = "normal")
-			self.other_gastro.config(state = "normal")
-			self.other_genito.config(state = "normal")
-			self.other_meta.config(state = "normal")
-			self.other_neuro.config(state = "normal")
-			self.other_musculo.config(state = "normal")
-			self.other_skin.config(state = "normal")
+			self.other_heent.config(state = "normal", bg = "#ffffff")
+			self.other_respi.config(state = "normal", bg = "#ffffff")
+			self.other_cardio.config(state = "normal", bg = "#ffffff")
+			self.other_gastro.config(state = "normal", bg = "#ffffff")
+			self.other_genito.config(state = "normal", bg = "#ffffff")
+			self.other_meta.config(state = "normal", bg = "#ffffff")
+			self.other_neuro.config(state = "normal", bg = "#ffffff")
+			self.other_musculo.config(state = "normal", bg = "#ffffff")
+			self.other_skin.config(state = "normal", bg = "#ffffff")
 
 class review_of_systems_form_2(tk.Frame):
 
@@ -2026,6 +2156,7 @@ class review_of_systems_form_2(tk.Frame):
 
 		self.add_button = tk.Button(form_frame, text="ADD", command=lambda: self.add_details(), height = 2, width = 10, bd = 0, bg = "#259400", fg = "#ffffff", activebackground = "#cf0007")
 		self.add_button.place(x=875, y=65)
+
 		# add selected details from checkboxes
 		self.next_button = tk.Button(form_frame, text="Prev Page", command=lambda: controller.show_frame("review_of_systems_form"), height = 2, width = 10, bd = 0, bg = "#0060ba", fg = "#ffffff", activebackground = "#cf0007")
 		self.next_button.place(x=875, y=25)
@@ -2109,9 +2240,9 @@ class review_of_systems_form_2(tk.Frame):
 					cur.execute(("UPDATE patientrevofsys SET famhist_allergy = %s WHERE patient_id = %s"), (self.medhist_allergy.get("1.0",'end-1c'), self.controller.patient_id.get()))
 					mydb.commit()
 
-				self.medhist_illness.delete('1.0', 'end') # clear the text field
-				self.medhist_hospt.delete('1.0', 'end') # clear the text field
-				self.medhist_allergy.delete('1.0', 'end') # clear the text field
+				self.medhist_illness.delete('1.0', 'end') 
+				self.medhist_hospt.delete('1.0', 'end') 
+				self.medhist_allergy.delete('1.0', 'end') 
 
 
 				cur.execute(("SELECT famhist_1, famhist_2, famhist_3, famhist_4, famhist_5, famhist_6, famhist_7 FROM patientrevofsys WHERE patient_id = %s"), (self.controller.patient_id.get(),))
@@ -2226,14 +2357,12 @@ class review_of_systems_form_2(tk.Frame):
 
 				####################################
 
-				############### get details for family history
 				for i in range(len(self.famhist_var)):
 					if i >= len(self.famhist_opt):
 						if self.famhist_var[i].get() == 1:
-							self.other_famhist.delete('1.0', 'end') # clear the text field
+							self.other_famhist.delete('1.0', 'end') 
 					self.famhist_var[i] = tk.IntVar(self)
 
-					############### get details for immunization history
 				for i in range(len(self.immunohist_var)):
 					if i >= len(self.immunohist_opt):
 						if i == len(self.immunohist_opt):
@@ -2519,23 +2648,23 @@ class review_of_systems_form_2(tk.Frame):
 					mydb.commit()
 				
 
-				self.pack_smoke.delete('1.0', 'end') # clear the text field
-				self.quit_cb_text.delete('1.0', 'end') # clear the text field
-				self.alco_freq.delete('1.0', 'end') # clear the text field
-				self.alco_dur.delete('1.0', 'end') # clear the text field
-				self.alco_type.delete('1.0', 'end') # clear the text field
-				self.exercise_type.delete('1.0', 'end') # clear the text field
-				self.g_type.delete('1.0', 'end') # clear the text field
-				self.p_type.delete('1.0', 'end') # clear the text field
-				self.menarche.delete('1.0', 'end') # clear the text field
-				self.menopause.delete('1.0', 'end') # clear the text field
-				self.coitus.delete('1.0', 'end') # clear the text field
-				self.born.delete('1.0', 'end') # clear the text field
-				self.via.delete('1.0', 'end') # clear the text field
-				self.to_a_g.delete('1.0', 'end') # clear the text field
-				self.bm_p.delete('1.0', 'end') # clear the text field
-				self.bm_year.delete('1.0', 'end') # clear the text field
-				self.mb_compli.delete('1.0', 'end') # clear the text field
+				self.pack_smoke.delete('1.0', 'end') 
+				self.quit_cb_text.delete('1.0', 'end') 
+				self.alco_freq.delete('1.0', 'end') 
+				self.alco_dur.delete('1.0', 'end') 
+				self.alco_type.delete('1.0', 'end') 
+				self.exercise_type.delete('1.0', 'end') 
+				self.g_type.delete('1.0', 'end') 
+				self.p_type.delete('1.0', 'end') 
+				self.menarche.delete('1.0', 'end') 
+				self.menopause.delete('1.0', 'end') 
+				self.coitus.delete('1.0', 'end') 
+				self.born.delete('1.0', 'end') 
+				self.via.delete('1.0', 'end') 
+				self.to_a_g.delete('1.0', 'end') 
+				self.bm_p.delete('1.0', 'end') 
+				self.bm_year.delete('1.0', 'end') 
+				self.mb_compli.delete('1.0', 'end') 
 				
 				self.controller.show_frame("FirstConsForm")
 
@@ -2711,31 +2840,31 @@ class review_of_systems_form_2(tk.Frame):
 			self.alcohol_cb[1].config(state = "disabled")
 			self.exercise_cb[0].config(state = "disabled")
 			self.exercise_cb[1].config(state = "disabled")
-			self.medhist_illness.config(state = "disabled")
-			self.medhist_hospt.config(state = "disabled")
-			self.medhist_allergy.config(state = "disabled")
-			self.other_famhist.config(state = "disabled")
-			self.other_booster.config(state = "disabled")
-			self.other_combi.config(state = "disabled")
-			self.other_immunohist.config(state = "disabled")
-			self.pack_smoke.config(state = "disabled")
+			self.medhist_illness.config(state = "disabled", bg = "#e8e8e8")
+			self.medhist_hospt.config(state = "disabled", bg = "#e8e8e8")
+			self.medhist_allergy.config(state = "disabled", bg = "#e8e8e8")
+			self.other_famhist.config(state = "disabled", bg = "#e8e8e8")
+			self.other_booster.config(state = "disabled", bg = "#e8e8e8")
+			self.other_combi.config(state = "disabled", bg = "#e8e8e8")
+			self.other_immunohist.config(state = "disabled", bg = "#e8e8e8")
+			self.pack_smoke.config(state = "disabled", bg = "#e8e8e8")
 			self.quit_cb.config(state = "disabled")
-			self.quit_cb_text.config(state = "disabled")
-			self.alco_freq.config(state = "disabled")
-			self.alco_dur.config(state = "disabled")
-			self.alco_type.config(state = "disabled")
-			self.exercise_type.config(state = "disabled")
-			self.g_type.config(state = "disabled")
-			self.p_type.config(state = "disabled")
-			self.menarche.config(state = "disabled")
-			self.menopause.config(state = "disabled")
-			self.coitus.config(state = "disabled")
-			self.born.config(state = "disabled")
-			self.via.config(state = "disabled")
-			self.to_a_g.config(state = "disabled")
-			self.bm_p.config(state = "disabled")
-			self.bm_year.config(state = "disabled")
-			self.mb_compli.config(state = "disabled")
+			self.quit_cb_text.config(state = "disabled", bg = "#e8e8e8")
+			self.alco_freq.config(state = "disabled", bg = "#e8e8e8")
+			self.alco_dur.config(state = "disabled", bg = "#e8e8e8")
+			self.alco_type.config(state = "disabled", bg = "#e8e8e8")
+			self.exercise_type.config(state = "disabled", bg = "#e8e8e8")
+			self.g_type.config(state = "disabled", bg = "#e8e8e8")
+			self.p_type.config(state = "disabled", bg = "#e8e8e8")
+			self.menarche.config(state = "disabled", bg = "#e8e8e8")
+			self.menopause.config(state = "disabled", bg = "#e8e8e8")
+			self.coitus.config(state = "disabled", bg = "#e8e8e8")
+			self.born.config(state = "disabled", bg = "#e8e8e8")
+			self.via.config(state = "disabled", bg = "#e8e8e8")
+			self.to_a_g.config(state = "disabled", bg = "#e8e8e8")
+			self.bm_p.config(state = "disabled", bg = "#e8e8e8")
+			self.bm_year.config(state = "disabled", bg = "#e8e8e8")
+			self.mb_compli.config(state = "disabled", bg = "#e8e8e8")
 			self.add_button.config(state = "disabled")
 		else:
 			self.medhist_illness.delete('1.0', 'end')
@@ -2773,32 +2902,32 @@ class review_of_systems_form_2(tk.Frame):
 			self.alcohol_cb[0].config(state = "normal")
 			self.alcohol_cb[1].config(state = "normal")
 			self.exercise_cb[0].config(state = "normal")
-			self.exercise_cb[1].config(state = "normal")
-			self.medhist_illness.config(state = "normal")
-			self.medhist_hospt.config(state = "normal")
-			self.medhist_allergy.config(state = "normal")
-			self.other_famhist.config(state = "normal")
-			self.other_booster.config(state = "normal")
-			self.other_combi.config(state = "normal")
-			self.other_immunohist.config(state = "normal")
-			self.pack_smoke.config(state = "normal")
+			self.exercise_cb[1].config(state = "normal", bg = "#ffffff")
+			self.medhist_illness.config(state = "normal", bg = "#ffffff")
+			self.medhist_hospt.config(state = "normal", bg = "#ffffff")
+			self.medhist_allergy.config(state = "normal", bg = "#ffffff")
+			self.other_famhist.config(state = "normal", bg = "#ffffff")
+			self.other_booster.config(state = "normal", bg = "#ffffff")
+			self.other_combi.config(state = "normal", bg = "#ffffff")
+			self.other_immunohist.config(state = "normal", bg = "#ffffff")
+			self.pack_smoke.config(state = "normal", bg = "#ffffff")
 			self.quit_cb.config(state = "normal")
-			self.quit_cb_text.config(state = "normal")
-			self.alco_freq.config(state = "normal")
-			self.alco_dur.config(state = "normal")
-			self.alco_type.config(state = "normal")
-			self.exercise_type.config(state = "normal")
-			self.g_type.config(state = "normal")
-			self.p_type.config(state = "normal")
-			self.menarche.config(state = "normal")
-			self.menopause.config(state = "normal")
-			self.coitus.config(state = "normal")
-			self.born.config(state = "normal")
-			self.via.config(state = "normal")
-			self.to_a_g.config(state = "normal")
-			self.bm_p.config(state = "normal")
-			self.bm_year.config(state = "normal")
-			self.mb_compli.config(state = "normal")
+			self.quit_cb_text.config(state = "normal", bg = "#ffffff")
+			self.alco_freq.config(state = "normal", bg = "#ffffff")
+			self.alco_dur.config(state = "normal", bg = "#ffffff")
+			self.alco_type.config(state = "normal", bg = "#ffffff")
+			self.exercise_type.config(state = "normal", bg = "#ffffff")
+			self.g_type.config(state = "normal", bg = "#ffffff")
+			self.p_type.config(state = "normal", bg = "#ffffff")
+			self.menarche.config(state = "normal", bg = "#ffffff")
+			self.menopause.config(state = "normal", bg = "#ffffff")
+			self.coitus.config(state = "normal", bg = "#ffffff")
+			self.born.config(state = "normal", bg = "#ffffff")
+			self.via.config(state = "normal", bg = "#ffffff")
+			self.to_a_g.config(state = "normal", bg = "#ffffff")
+			self.bm_p.config(state = "normal", bg = "#ffffff")
+			self.bm_year.config(state = "normal", bg = "#ffffff")
+			self.mb_compli.config(state = "normal", bg = "#ffffff")
 			self.add_button.config(state = "normal")
 
 	def check_cb(self, cb_arr, cb_var_arr, i, question):
@@ -3205,8 +3334,6 @@ class physical_examination_form(tk.Frame):
 
 		y_value = y_value + 25
 
-		# tk.Button(form_frame, text="ADD", command=lambda: self.add_details(), height = 2, width = 10, bd = 0, bg = "#259400", fg = "#ffffff", activebackground = "#cf0007").place(x=875, y=65)
-		# add selected details from checkboxes
 		self.next_button = tk.Button(form_frame, text="Next Page", command=lambda: controller.show_frame("assessment_table"), height = 2, width = 10, bd = 0, bg = "#0060ba", fg = "#ffffff", activebackground = "#cf0007")
 		self.next_button.place(x=875, y=25)
 
@@ -3218,18 +3345,18 @@ class physical_examination_form(tk.Frame):
 		if i == 0:
 			if cb_var_arr[i].get() == 1:
 				cb_arr[i+1].config(state="disabled")
-				textfield.config(state="disabled")
+				textfield.config(state="disabled", bg = "#e8e8e8")
 			else:
 				cb_arr[i+1].config(state="normal")
-				textfield.config(state="normal")
+				textfield.config(state="normal", bg = "#ffffff")
 			self.listvar[index] = 0
 		else:
 			if cb_var_arr[i].get() == 1:
 				cb_arr[i-1].config(state="disabled")
-				textfield.config(state="normal")
+				textfield.config(state="normal", bg = "#ffffff")
 			else:
 				cb_arr[i-1].config(state="normal")
-				textfield.config(state="disabled")
+				textfield.config(state="disabled", bg = "#e8e8e8")
 			self.listvar[index] = 1
 
 	def add_details(self):
@@ -3600,17 +3727,17 @@ class physical_examination_form(tk.Frame):
 				mydb.commit()
 
 
-		self.ge_find.delete('1.0', 'end') # clear the text field
-		self.sk_find.delete('1.0', 'end') # clear the text field
-		self.mu_find.delete('1.0', 'end') # clear the text field
-		self.he_find.delete('1.0', 'end') # clear the text field
-		self.re_find.delete('1.0', 'end') # clear the text field
-		self.ca_find.delete('1.0', 'end') # clear the text field
-		self.ga_find.delete('1.0', 'end') # clear the text field
-		self.gn_find.delete('1.0', 'end') # clear the text field
-		self.ie_find.delete('1.0', 'end') # clear the text field
-		self.dre_find.delete('1.0', 'end') # clear the text field
-		self.ne_find.delete('1.0', 'end') # clear the text field
+		self.ge_find.delete('1.0', 'end') 
+		self.sk_find.delete('1.0', 'end') 
+		self.mu_find.delete('1.0', 'end') 
+		self.he_find.delete('1.0', 'end') 
+		self.re_find.delete('1.0', 'end') 
+		self.ca_find.delete('1.0', 'end') 
+		self.ga_find.delete('1.0', 'end') 
+		self.gn_find.delete('1.0', 'end') 
+		self.ie_find.delete('1.0', 'end') 
+		self.dre_find.delete('1.0', 'end') 
+		self.ne_find.delete('1.0', 'end') 
 
 	def load_data(self):
 		self.hr.delete('1.0', 'end')
@@ -3651,17 +3778,17 @@ class physical_examination_form(tk.Frame):
 			if res[10] is not None:
 				self.abw.insert('1.0', res[10])
 
-			self.hr.config(state="disabled")
-			self.bp.config(state="disabled")
-			self.rr.config(state="disabled")
-			self.temp.config(state="disabled")
-			self.height.config(state="disabled")
-			self.bmi.config(state="disabled")
-			self.ibw.config(state="disabled")
-			self.hipcirc.config(state="disabled")
-			self.waistcirc.config(state="disabled")
-			self.headcirc.config(state="disabled")
-			self.abw.config(state="disabled")
+			self.hr.config(state="disabled", bg = "#e8e8e8")
+			self.bp.config(state="disabled", bg = "#e8e8e8")
+			self.rr.config(state="disabled", bg = "#e8e8e8")
+			self.temp.config(state="disabled", bg = "#e8e8e8")
+			self.height.config(state="disabled", bg = "#e8e8e8")
+			self.bmi.config(state="disabled", bg = "#e8e8e8")
+			self.ibw.config(state="disabled", bg = "#e8e8e8")
+			self.hipcirc.config(state="disabled", bg = "#e8e8e8")
+			self.waistcirc.config(state="disabled", bg = "#e8e8e8")
+			self.headcirc.config(state="disabled", bg = "#e8e8e8")
+			self.abw.config(state="disabled", bg = "#e8e8e8")
 		else:
 			self.hr.delete('1.0', 'end')
 			self.bp.delete('1.0', 'end')
@@ -3675,17 +3802,17 @@ class physical_examination_form(tk.Frame):
 			self.headcirc.delete('1.0', 'end')
 			self.abw.delete('1.0', 'end')
 
-			self.hr.config(state="normal")
-			self.bp.config(state="normal")
-			self.rr.config(state="normal")
-			self.temp.config(state="normal")
-			self.height.config(state="normal")
-			self.bmi.config(state="normal")
-			self.ibw.config(state="normal")
-			self.hipcirc.config(state="normal")
-			self.waistcirc.config(state="normal")
-			self.headcirc.config(state="normal")
-			self.abw.config(state="normal")
+			self.hr.config(state="normal", bg = "#ffffff")
+			self.bp.config(state="normal", bg = "#ffffff")
+			self.rr.config(state="normal", bg = "#ffffff")
+			self.temp.config(state="normal", bg = "#ffffff")
+			self.height.config(state="normal", bg = "#ffffff")
+			self.bmi.config(state="normal", bg = "#ffffff")
+			self.ibw.config(state="normal", bg = "#ffffff")
+			self.hipcirc.config(state="normal", bg = "#ffffff")
+			self.waistcirc.config(state="normal", bg = "#ffffff")
+			self.headcirc.config(state="normal", bg = "#ffffff")
+			self.abw.config(state="normal", bg = "#ffffff")
 
 		cur.execute(("SELECT ge_1, skin_1, musculo_1, heent_1, respi_1, cardio_1, gastro_1, genito_1, ie_1, dre_1, neuro_1 FROM patientassessment WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
@@ -3818,17 +3945,17 @@ class physical_examination_form(tk.Frame):
 			for i in range(11):
 				self.listvar[i] = 0
 
-		self.ge_find.delete('1.0', 'end') # clear the text field
-		self.sk_find.delete('1.0', 'end') # clear the text field
-		self.mu_find.delete('1.0', 'end') # clear the text field
-		self.he_find.delete('1.0', 'end') # clear the text field
-		self.re_find.delete('1.0', 'end') # clear the text field
-		self.ca_find.delete('1.0', 'end') # clear the text field
-		self.ga_find.delete('1.0', 'end') # clear the text field
-		self.gn_find.delete('1.0', 'end') # clear the text field
-		self.ie_find.delete('1.0', 'end') # clear the text field
-		self.dre_find.delete('1.0', 'end') # clear the text field
-		self.ne_find.delete('1.0', 'end') # clear the text field
+		self.ge_find.delete('1.0', 'end') 
+		self.sk_find.delete('1.0', 'end') 
+		self.mu_find.delete('1.0', 'end') 
+		self.he_find.delete('1.0', 'end') 
+		self.re_find.delete('1.0', 'end') 
+		self.ca_find.delete('1.0', 'end') 
+		self.ga_find.delete('1.0', 'end') 
+		self.gn_find.delete('1.0', 'end') 
+		self.ie_find.delete('1.0', 'end') 
+		self.dre_find.delete('1.0', 'end') 
+		self.ne_find.delete('1.0', 'end') 
 
 		cur.execute(("SELECT ge_others, skin_others, musculo_others, heent_others, respi_others, cardio_others, gastro_others, genito_others, ie_others, dre_others, neuro_others FROM patientassessment WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
@@ -3857,17 +3984,17 @@ class physical_examination_form(tk.Frame):
 			if res[10] is not None:
 				self.ne_find.insert('1.0', res[10])
 
-			self.ge_find.config(state = "disabled")
-			self.sk_find.config(state = "disabled")
-			self.mu_find.config(state = "disabled")
-			self.he_find.config(state = "disabled")
-			self.re_find.config(state = "disabled")
-			self.ca_find.config(state = "disabled")
-			self.ga_find.config(state = "disabled")
-			self.gn_find.config(state = "disabled")
-			self.ie_find.config(state = "disabled")
-			self.dre_find.config(state = "disabled")
-			self.ne_find.config(state = "disabled")
+			self.ge_find.config(state = "disabled", bg = "#e8e8e8")
+			self.sk_find.config(state = "disabled", bg = "#e8e8e8")
+			self.mu_find.config(state = "disabled", bg = "#e8e8e8")
+			self.he_find.config(state = "disabled", bg = "#e8e8e8")
+			self.re_find.config(state = "disabled", bg = "#e8e8e8")
+			self.ca_find.config(state = "disabled", bg = "#e8e8e8")
+			self.ga_find.config(state = "disabled", bg = "#e8e8e8")
+			self.gn_find.config(state = "disabled", bg = "#e8e8e8")
+			self.ie_find.config(state = "disabled", bg = "#e8e8e8")
+			self.dre_find.config(state = "disabled", bg = "#e8e8e8")
+			self.ne_find.config(state = "disabled", bg = "#e8e8e8")
 			for i in range(2):
 				self.ge_cb[i].config(state = "disabled")
 				self.sk_cb[i].config(state = "disabled")
@@ -3881,29 +4008,29 @@ class physical_examination_form(tk.Frame):
 				self.dre_cb[i].config(state = "disabled")
 				self.ne_cb[i].config(state = "disabled")
 		else:
-			self.ge_find.delete('1.0', 'end') # clear the text field
-			self.sk_find.delete('1.0', 'end') # clear the text field
-			self.mu_find.delete('1.0', 'end') # clear the text field
-			self.he_find.delete('1.0', 'end') # clear the text field
-			self.re_find.delete('1.0', 'end') # clear the text field
-			self.ca_find.delete('1.0', 'end') # clear the text field
-			self.ga_find.delete('1.0', 'end') # clear the text field
-			self.gn_find.delete('1.0', 'end') # clear the text field
-			self.ie_find.delete('1.0', 'end') # clear the text field
-			self.dre_find.delete('1.0', 'end') # clear the text field
-			self.ne_find.delete('1.0', 'end') # clear the text field
+			self.ge_find.delete('1.0', 'end') 
+			self.sk_find.delete('1.0', 'end') 
+			self.mu_find.delete('1.0', 'end') 
+			self.he_find.delete('1.0', 'end') 
+			self.re_find.delete('1.0', 'end') 
+			self.ca_find.delete('1.0', 'end') 
+			self.ga_find.delete('1.0', 'end') 
+			self.gn_find.delete('1.0', 'end') 
+			self.ie_find.delete('1.0', 'end') 
+			self.dre_find.delete('1.0', 'end') 
+			self.ne_find.delete('1.0', 'end') 
 
-			self.ge_find.config(state = "normal")
-			self.sk_find.config(state = "normal")
-			self.mu_find.config(state = "normal")
-			self.he_find.config(state = "normal")
-			self.re_find.config(state = "normal")
-			self.ca_find.config(state = "normal")
-			self.ga_find.config(state = "normal")
-			self.gn_find.config(state = "normal")
-			self.ie_find.config(state = "normal")
-			self.dre_find.config(state = "normal")
-			self.ne_find.config(state = "normal")
+			self.ge_find.config(state = "normal", bg = "#ffffff")
+			self.sk_find.config(state = "normal", bg = "#ffffff")
+			self.mu_find.config(state = "normal", bg = "#ffffff")
+			self.he_find.config(state = "normal", bg = "#ffffff")
+			self.re_find.config(state = "normal", bg = "#ffffff")
+			self.ca_find.config(state = "normal", bg = "#ffffff")
+			self.ga_find.config(state = "normal", bg = "#ffffff")
+			self.gn_find.config(state = "normal", bg = "#ffffff")
+			self.ie_find.config(state = "normal", bg = "#ffffff")
+			self.dre_find.config(state = "normal", bg = "#ffffff")
+			self.ne_find.config(state = "normal", bg = "#ffffff")
 
 			for i in range(2):
 				self.ge_cb[i].config(state = "normal")
@@ -4022,8 +4149,6 @@ class assessment_table(tk.Frame):
 		self.next_button.place(x=875, y=25)
 
 	def add_assessment(self):
-		## include physical examination details
-
 		self.controller.get_page("physical_examination_form").add_details()
 
 		cur.execute(("SELECT log_id FROM patientassessment WHERE patient_id = %s"), (self.controller.patient_id.get(),))
@@ -4039,12 +4164,12 @@ class assessment_table(tk.Frame):
 			cur.execute(sql, val)
 			mydb.commit()
 
-		self.drugs.delete('1.0', 'end') # clear the text field
-		self.diet.delete('1.0', 'end') # clear the text field
-		self.lifestyle.delete('1.0', 'end') # clear the text field
-		self.exer.delete('1.0', 'end') # clear the text field
-		self.referral.delete('1.0', 'end') # clear the text field
-		self.follow_up.delete('1.0', 'end') # clear the text field
+		self.drugs.delete('1.0', 'end') 
+		self.diet.delete('1.0', 'end') 
+		self.lifestyle.delete('1.0', 'end') 
+		self.exer.delete('1.0', 'end') 
+		self.referral.delete('1.0', 'end') 
+		self.follow_up.delete('1.0', 'end') 
 
 		cur.execute(("SELECT log_id FROM patientassessment WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchone()
@@ -4126,12 +4251,12 @@ class assessment_table(tk.Frame):
 				self.referral.insert('1.0', res[4])
 			if res[5] is not None:
 				self.follow_up.insert('1.0', res[5])
-			self.drugs.config(state="disabled")
-			self.diet.config(state="disabled")
-			self.lifestyle.config(state="disabled")
-			self.exer.config(state="disabled")
-			self.referral.config(state="disabled")
-			self.follow_up.config(state="disabled")
+			self.drugs.config(state="disabled", bg = "#e8e8e8")
+			self.diet.config(state="disabled", bg = "#e8e8e8")
+			self.lifestyle.config(state="disabled", bg = "#e8e8e8")
+			self.exer.config(state="disabled", bg = "#e8e8e8")
+			self.referral.config(state="disabled", bg = "#e8e8e8")
+			self.follow_up.config(state="disabled", bg = "#e8e8e8")
 		else:
 			self.drugs.delete('1.0', 'end')
 			self.diet.delete('1.0', 'end')
@@ -4139,12 +4264,12 @@ class assessment_table(tk.Frame):
 			self.exer.delete('1.0', 'end')
 			self.referral.delete('1.0', 'end')
 			self.follow_up.delete('1.0', 'end')
-			self.drugs.config(state="normal")
-			self.diet.config(state="normal")
-			self.lifestyle.config(state="normal")
-			self.exer.config(state="normal")
-			self.referral.config(state="normal")
-			self.follow_up.config(state="normal")
+			self.drugs.config(state="normal", bg = "#ffffff")
+			self.diet.config(state="normal", bg = "#ffffff")
+			self.lifestyle.config(state="normal", bg = "#ffffff")
+			self.exer.config(state="normal", bg = "#ffffff")
+			self.referral.config(state="normal", bg = "#ffffff")
+			self.follow_up.config(state="normal", bg = "#ffffff")
 
 		cur.execute(("SELECT assessment, icd_code, dpra FROM patientassessmenttree WHERE patient_id = %s"), (self.controller.patient_id.get(),))
 		res = cur.fetchall()
@@ -4310,10 +4435,8 @@ class family_apgar_form(tk.Frame):
 		res = cur.fetchone()
 		if res is None:
 			self.res_bttn.config(state = "disabled")
-			self.sub_bttn.config(state = "normal")
 		else:
 			self.res_bttn.config(state = "normal")
-			self.sub_bttn.config(state = "disabled")
 
 		for i in range(5):
 			self.apgar_var[i][0].set(0)
@@ -4323,7 +4446,26 @@ class family_apgar_form(tk.Frame):
 			self.apgar_var[i][4].set(0)
 			self.apgar_var[i][5].set(0)
 
-	def check_cb(self, cb_arr, cb_var_arr, i, average, index): # will not add a button, must update database with every data change
+			self.apgar_cb[i][0].config(state="normal")
+			self.apgar_cb[i][1].config(state="normal")
+			self.apgar_cb[i][2].config(state="normal")
+			self.apgar_cb[i][3].config(state="normal")
+			self.apgar_cb[i][4].config(state="normal")
+			self.apgar_cb[i][5].config(state="normal")
+
+			self.average[i]['text'] = ""
+
+			self.vote_1_arr[i] = 0
+			self.vote_2_arr[i] = 0
+			self.avg_vote[i] = 0
+
+		self.vote_1 = 0
+		self.vote_2 = 0
+		self.overall_f1_txt['text'] = ""
+		self.overall_f2_txt['text'] = ""
+		self.overall_avg_txt['text'] = "" 
+
+	def check_cb(self, cb_arr, cb_var_arr, i, average, index):
 		if i < 3:
 			if i == 0:
 				if cb_var_arr[i].get() == 1:
@@ -4390,9 +4532,9 @@ class family_apgar_form(tk.Frame):
 					self.vote_2_arr[index] = 0
 
 		for i in range(5):
-			avg_value = (self.vote_1_arr[i] + self.vote_2_arr[i]) / 2
-			self.average[i]['text'] = str(avg_value)
-			self.avg_vote[i] = self.avg_value
+			temp_avg = (self.vote_1_arr[i] + self.vote_2_arr[i]) / 2
+			self.average[i]['text'] = str(temp_avg)
+			self.avg_vote[i] = temp_avg
 
 		self.avg_value = 0
 		for i in range(len(self.avg_vote)):
@@ -4432,7 +4574,6 @@ class family_apgar_form(tk.Frame):
 			mydb.commit()
 
 		self.res_bttn.config(state = "normal")
-		self.sub_bttn.config(state = "disabled")
 
 class family_apgar_form_res(tk.Frame):
 
@@ -4592,9 +4733,6 @@ class followup_patient_form(tk.Frame):
 		self.next_button = tk.Button(form_frame, text="Next Page", command=lambda: controller.show_frame("followup_patient_form_2"), height = 2, width = 10, bd = 0, bg = "#0060ba", fg = "#ffffff", activebackground = "#cf0007")
 		self.next_button.place(x=875, y=25)
 
-		# self.next_button = tk.Button(form_frame, text="Prev Page", command=lambda: controller.show_frame("FirstConsForm"), height = 2, width = 10, bd = 0, bg = "#0060ba", fg = "#ffffff", activebackground = "#cf0007")
-		# self.next_button.place(x=875, y=25)
-
 	def check_cb(self, cb_arr, cb_var_arr, i):
 		if i == 0:
 			if cb_var_arr[i].get() == 1:
@@ -4641,40 +4779,6 @@ class followup_patient_form(tk.Frame):
 		self.reason = 2
 		self.f_s.delete('1.0', 'end')
 		self.f_medication.delete('1.0', 'end')
-
-		# cur.execute(("SELECT followup_date, reason, followup_s, followup_med FROM patientfollowup WHERE patient_id = %s"), (self.controller.patient_id.get(),))
-		# res = cur.fetchone()
-
-		# self.f_s.delete('1.0', 'end')
-		# self.f_medication.delete('1.0', 'end')
-
-		# if res is not None:
-		# 	self.f_date_input.set_date(res[0])
-		# 	if res[1] == 0:
-		# 		self.r_var[0].set(0)
-		# 		self.r_var[1].set(1)
-		# 	elif res[1] == 1:
-		# 		self.r_var[0].set(1)
-		# 		self.r_var[1].set(0)
-		# 	else:
-		# 		self.r_var[0].set(0)
-		# 		self.r_var[1].set(0)
-		# 	if res[2] is not None:
-		# 		self.f_s.insert('1.0', res[2])
-		# 		self.f_s.config(state = "disabled")
-		# 	if res[3] is not None:
-		# 		self.f_medication.insert('1.0', res[3])
-		# 		self.f_medication.config(state = "disabled")
-
-		# else:
-		# 	self.f_date_input.set_date(dt.datetime.today())
-		# 	for i in range(2):
-		# 		self.r_var[i].set(0)
-		# 	self.reason = 2
-		# 	self.f_s.delete('1.0', 'end')
-		# 	self.f_medication.delete('1.0', 'end')
-		# 	self.f_s.config(state = "normal")
-		# 	self.f_medication.config(state = "normal")
 
 class followup_patient_form_2(tk.Frame):
 
@@ -5017,18 +5121,18 @@ class followup_patient_form_2(tk.Frame):
 		if i == 0:
 			if cb_var_arr[i].get() == 1:
 				cb_arr[i+1].config(state="disabled")
-				textfield.config(state="disabled")
+				textfield.config(state="disabled", bg = "#e8e8e8")
 			else:
 				cb_arr[i+1].config(state="normal")
-				textfield.config(state="normal")
+				textfield.config(state="normal", bg = "#ffffff")
 			self.listvar[index] = 0
 		else:
 			if cb_var_arr[i].get() == 1:
 				cb_arr[i-1].config(state="disabled")
-				textfield.config(state="normal")
+				textfield.config(state="normal", bg = "#ffffff")
 			else:
 				cb_arr[i-1].config(state="normal")
-				textfield.config(state="disabled")
+				textfield.config(state="disabled", bg = "#e8e8e8")
 			self.listvar[index] = 1
 
 	def add_details(self):
@@ -5401,17 +5505,17 @@ class followup_patient_form_2(tk.Frame):
 				mydb.commit()
 
 
-		self.ge_find.delete('1.0', 'end') # clear the text field
-		self.sk_find.delete('1.0', 'end') # clear the text field
-		self.mu_find.delete('1.0', 'end') # clear the text field
-		self.he_find.delete('1.0', 'end') # clear the text field
-		self.re_find.delete('1.0', 'end') # clear the text field
-		self.ca_find.delete('1.0', 'end') # clear the text field
-		self.ga_find.delete('1.0', 'end') # clear the text field
-		self.gn_find.delete('1.0', 'end') # clear the text field
-		self.ie_find.delete('1.0', 'end') # clear the text field
-		self.dre_find.delete('1.0', 'end') # clear the text field
-		self.ne_find.delete('1.0', 'end') # clear the text field
+		self.ge_find.delete('1.0', 'end') 
+		self.sk_find.delete('1.0', 'end') 
+		self.mu_find.delete('1.0', 'end') 
+		self.he_find.delete('1.0', 'end') 
+		self.re_find.delete('1.0', 'end') 
+		self.ca_find.delete('1.0', 'end') 
+		self.ga_find.delete('1.0', 'end') 
+		self.gn_find.delete('1.0', 'end') 
+		self.ie_find.delete('1.0', 'end') 
+		self.dre_find.delete('1.0', 'end') 
+		self.ne_find.delete('1.0', 'end') 
 
 	def load_data(self):
 		self.followup_date = self.controller.get_page("followup_patient_form").f_date_input.get_date().strftime('%Y-%m-%d')
@@ -5438,17 +5542,17 @@ class followup_patient_form_2(tk.Frame):
 		for i in range(11):
 			self.listvar[i] = 0
 
-		self.ge_find.delete('1.0', 'end') # clear the text field
-		self.sk_find.delete('1.0', 'end') # clear the text field
-		self.mu_find.delete('1.0', 'end') # clear the text field
-		self.he_find.delete('1.0', 'end') # clear the text field
-		self.re_find.delete('1.0', 'end') # clear the text field
-		self.ca_find.delete('1.0', 'end') # clear the text field
-		self.ga_find.delete('1.0', 'end') # clear the text field
-		self.gn_find.delete('1.0', 'end') # clear the text field
-		self.ie_find.delete('1.0', 'end') # clear the text field
-		self.dre_find.delete('1.0', 'end') # clear the text field
-		self.ne_find.delete('1.0', 'end') # clear the text field
+		self.ge_find.delete('1.0', 'end') 
+		self.sk_find.delete('1.0', 'end') 
+		self.mu_find.delete('1.0', 'end') 
+		self.he_find.delete('1.0', 'end') 
+		self.re_find.delete('1.0', 'end') 
+		self.ca_find.delete('1.0', 'end') 
+		self.ga_find.delete('1.0', 'end') 
+		self.gn_find.delete('1.0', 'end') 
+		self.ie_find.delete('1.0', 'end') 
+		self.dre_find.delete('1.0', 'end') 
+		self.ne_find.delete('1.0', 'end') 
 
 class followup_patient_form_res(tk.Frame):
 
@@ -5672,7 +5776,6 @@ class followup_assessment_table(tk.Frame):
 
 		tk.Button(form_frame, text="Add Follow-up record", command=lambda: self.add_follow_up(), height = 3, width = 20, bd = 0, bg = "#259400", fg = "#ffffff", activebackground = "#cf0007", wraplength = 150).place(x=650, y=530)
 
-		# add selected details from checkboxes
 		self.next_button = tk.Button(form_frame, text="Prev Page", command=lambda: controller.show_frame("followup_patient_form_2"), height = 2, width = 10, bd = 0, bg = "#0060ba", fg = "#ffffff", activebackground = "#cf0007")
 		self.next_button.place(x=875, y=25)
 
@@ -5688,8 +5791,6 @@ class followup_assessment_table(tk.Frame):
 		self.exer.delete('1.0', 'end')
 
 	def add_follow_up(self):
-		## include physical examination details
-
 		self.controller.get_page("followup_patient_form_2").add_details()
 
 		cur.execute(("SELECT log_id FROM patientfollowup WHERE patient_id = %s and followup_date = %s"), (self.controller.patient_id.get(), self.followup_date))
@@ -5705,10 +5806,10 @@ class followup_assessment_table(tk.Frame):
 			cur.execute(sql, val)
 			mydb.commit()
 
-		self.drugs.delete('1.0', 'end') # clear the text field
-		self.diet.delete('1.0', 'end') # clear the text field
-		self.lifestyle.delete('1.0', 'end') # clear the text field
-		self.exer.delete('1.0', 'end') # clear the text field
+		self.drugs.delete('1.0', 'end') 
+		self.diet.delete('1.0', 'end') 
+		self.lifestyle.delete('1.0', 'end') 
+		self.exer.delete('1.0', 'end') 
 
 		self.controller.show_frame("followup_patient_form")
 
@@ -5753,7 +5854,7 @@ class ReferralForm(tk.Frame):
 		r_date_label = tk.Label(form_frame, text="Date of Follow-up: ", font=self.label_font_2)
 		r_date_label.place(x=90, y=55)
 
-		self.r_date_input = DateEntry(form_frame, style = "my.DateEntry", locale = "en_US", date_pattern = "yyyy/mm/dd") # working
+		self.r_date_input = DateEntry(form_frame, style = "my.DateEntry", locale = "en_US", date_pattern = "yyyy/mm/dd")
 		self.r_date_input.place(x=200, y=55)
 
 		self.referring_phys = tk.Text(form_frame, height = 1, width = 65, wrap="word")
@@ -5814,18 +5915,6 @@ class ReferralForm(tk.Frame):
 
 	def add_referral(self, date, referring_phys, phys_referred, reason):
 
-		# cur.execute(("SELECT date_of_followup FROM patientreferral WHERE patient_id = %s and date_of_followup = %s"), (self.controller.patient_id.get(), date))
-		# res = cur.fetchone()
-		# if res is None:
-		# 	sql = "INSERT INTO patientreferral (date_of_followup, referring_phys, phys_referred_to, reasons, patient_id) VALUES (%s, %s, %s, %s, %s)"
-		# 	val = (date, referring_phys, phys_referred, reason, self.controller.patient_id.get())
-		# 	cur.execute(sql, val)
-		# 	mydb.commit()
-		# else:
-		# 	sql = "UPDATE patientreferral SET date_of_followup = %s, referring_phys = %s, phys_referred_to = %s, reasons = %s WHERE patient_id = %s and date_of_followup = %s"
-		# 	val = (referring_phys, phys_referred, reason, self.controller.patient_id.get(), date)
-		# 	mydb.commit()
-
 		sql = "INSERT INTO patientreferral (date_of_followup, referring_phys, phys_referred_to, reasons, patient_id) VALUES (%s, %s, %s, %s, %s)"
 		val = (date, referring_phys, phys_referred, reason, self.controller.patient_id.get())
 		cur.execute(sql, val)
@@ -5852,16 +5941,16 @@ class ReferralForm(tk.Frame):
 			val = (working_impre, brief_hist, summ_lab, summ_med, self.controller.patient_id.get())
 			mydb.commit()
 
-		self.p_working_impre.config(state="disabled")
-		self.p_brief_hist.config(state="disabled")
-		self.p_summ_lab.config(state="disabled")
-		self.p_summ_med.config(state="disabled")
+		self.p_working_impre.config(state="disabled", bg = "#e8e8e8")
+		self.p_brief_hist.config(state="disabled", bg = "#e8e8e8")
+		self.p_summ_lab.config(state="disabled", bg = "#e8e8e8")
+		self.p_summ_med.config(state="disabled", bg = "#e8e8e8")
 
 	def edit_summary(self):
-		self.p_working_impre.config(state="normal")
-		self.p_brief_hist.config(state="normal")
-		self.p_summ_lab.config(state="normal")
-		self.p_summ_med.config(state="normal")
+		self.p_working_impre.config(state="normal", bg = "#ffffff")
+		self.p_brief_hist.config(state="normal", bg = "#ffffff")
+		self.p_summ_lab.config(state="normal", bg = "#ffffff")
+		self.p_summ_med.config(state="normal", bg = "#ffffff")
 
 	def load_data(self):
 		self.p_working_impre.delete('1.0', 'end')
@@ -5886,19 +5975,19 @@ class ReferralForm(tk.Frame):
 			self.p_brief_hist.insert('1.0', res[2])
 			self.p_summ_lab.insert('1.0', res[3])
 			self.p_summ_med.insert('1.0', res[4])
-			self.p_working_impre.config(state="disabled")
-			self.p_brief_hist.config(state="disabled")
-			self.p_summ_lab.config(state="disabled")
-			self.p_summ_med.config(state="disabled")
+			self.p_working_impre.config(state="disabled", bg = "#e8e8e8")
+			self.p_brief_hist.config(state="disabled", bg = "#e8e8e8")
+			self.p_summ_lab.config(state="disabled", bg = "#e8e8e8")
+			self.p_summ_med.config(state="disabled", bg = "#e8e8e8")
 		else:
 			self.p_working_impre.delete('1.0', 'end')
 			self.p_brief_hist.delete('1.0', 'end')
 			self.p_summ_lab.delete('1.0', 'end')
 			self.p_summ_med.delete('1.0', 'end')
-			self.p_working_impre.config(state="normal")
-			self.p_brief_hist.config(state="normal")
-			self.p_summ_lab.config(state="normal")
-			self.p_summ_med.config(state="normal")
+			self.p_working_impre.config(state="normal", bg = "#ffffff")
+			self.p_brief_hist.config(state="normal", bg = "#ffffff")
+			self.p_summ_lab.config(state="normal", bg = "#ffffff")
+			self.p_summ_med.config(state="normal", bg = "#ffffff")
 
 class ReferralForm_res(tk.Frame):
 
@@ -5906,7 +5995,7 @@ class ReferralForm_res(tk.Frame):
 		tk.Frame.__init__(self, parent)
 		self.controller = controller
 		menu_frame(self, self.controller, 3)
-		submenu_buttons_3(self, self.controller, 2)
+		submenu_buttons_3(self, self.controller, 3)
 
 		form_frame = tk.Frame(self, height = 720, width = 1000)
 		form_frame.pack(side="left")
@@ -5922,6 +6011,9 @@ class ReferralForm_res(tk.Frame):
 		vsb = ttk.Scrollbar(orient="vertical", command=self.tree.yview)
 		self.tree.configure(yscrollcommand=vsb.set)
 		self.tree.place(x=65, y=25)
+
+		self.res_bttn = tk.Button(self, text="Go Back", command=lambda: controller.show_frame("ReferralForm"), height = 1, width = 12, bd = 0, bg = "#183873", fg = "#ffffff")
+		self.res_bttn.place(x=950, y=635)
 
 	def load_data(self):
 
