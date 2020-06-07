@@ -29,3 +29,6 @@ List of imported libraries and modules:
 3. mysql.connector
 - to install
 > python -m pip install mysql-connector
+
+**Check MYSQL Connector credentials**
+> MYSQL connector can be found at ../database/config.py
